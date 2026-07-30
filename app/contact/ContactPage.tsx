@@ -8,8 +8,10 @@ import Icon from "@/components/Icon";
 
 import { WHATSAPP_NUMBER } from "@/lib/config";
 
-/* TODO: Replace with real email before launch */
-const EMAIL = "shivanii@example.com";
+/* TODO(launch): set the real email to make the Email card appear.
+   A fake/placeholder address must NEVER render — a visitor who spots
+   example.com writes the whole site off as a scam. */
+const EMAIL: string = "";
 
 export default function ContactPage() {
   const { t } = useI18n();
@@ -35,17 +37,19 @@ export default function ContactPage() {
             </a>
           </PatrikaFrame>
 
-          {/* Email */}
-          <PatrikaFrame style={{ textAlign: "center" }}>
-            <div className="contact-icon"><Icon name="mail" size={26} /></div>
-            <h3 style={{ marginBottom: "0.5rem" }}>Email</h3>
-            <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: "1.25rem" }}>
-              For detailed inquiries. Shivanii responds within 24 hours.
-            </p>
-            <a href={`mailto:${EMAIL}`} className="btn btn-secondary">
-              {EMAIL}
-            </a>
-          </PatrikaFrame>
+          {/* Email — hidden until a real address exists */}
+          {EMAIL && !EMAIL.includes("example.") && (
+            <PatrikaFrame style={{ textAlign: "center" }}>
+              <div className="contact-icon"><Icon name="mail" size={26} /></div>
+              <h3 style={{ marginBottom: "0.5rem" }}>Email</h3>
+              <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: "1.25rem" }}>
+                For detailed inquiries. Shivanii responds within 24 hours.
+              </p>
+              <a href={`mailto:${EMAIL}`} className="btn btn-secondary">
+                {EMAIL}
+              </a>
+            </PatrikaFrame>
+          )}
 
           {/* Discovery call */}
           <PatrikaFrame style={{ textAlign: "center" }}>

@@ -434,6 +434,11 @@ function TurantUttarInner() {
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
                   Ref: {refCode}
                 </p>
+                <p className={`cta-note${isHi ? " devanagari" : ""}`} style={{ fontSize: "0.75rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>
+                  {isHi
+                    ? "उत्तर न मिले तो पूर्ण रिफंड — बस Ref कोड के साथ WhatsApp पर संदेश करें"
+                    : "No answer = full refund — just message on WhatsApp with your ref code"}
+                </p>
               </div>
             </PatrikaFrame>
           </div>

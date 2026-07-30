@@ -77,7 +77,7 @@ const TIERS = [
         "WhatsApp direct — ask follow-ups",
         "Transparent confidence levels",
       ],
-      verdict: "World-class accuracy. Personal touch. Fair price.",
+      verdict: "Every calculation checkable. Every word Shivanii's own.",
     },
     hi: {
       label: "ज्योतिषाचार्य शिवानी",
@@ -90,7 +90,7 @@ const TIERS = [
         "WhatsApp पर सीधे — प्रश्न पूछें",
         "पारदर्शी सटीकता स्तर",
       ],
-      verdict: "विश्व-स्तरीय सटीकता। व्यक्तिगत स्पर्श। उचित मूल्य।",
+      verdict: "हर गणना आप स्वयं जांच सकते हैं। हर शब्द शिवानी का अपना।",
     },
   },
 ];

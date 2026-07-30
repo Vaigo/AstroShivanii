@@ -43,6 +43,17 @@ async function request<T>(
     );
   }
 
+  // HONESTY GUARD: if the API answered in test mode (sk-test key — a fixed
+  // sample chart, NOT the visitor's data), never present it as their result.
+  // This happens only when the production API key isn't configured yet.
+  if (json?.meta && (json.meta.mode === "test" || json.meta.test_mode === true)) {
+    throw new ApiError(
+      503,
+      "SETUP",
+      "This tool is being set up — please try again a little later. | यह टूल अभी तैयार हो रहा है — कृपया थोड़ी देर बाद आज़माएं।"
+    );
+  }
+
   return json.data ?? json;
 }
 

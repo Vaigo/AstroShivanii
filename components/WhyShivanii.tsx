@@ -46,7 +46,7 @@ const COMPARE_ROWS = [
   },
   {
     feature: { en: "Direct WhatsApp access", hi: "सीधा WhatsApp संपर्क" },
-    shivanii: { en: "Instant reply", hi: "त्वरित उत्तर", yes: true },
+    shivanii: { en: "Replies from Shivanii herself", hi: "उत्तर शिवानी स्वयं देती हैं", yes: true },
     others: { en: "Email tickets (days)", hi: "ईमेल टिकट (कई दिन)", yes: false },
   },
   {
@@ -66,8 +66,10 @@ const COMPARE_ROWS = [
   },
 ];
 
+/* Every number here must be VERIFIABLE on the site itself — a visitor burned
+   by fake "10,000+ happy clients" claims elsewhere will check. */
 const STATS = [
-  { end: 500, suffix: "+", en: "Readings Delivered", hi: "पाठन पूर्ण किए" },
+  { end: 7, en: "Free Tools — try before you pay", hi: "निःशुल्क टूल्स — पहले परखें" },
   { end: 100, suffix: "%", en: "Personal — by Shivanii", hi: "व्यक्तिगत — शिवानी द्वारा" },
   { end: 499, prefix: "₹", en: "Readings Start At", hi: "पाठन की शुरुआत" },
 ];
@@ -176,7 +178,7 @@ export default function WhyShivanii() {
         <Reveal delay={160}>
           <div style={{ textAlign: "center", marginTop: "2rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
             <a href="/book" className="btn btn-primary btn-lg">
-              {isHi ? "अभी बुक करें — स्लॉट सीमित हैं" : "Book Now — Before Slots Fill"}
+              {isHi ? "अभी बुक करें" : "Book a Reading"}
             </a>
             <p style={{ color: "var(--muted)", fontSize: "0.82rem", fontStyle: "italic" }}>
               {isHi ? "शुरुआत ₹499 से — कोई छिपा हुआ शुल्क नहीं" : "Starting ₹499 · Flat rate · No per-minute meter"}

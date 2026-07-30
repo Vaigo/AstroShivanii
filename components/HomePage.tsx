@@ -66,8 +66,8 @@ export default function HomePage() {
             <div className={`fomo-badge${isHi ? " devanagari" : ""}`}>
               <span className="fomo-dot" />
               {isHi
-                ? "सीमित: शिवानी जी सप्ताह में केवल 8 कुंडलियां स्वयं पढ़ती हैं · स्लॉट जल्दी भरते हैं"
-                : "Limited: Shivanii personally reads 8 charts/week · Slots fill fast"}
+                ? "शिवानी जी सप्ताह में केवल 8 कुंडलियां स्वयं पढ़ती हैं — इसीलिए हर पाठन व्यक्तिगत है"
+                : "Shivanii personally reads only 8 charts a week — that's why every reading is personal"}
             </div>
           </div>
 
