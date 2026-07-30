@@ -84,6 +84,24 @@ export function recordBookingIntent(b: {
   }).catch(() => null);
 }
 
+/* ── payments (Razorpay — one account serves both sites) ── */
+export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
+
+export function createPaymentOrder(body: {
+  kind: "booking" | "turant-uttar"; slug: string;
+  name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
+}) {
+  return siteFetch<CreatedOrder>("/v1/site/payments/create-order", {
+    body, headers: { "X-Site-Token": getSiteToken() ?? "" },
+  });
+}
+
+export function verifyPayment(body: {
+  razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string;
+}) {
+  return siteFetch<{ verified: boolean }>("/v1/site/payments/verify", { body });
+}
+
 /* ── admin ── */
 export interface AdminOverview {
   users: { total: number; new_this_week: number };

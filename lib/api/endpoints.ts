@@ -90,11 +90,11 @@ export function fetchFestivals(
  *  user's optional 2-3 line situation — framing only, never evidence. */
 export function fetchTurantUttarAI(
   birth: BirthRequest, category: string, question: string, language: "en" | "hi",
-  context?: string, refCode?: string, siteToken?: string | null
+  context?: string, refCode?: string, siteToken?: string | null, razorpayOrderId?: string
 ): Promise<TurantUttarAIResult> {
   return post(
     "/v1/ai/turant-uttar",
-    { birth, category, question, language, context, ref_code: refCode },
+    { birth, category, question, language, context, ref_code: refCode, razorpay_order_id: razorpayOrderId },
     siteToken ? { "X-Site-Token": siteToken } : undefined
   );
 }

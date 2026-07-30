@@ -9,10 +9,9 @@ import Link from "next/link";
 import Icon from "@/components/Icon";
 import { READINGS, readingName, getReading } from "@/lib/readings";
 import { WHATSAPP_NUMBER } from "@/lib/config";
-import { recordBookingIntent } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, SiteApiError } from "@/lib/api/site";
 
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 declare global {
   interface Window {
@@ -58,29 +57,19 @@ function BookForm() {
     setLoading(true);
     setError("");
 
-    // Record the booking intent for the user's account history + admin panel
-    // (fire-and-forget — must never block or break the booking itself)
-    recordBookingIntent({
-      reading_slug: slug, name, email, whatsapp, dob, tob, notes,
-      amount_inr: reading.priceINR,
-    });
-
     try {
-      /* 1. Ask backend to create a Razorpay order (secret stays on server) */
-      const orderRes = await fetch(`${API_BASE}/v1/account/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: reading.amountPaise,
-          currency: "INR",
-          receipt: `${slug}-${Date.now()}`,
-          notes: { name, email, whatsapp, dob, reading: slug },
-        }),
-      });
-
-      if (!orderRes.ok) {
-        // Never surface raw API error codes ("Not Found") at the payment
-        // moment — always steer to the WhatsApp fallback that's on this page.
+      /* 1. Server creates the Razorpay order — price comes from the server's
+         own price list AND the booking is recorded for history/admin. */
+      let order;
+      try {
+        order = await createPaymentOrder({
+          kind: "booking", slug, name, email, whatsapp, dob, tob,
+          notes: callSlot ? `${notes}\n[Call slot: ${callSlot}]` : notes,
+        });
+      } catch (err) {
+        // Never surface raw API error codes at the payment moment — always
+        // steer to the WhatsApp fallback that's on this page.
+        void err;
         throw new Error(
           isHi
             ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। कृपया नीचे दिए गए WhatsApp बटन से बुक करें — वही विवरण वहां भेज दें।"
@@ -88,27 +77,27 @@ function BookForm() {
         );
       }
 
-      const { order_id, amount, currency } = await orderRes.json();
-
-      /* 2. Open Razorpay Checkout (only public key on frontend) */
+      /* 2. Open Razorpay Checkout (only the public key reaches the browser) */
       const rzp = new window.Razorpay({
-        key: RAZORPAY_KEY,
-        amount,
-        currency,
-        order_id,
+        key: order.key_id || RAZORPAY_KEY,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.order_id,
         name: "Astrologer Shivanii",
         description: readingName(slug, "en"),
         prefill: { name, email, contact: whatsapp },
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string };
-          /* 3. Verify on backend */
-          await fetch(`${API_BASE}/v1/account/verify-payment`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...r, booking: { name, email, whatsapp, dob, tob, notes, callSlot, reading: slug } }),
-          });
-          setSuccess(true);
+          /* 3. Verify the signature server-side — marks the booking 'paid' */
+          try {
+            await verifyPayment(r);
+            setSuccess(true);
+          } catch (err) {
+            setError(err instanceof SiteApiError ? err.message
+              : (isHi ? "भुगतान सत्यापन में समस्या — WhatsApp पर संपर्क करें" : "Verification issue — please contact us on WhatsApp"));
+            setLoading(false);
+          }
         },
         modal: {
           ondismiss: () => setLoading(false),

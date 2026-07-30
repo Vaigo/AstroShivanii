@@ -11,7 +11,13 @@ import ResultCTA from "@/components/ResultCTA";
 import KundliChart from "@/components/KundliChart";
 import { waLink } from "@/lib/config";
 import { fetchKundli, fetchTurantUttarAI } from "@/lib/api/endpoints";
-import { getSiteToken } from "@/lib/api/site";
+import { getSiteToken, createPaymentOrder, verifyPayment } from "@/lib/api/site";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: Record<string, unknown>) => { open(): void; on(event: string, handler: (r: unknown) => void): void };
+  }
+}
 import { resolveTier, getFactSheet, type FactSheet } from "@/lib/turant-uttar-engine";
 import { PLANET_HI } from "@/lib/hindi-labels";
 import {
@@ -192,15 +198,72 @@ function TurantUttarInner() {
     }
   }
 
-  /** TEMPORARY (v1): called after the WhatsApp self-attested "I've paid"
-   *  click. Swap this for a real Razorpay Payment Link + webhook-confirmed
-   *  unlock later — the narration call itself doesn't need to change. */
-  async function handleUnlock() {
+  // Razorpay checkout.js — loaded once, used by the paid unlock
+  useEffect(() => {
+    if (document.querySelector('script[src*="checkout.razorpay.com"]')) return;
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
+
+  /** Primary path: real Razorpay payment (test keys until launch), then the
+   *  answer unlocks with a server-verified order id → history shows 'paid'. */
+  async function handlePayOnline() {
+    setPaying(true); setPayError("");
+    try {
+      const order = await createPaymentOrder({
+        kind: "turant-uttar", slug: "turant-uttar",
+        name: userName.trim(), ref_code: refCode,
+      });
+      const rzp = new window.Razorpay({
+        key: order.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.order_id,
+        name: "Astrologer Shivanii",
+        description: "तुरंत उत्तर — Instant Answer",
+        prefill: { name: userName.trim() },
+        theme: { color: "#6E1E2A" },
+        handler: async (response: unknown) => {
+          const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
+          try {
+            await verifyPayment(r);
+            await handleUnlock(r.razorpay_order_id);
+          } catch {
+            setPayError(isHi
+              ? "भुगतान सत्यापन में समस्या — Ref कोड के साथ WhatsApp पर संदेश करें, हम तुरंत सुलझाएंगे"
+              : "Verification issue — message us on WhatsApp with your ref code, we'll fix it right away");
+          } finally {
+            setPaying(false);
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) },
+      });
+      rzp.on("payment.failed", () => {
+        setPayError(isHi ? "भुगतान विफल रहा — पुनः प्रयास करें या WhatsApp से भुगतान करें" : "Payment failed — try again or pay via WhatsApp");
+        setPaying(false);
+      });
+      rzp.open();
+    } catch {
+      setPaying(false);
+      setPayError(isHi
+        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया WhatsApp वाला तरीका इस्तेमाल करें"
+        : "Online payment unavailable right now — please use the WhatsApp option");
+    }
+  }
+
+  /** Fallback path (WhatsApp-relay + self-attest) and the post-payment
+   *  unlock both land here; a verified order id marks history 'paid'. */
+  async function handleUnlock(razorpayOrderId?: string) {
     setStep("narrating");
     try {
       const result = await fetchTurantUttarAI(
         birthData!, category!, questionText, lang, situation.trim() || undefined,
-        refCode, getSiteToken()
+        refCode, getSiteToken(), razorpayOrderId
       );
       // Until the AI key is configured the backend returns a facts-only
       // template. Blend in our hand-written tier verdict so the answer
@@ -427,23 +490,43 @@ function TurantUttarInner() {
                 <div className="tu-paywall-sub">
                   {isHi ? "पूर्ण उत्तर + आवश्यक होने पर उपाय" : "Full answer + remedy if relevant"}
                 </div>
-                <a
-                  href={waLink(waMessage)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary"
-                  style={{ width: "100%", marginBottom: "0.75rem" }}
-                >
-                  {isHi ? `WhatsApp पर ₹${PRICE} भुगतान करें` : `Pay ₹${PRICE} on WhatsApp`}
-                </a>
+                {/* Primary: real Razorpay checkout (UPI/card/netbanking) —
+                    the answer unlocks the moment payment verifies */}
                 <button
                   type="button"
-                  className="btn btn-ghost"
-                  style={{ width: "100%", color: "var(--gold-bright)", borderColor: "var(--gold)" }}
-                  onClick={handleUnlock}
+                  className="btn btn-primary"
+                  style={{ width: "100%", marginBottom: "0.75rem" }}
+                  onClick={handlePayOnline}
+                  disabled={paying}
                 >
-                  {isHi ? "मैंने भुगतान कर दिया — उत्तर देखें" : "I've Paid — Show My Answer"}
+                  {paying
+                    ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…")
+                    : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                 </button>
+                {payError && (
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>
+                    {payError}
+                  </p>
+                )}
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <a
+                    href={waLink(waMessage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost btn-sm"
+                    style={{ flex: 1, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
+                  >
+                    {isHi ? "WhatsApp से भुगतान" : "Pay via WhatsApp"}
+                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    style={{ flex: 1, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
+                    onClick={() => handleUnlock()}
+                  >
+                    {isHi ? "भुगतान हो गया — उत्तर देखें" : "Paid — Show Answer"}
+                  </button>
+                </div>
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
                   Ref: {refCode}
                 </p>
