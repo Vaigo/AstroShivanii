@@ -1,0 +1,20 @@
+/** Shared city list for birth/panchang location pickers. */
+export const CITIES: { name: string; lat: number; lon: number; tz: number }[] = [
+  { name: "New Delhi", lat: 28.6139, lon: 77.209, tz: 5.5 },
+  { name: "Mumbai", lat: 19.076, lon: 72.8777, tz: 5.5 },
+  { name: "Bangalore", lat: 12.9716, lon: 77.5946, tz: 5.5 },
+  { name: "Chennai", lat: 13.0827, lon: 80.2707, tz: 5.5 },
+  { name: "Kolkata", lat: 22.5726, lon: 88.3639, tz: 5.5 },
+  { name: "Hyderabad", lat: 17.385, lon: 78.4867, tz: 5.5 },
+  { name: "Ahmedabad", lat: 23.0225, lon: 72.5714, tz: 5.5 },
+  { name: "Pune", lat: 18.5204, lon: 73.8567, tz: 5.5 },
+  { name: "Jaipur", lat: 26.9124, lon: 75.7873, tz: 5.5 },
+  { name: "Lucknow", lat: 26.8467, lon: 80.9462, tz: 5.5 },
+  { name: "Varanasi", lat: 25.3176, lon: 82.9739, tz: 5.5 },
+  { name: "Indore", lat: 22.7196, lon: 75.8577, tz: 5.5 },
+  { name: "London", lat: 51.5074, lon: -0.1278, tz: 0 },
+  { name: "New York", lat: 40.7128, lon: -74.006, tz: -5 },
+  { name: "Dubai", lat: 25.2048, lon: 55.2708, tz: 4 },
+  { name: "Toronto", lat: 43.6532, lon: -79.3832, tz: -5 },
+  { name: "Sydney", lat: -33.8688, lon: 151.2093, tz: 10 },
+];

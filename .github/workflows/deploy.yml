@@ -1,0 +1,68 @@
+# Build the static export and publish to GitHub Pages on every push to main.
+#
+# Required repo configuration (Settings → ...):
+#   Pages → Source: "GitHub Actions"
+#   Secrets → Actions:
+#     NEXT_PUBLIC_API_KEY          — the site's internal GrahaAPI key
+#                                    (sk-prod-…, label "AstroShivanii website";
+#                                    see .env.production.example for creation)
+#     NEXT_PUBLIC_RAZORPAY_KEY_ID  — rzp_live_… public key id (optional until
+#                                    payments launch; booking falls back to
+#                                    WhatsApp without it)
+#
+# NOTE: NEXT_PUBLIC_* values are baked into the public JS bundle by design —
+# the API key is site-scoped, monitored, and rotatable (never reused elsewhere).
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # /festivals-2026 fetches the live GrahaAPI at build time — the API must
+      # be reachable from CI. Without the key secret the build still succeeds
+      # on the sk-test fallback, but tools/festival data will be SAMPLE data:
+      # set the real secret before treating a deploy as production.
+      - name: Build static export
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://api.grahaapi.com
+          NEXT_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_API_KEY }}
+          NEXT_PUBLIC_RAZORPAY_KEY_ID: ${{ secrets.NEXT_PUBLIC_RAZORPAY_KEY_ID }}
+          NEXT_PUBLIC_SITE_URL: https://astroshivanii.com
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

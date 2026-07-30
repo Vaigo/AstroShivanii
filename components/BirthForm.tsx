@@ -1,0 +1,173 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type { BirthRequest } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
+import PlaceSearch, { Place } from "./PlaceSearch";
+import { timezoneNameFor, utcOffsetHoursAt } from "@/lib/timezone";
+
+interface BirthFormProps {
+  /** Standalone mode: called when the user presses the submit button. */
+  onSubmit?: (data: BirthRequest) => void;
+  /** Embedded mode: called on every change with the current data (null until complete). */
+  onChange?: (data: BirthRequest | null) => void;
+  /** Embedded mode renders plain fields (no <form>, no submit button). */
+  embedded?: boolean;
+  loading?: boolean;
+  label?: string;
+}
+
+const DEFAULT_PLACE: Place = {
+  label: "New Delhi",
+  lat: 28.6139,
+  lon: 77.209,
+  tzName: "Asia/Kolkata",
+};
+
+export default function BirthForm({ onSubmit, onChange, embedded, loading, label }: BirthFormProps) {
+  const { t } = useI18n();
+  const [dob, setDob] = useState("");
+  const [tob, setTob] = useState("");
+  const [place, setPlace] = useState<Place | null>(DEFAULT_PLACE);
+  const [manual, setManual] = useState(false);
+  const [mLat, setMLat] = useState("28.6139");
+  const [mLon, setMLon] = useState("77.2090");
+  const [mTz, setMTz] = useState("5.5");
+
+  /** The tz sent to the API is resolved for the BIRTH DATE (historical DST),
+   *  not for "today" — a July London birth gets +1 (BST), a January one 0 (GMT). */
+  function currentBirth(): BirthRequest | null {
+    if (!dob) return null;
+    if (manual) {
+      const lat = parseFloat(mLat), lon = parseFloat(mLon), tz = parseFloat(mTz);
+      if ([lat, lon, tz].some(Number.isNaN)) return null;
+      return { dob, tob: tob || undefined, lat, lon, tz };
+    }
+    if (!place) return null;
+    return {
+      dob,
+      tob: tob || undefined,
+      lat: place.lat,
+      lon: place.lon,
+      tz: utcOffsetHoursAt(place.tzName, dob, tob || undefined),
+    };
+  }
+
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    onChangeRef.current?.(currentBirth());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dob, tob, place, manual, mLat, mLon, mTz]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const birth = currentBirth();
+    if (birth) onSubmit?.(birth);
+  }
+
+  const resolvedOffset =
+    !manual && place && dob ? utcOffsetHoursAt(place.tzName, dob, tob || undefined) : null;
+
+  const fields = (
+    <>
+      {label && (
+        <p style={{ fontWeight: 600, color: "var(--maroon-deep)", marginBottom: "1rem" }}>
+          {label}
+        </p>
+      )}
+
+      <div className="form-group">
+        <label className="form-label">{t("form.dob")}</label>
+        <input
+          type="date"
+          className="form-input"
+          value={dob}
+          onChange={(e) => setDob(e.target.value)}
+          required
+          max={new Date().toISOString().split("T")[0]}
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">{t("form.tobOptional")}</label>
+        <input
+          type="time"
+          className="form-input"
+          value={tob}
+          onChange={(e) => setTob(e.target.value)}
+        />
+        <span className="form-hint">{t("form.noTimeTip")}</span>
+      </div>
+
+      {!manual ? (
+        <>
+          <PlaceSearch value={place} onSelect={setPlace} />
+          {resolvedOffset !== null && place && (
+            <p className="form-hint" style={{ marginTop: "-0.5rem", marginBottom: "0.75rem" }}>
+              {place.tzName} · UTC{resolvedOffset >= 0 ? "+" : ""}{resolvedOffset}{" "}
+              {tob ? "(आपकी जन्म-तिथि के अनुसार / for your birth date)" : "(जन्म-तिथि अनुसार)"}
+            </p>
+          )}
+          <p style={{ marginBottom: "1rem" }}>
+            <button
+              type="button"
+              onClick={() => setManual(true)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline", padding: 0 }}
+            >
+              Can&apos;t find your place? Enter coordinates manually
+            </button>
+          </p>
+        </>
+      ) : (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
+            <div className="form-group">
+              <label className="form-label">{t("form.lat")}</label>
+              <input className="form-input" type="number" step="0.0001" value={mLat} onChange={(e) => setMLat(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">{t("form.lon")}</label>
+              <input className="form-input" type="number" step="0.0001" value={mLon} onChange={(e) => setMLon(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">{t("form.tz")}</label>
+              <input className="form-input" type="number" step="0.25" value={mTz} onChange={(e) => setMTz(e.target.value)} required />
+            </div>
+          </div>
+          <p style={{ marginBottom: "1rem" }}>
+            <button
+              type="button"
+              onClick={() => { setManual(false); setPlace(DEFAULT_PLACE); }}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline", padding: 0 }}
+            >
+              ← Back to place search
+            </button>
+          </p>
+        </>
+      )}
+    </>
+  );
+
+  if (embedded) {
+    return <div>{fields}</div>;
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {fields}
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={loading || (!manual && !place)}
+        style={{ width: "100%" }}
+      >
+        {loading ? t("form.calculating") : t("form.calculate")}
+      </button>
+    </form>
+  );
+}
+
+// Re-export for callers that need to resolve places themselves (e.g. Panchang).
+export { timezoneNameFor };
