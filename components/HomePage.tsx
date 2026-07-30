@@ -455,8 +455,8 @@ export default function HomePage() {
 
       {/* ── Book CTA banner ──────────────────────────────────────────────────── */}
       <section
+        className="jaali-band"
         style={{
-          background: "linear-gradient(135deg, var(--maroon-deep) 0%, var(--maroon) 100%)",
           padding: "3.5rem 1.5rem",
           textAlign: "center",
           borderTop: "2px solid var(--gold)",
