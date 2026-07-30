@@ -41,7 +41,11 @@ jobs:
           node-version: 24
           cache: npm
 
-      - run: npm ci
+      # npm install, not npm ci: the lock is generated on Windows, and npm
+      # (10 and 11 alike) fails to record Linux-side optional deps
+      # (@emnapi/*) in it, so `npm ci`'s strict sync check can never pass
+      # cross-platform here. Versions are still pinned by the lock.
+      - run: npm install --no-audit --no-fund
 
       # /festivals-2026 fetches the live GrahaAPI at build time — the API must
       # be reachable from CI. Without the key secret the build still succeeds
