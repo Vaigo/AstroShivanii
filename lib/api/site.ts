@@ -6,6 +6,8 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "as-site-token";
 const USER_KEY = "as-site-user";
 
+import type { BirthRequest, TurantUttarAIResult } from "./types";
+
 export interface SiteUser { id: number; email: string; name: string; created_at?: number; }
 
 export interface TuOrder {
@@ -82,6 +84,19 @@ export function recordBookingIntent(b: {
   return siteFetch("/v1/site/bookings/initiate", {
     body: b, headers: { "X-Site-Token": getSiteToken() ?? "" },
   }).catch(() => null);
+}
+
+/** तुरंत उत्तर — AstroShivanii-only endpoint. Deliberately NOT on the
+ *  GrahaAPI-keyed client (./client.ts): this must never be reachable with
+ *  a GrahaAPI developer key, only from this site. */
+export function fetchTurantUttarAI(
+  birth: BirthRequest, category: string, question: string, language: "en" | "hi",
+  context?: string, refCode?: string, siteToken?: string | null, razorpayOrderId?: string
+): Promise<TurantUttarAIResult> {
+  return siteFetch<TurantUttarAIResult>("/v1/site/turant-uttar", {
+    body: { birth, category, question, language, context, ref_code: refCode, razorpay_order_id: razorpayOrderId },
+    headers: siteToken ? { "X-Site-Token": siteToken } : undefined,
+  });
 }
 
 /* ── payments (Razorpay — one account serves both sites) ── */

@@ -14,7 +14,6 @@ import type {
   MuhurtaResult,
   MangalDoshaResult,
   FestivalsResult,
-  TurantUttarAIResult,
   MahadashaListResult,
 } from "./types";
 
@@ -84,17 +83,5 @@ export function fetchFestivals(
   return post("/v1/panchang/festivals", panchangBody(date, lat, lon, tz));
 }
 
-/** तुरंत उत्तर paid answer — code computes the chart dossier server-side;
- *  Haiku narrates it when configured, otherwise a rule-based narration
- *  built from the same real facts is returned instead. `context` is the
- *  user's optional 2-3 line situation — framing only, never evidence. */
-export function fetchTurantUttarAI(
-  birth: BirthRequest, category: string, question: string, language: "en" | "hi",
-  context?: string, refCode?: string, siteToken?: string | null, razorpayOrderId?: string
-): Promise<TurantUttarAIResult> {
-  return post(
-    "/v1/ai/turant-uttar",
-    { birth, category, question, language, context, ref_code: refCode, razorpay_order_id: razorpayOrderId },
-    siteToken ? { "X-Site-Token": siteToken } : undefined
-  );
-}
+// fetchTurantUttarAI moved to lib/api/site.ts — it's AstroShivanii-only and
+// must never travel through the GrahaAPI-keyed client.

@@ -10,8 +10,8 @@ import Icon from "@/components/Icon";
 import ResultCTA from "@/components/ResultCTA";
 import KundliChart from "@/components/KundliChart";
 import { waLink } from "@/lib/config";
-import { fetchKundli, fetchTurantUttarAI } from "@/lib/api/endpoints";
-import { getSiteToken, createPaymentOrder, verifyPayment } from "@/lib/api/site";
+import { fetchKundli } from "@/lib/api/endpoints";
+import { getSiteToken, createPaymentOrder, verifyPayment, fetchTurantUttarAI } from "@/lib/api/site";
 
 declare global {
   interface Window {
