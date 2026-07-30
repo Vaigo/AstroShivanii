@@ -6,12 +6,9 @@ import Divider from "@/components/Divider";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 
-import { WHATSAPP_NUMBER } from "@/lib/config";
+import { WHATSAPP_NUMBER, CONTACT_EMAIL } from "@/lib/config";
 
-/* TODO(launch): set the real email to make the Email card appear.
-   A fake/placeholder address must NEVER render — a visitor who spots
-   example.com writes the whole site off as a scam. */
-const EMAIL: string = "";
+const EMAIL: string = CONTACT_EMAIL;
 
 export default function ContactPage() {
   const { t } = useI18n();
