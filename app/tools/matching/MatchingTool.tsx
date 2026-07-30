@@ -157,7 +157,7 @@ export default function MatchingTool() {
         </div>
 
         <form onSubmit={handleCalculate}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
+          <div className="form-2col-wide" style={{ marginBottom: "1.5rem" }}>
             <PatrikaFrame>
               <BirthForm embedded onChange={setP1} label={t("form.person1")} />
             </PatrikaFrame>

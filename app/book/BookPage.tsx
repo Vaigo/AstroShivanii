@@ -176,7 +176,7 @@ function BookForm() {
         <Divider />
 
         {/* Contact details */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+        <div className="form-2col">
           <div className="form-group">
             <label className="form-label" htmlFor="name">{t("book.name")}</label>
             <input id="name" type="text" className="form-input" required value={name} onChange={(e) => setName(e.target.value)} />
@@ -194,7 +194,7 @@ function BookForm() {
 
         {/* Birth details */}
         <Divider />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+        <div className="form-2col">
           <div className="form-group">
             <label className="form-label" htmlFor="dob">{t("form.dob")}</label>
             <input id="dob" type="date" className="form-input" required value={dob} onChange={(e) => setDob(e.target.value)} />

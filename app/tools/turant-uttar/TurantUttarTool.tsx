@@ -305,7 +305,7 @@ function TurantUttarInner() {
             <PatrikaFrame>
               {/* Name + gender: address them personally, and write correct
                   gendered Hindi. Optional — never a wall. */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <div className="form-2col">
                 <div className="form-group">
                   <label className="form-label" htmlFor="tu-name">{isHi ? "आपका नाम (वैकल्पिक)" : "Your name (optional)"}</label>
                   <input
@@ -461,9 +461,15 @@ function TurantUttarInner() {
         {/* ── Step: unlocked full answer ──────────────────────────────────── */}
         {step === "unlocked" && content && facts && kundli && (
           <div ref={stepRef}>
-            <PatrikaFrame>
+            <PatrikaFrame className="tu-answer">
               <div className="tu-tier-strip">
                 <div className="tu-tier-marker" style={{ left: `${tierPct}%` }} />
+              </div>
+
+              {/* The question, echoed — a paid answer must visibly address THE question */}
+              <div className="tu-question-echo">
+                <span className="q-label">{isHi ? "आपका प्रश्न" : "Your Question"}</span>
+                <span className="q-text">{questionText}</span>
               </div>
 
               {/* Real, per-person chart facts — the question's house shaded saffron */}
@@ -522,60 +528,61 @@ function TurantUttarInner() {
 
               <div className="result-box">
                 <div className="result-label">{isHi ? "पूर्ण उत्तर" : "Full Answer"}</div>
-                {narration ? (
-                  <>
-                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.95rem", color: "var(--maroon-deep)", fontWeight: 600, lineHeight: 1.6 }}>
-                      {narration.opening}
-                    </p>
-                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.95rem", color: "var(--ink-light)", lineHeight: 1.75, marginTop: "0.6rem", whiteSpace: "pre-line" }}>
-                      {narration.narrative}
-                    </p>
-                    {narration.timing_note && (
-                      <p className={`result-explain${isHi ? " devanagari" : ""}`}>{narration.timing_note}</p>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.95rem", color: "var(--ink-light)", lineHeight: 1.7 }}>
-                      {isHi ? content.answer.hi : content.answer.en}
-                    </p>
-                    <p className={`result-explain${isHi ? " devanagari" : ""}`}>
-                      {isHi
-                        ? (tier! >= 3 && facts.dashaEnd
-                            ? `यह प्रभाव सामान्यतः वर्तमान महादशा (${facts.dashaEnd.slice(0, 10)} तक) के दौरान बना रहेगा — दशा बदलने पर स्थिति में स्पष्ट परिवर्तन की संभावना है।`
-                            : `यह विश्लेषण आपके ${ORDINAL_HI[facts.house]} भाव और वर्तमान महादशा पर आधारित है — यही दो कारक इस उत्तर का आधार हैं।`)
-                        : (tier! >= 3 && facts.dashaEnd
-                            ? `This influence is likely to hold through the current Mahadasha (until ${facts.dashaEnd.slice(0, 10)}) — expect a real shift once it changes.`
-                            : `This reading is based on your ${facts.house}th house and current Mahadasha — those two factors are what this answer rests on.`)}
-                    </p>
-                  </>
+                <div className={`tu-answer-body${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.5rem" }}>
+                  {narration ? (
+                    <>
+                      <p className="tu-answer-opening">{narration.opening}</p>
+                      {/* Each paragraph breathes on its own — no wall of text */}
+                      {narration.narrative.split(/\n{2,}|\n/).filter(Boolean).map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <p className="tu-answer-opening">{isHi ? content.answer.hi : content.answer.en}</p>
+                      <p>
+                        {isHi
+                          ? (tier! >= 3 && facts.dashaEnd
+                              ? `यह प्रभाव सामान्यतः वर्तमान महादशा (${facts.dashaEnd.slice(0, 10)} तक) के दौरान बना रहेगा — दशा बदलने पर स्थिति में स्पष्ट परिवर्तन की संभावना है।`
+                              : `यह विश्लेषण आपके ${ORDINAL_HI[facts.house]} भाव और वर्तमान महादशा पर आधारित है — यही दो कारक इस उत्तर का आधार हैं।`)
+                          : (tier! >= 3 && facts.dashaEnd
+                              ? `This influence is likely to hold through the current Mahadasha (until ${facts.dashaEnd.slice(0, 10)}) — expect a real shift once it changes.`
+                              : `This reading is based on your ${facts.house}th house and current Mahadasha — those two factors are what this answer rests on.`)}
+                      </p>
+                    </>
+                  )}
+                </div>
+                {narration?.timing_note && (
+                  <div className={`tu-timing${isHi ? " devanagari" : ""}`}>
+                    <strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "समय: " : "Timing: "}</strong>
+                    {narration.timing_note}
+                  </div>
                 )}
               </div>
 
               {((narration?.remedies?.length ?? 0) > 0 || (!narration && content.remedy)) && (
-                <div className="kaal-box good">
-                  <strong>{isHi ? "उपाय" : "Remedies"}</strong>
-                  {narration?.remedies?.length ? (
-                    <ul style={{ fontSize: "0.85rem", paddingLeft: "1.2rem", margin: "0.3rem 0 0" }} className={isHi ? "devanagari" : undefined}>
-                      {narration.remedies.map((r, i) => <li key={i} style={{ marginBottom: "0.25rem" }}>{r}</li>)}
-                    </ul>
-                  ) : (
-                    <div style={{ fontSize: "0.85rem" }} className={isHi ? "devanagari" : undefined}>
-                      {isHi ? content.remedy?.hi : content.remedy?.en}
-                    </div>
-                  )}
+                <div className="remedy-box">
+                  <div className="remedy-title">
+                    <Icon name="diya" size={18} />
+                    {isHi ? "उपाय" : "Remedies"}
+                  </div>
+                  <ul className={isHi ? "devanagari" : undefined}>
+                    {narration?.remedies?.length
+                      ? narration.remedies.map((r, i) => <li key={i}>{r}</li>)
+                      : <li>{isHi ? content.remedy?.hi : content.remedy?.en}</li>}
+                  </ul>
                 </div>
               )}
 
               {/* Practical, non-ritual guidance that follows from the reading */}
               {(narration?.tips?.length ?? 0) > 0 && (
                 <div className="result-box">
-                  <div className="result-label" style={{ marginBottom: "0.4rem" }}>
+                  <div className="result-label" style={{ marginBottom: "0.6rem" }}>
                     {isHi ? "व्यावहारिक सुझाव" : "Practical Tips"}
                   </div>
-                  <ul style={{ fontSize: "0.88rem", color: "var(--ink-light)", paddingLeft: "1.2rem", margin: 0, lineHeight: 1.7 }} className={isHi ? "devanagari" : undefined}>
-                    {narration!.tips.map((tp, i) => <li key={i} style={{ marginBottom: "0.3rem" }}>{tp}</li>)}
-                  </ul>
+                  <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
+                    {narration!.tips.map((tp, i) => <li key={i}>{tp}</li>)}
+                  </ol>
                 </div>
               )}
 

@@ -2165,6 +2165,140 @@ a:hover { color: var(--saffron); }
 }
 .day-strip-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-top: 0.25rem; }
 
+/* ─── तुरंत उत्तर: the paid ANSWER treatment ─────────────────────────────────
+   The user paid for this screen — it must read like a manuscript letter
+   from the astrologer, not like the free tools' utility boxes. */
+.tu-answer .result-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-deep);
+}
+.tu-answer .result-label::before {
+  content: "✦ ";
+  color: var(--gold);
+}
+
+.tu-question-echo {
+  text-align: center;
+  margin: 0.25rem auto 1.1rem;
+  max-width: 34rem;
+}
+.tu-question-echo .q-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 0.3rem;
+}
+.tu-question-echo .q-text {
+  font-family: var(--font-devanagari);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--maroon-deep);
+  line-height: 1.5;
+}
+.tu-question-echo .q-text::before { content: "“"; color: var(--gold); }
+.tu-question-echo .q-text::after { content: "”"; color: var(--gold); }
+
+/* The reading itself — generous, book-like rhythm */
+.tu-answer-body p {
+  font-size: 1.02rem;
+  line-height: 1.9;
+  color: var(--ink-light);
+  margin: 0 0 1rem;
+}
+.tu-answer-body p:last-child { margin-bottom: 0; }
+.tu-answer-opening {
+  font-size: 1.08rem !important;
+  font-weight: 600;
+  color: var(--maroon-deep) !important;
+  line-height: 1.75 !important;
+}
+
+/* Timing — a quiet gold-edged callout */
+.tu-timing {
+  border-left: 3px solid;
+  border-image: linear-gradient(180deg, var(--gold-bright), var(--gold-deep)) 1;
+  background: rgba(201, 154, 58, 0.07);
+  padding: 0.7rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+}
+
+/* Remedies — a diya-lit parchment card, not a status box */
+.remedy-box {
+  position: relative;
+  background: linear-gradient(180deg, rgba(245, 224, 160, 0.28), rgba(244, 230, 198, 0.5));
+  border: 1px solid rgba(168, 121, 31, 0.45);
+  border-radius: 3px;
+  padding: 1rem 1.25rem 1rem 1.1rem;
+  margin-top: 1rem;
+}
+.remedy-box .remedy-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--maroon-deep);
+  margin-bottom: 0.5rem;
+}
+.remedy-box .remedy-title svg { color: var(--saffron); }
+.remedy-box ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+.remedy-box li {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+  padding-left: 1.1rem;
+  position: relative;
+}
+.remedy-box li::before {
+  content: "❋";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-size: 0.8rem;
+}
+
+/* Tips — elegant gold-numbered list */
+.tu-tips-list {
+  list-style: none;
+  counter-reset: tip;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+.tu-tips-list li {
+  counter-increment: tip;
+  position: relative;
+  padding-left: 2.1rem;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--ink-light);
+}
+.tu-tips-list li::before {
+  content: counter(tip);
+  position: absolute;
+  left: 0;
+  top: 0.12em;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--maroon-deep);
+  background: linear-gradient(180deg, #f2d489, #d0a238);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
 /* ─── तुरंत उत्तर (Turant Uttar) ─────────────────────────────────────────────── */
 .tu-steps {
   display: flex;
@@ -2358,6 +2492,14 @@ a:hover { color: var(--saffron); }
 }
 .nav-mobile-menu li:last-child a { border-bottom: none; }
 
+/* ─── Responsive form grids ─────────────────────────────────────────────────── */
+/* Paired form fields (name/email, dob/tob…) — 2-up, stacking on small phones */
+.form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+@media (max-width: 600px) { .form-2col { grid-template-columns: 1fr; } }
+/* Two full birth forms side by side (matching) need more room before stacking */
+.form-2col-wide { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 760px) { .form-2col-wide { grid-template-columns: 1fr; } }
+
 /* ─── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .nav-links { display: none; }
@@ -2369,6 +2511,17 @@ a:hover { color: var(--saffron); }
   /* 44px minimum touch targets on mobile */
   .nav-hamburger { width: 44px; height: 44px; }
   .lang-toggle { min-height: 42px; min-width: 42px; }
+}
+
+/* Small phones (≤420px): the logo + toggles + hamburger row must never force
+   horizontal scroll — measured 37px overflow at 360px before this block */
+@media (max-width: 420px) {
+  .nav-inner { padding: 0.6rem 0.75rem; gap: 0.4rem; }
+  .nav-logo { font-size: 1.02rem; }
+  .nav-logo-hi { font-size: 0.68rem; }
+  .nav-actions { gap: 0.35rem; }
+  .lang-toggle { min-width: 38px; min-height: 40px; padding: 0.3rem 0.4rem; }
+  .nav-hamburger { width: 42px; height: 42px; }
   .section { padding: 3rem 1rem; }
   .patrika-frame { padding: 1.25rem; }
   .grid-3, .grid-4 { grid-template-columns: 1fr; }
