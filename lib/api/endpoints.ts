@@ -89,7 +89,12 @@ export function fetchFestivals(
  *  built from the same real facts is returned instead. `context` is the
  *  user's optional 2-3 line situation — framing only, never evidence. */
 export function fetchTurantUttarAI(
-  birth: BirthRequest, category: string, question: string, language: "en" | "hi", context?: string
+  birth: BirthRequest, category: string, question: string, language: "en" | "hi",
+  context?: string, refCode?: string, siteToken?: string | null
 ): Promise<TurantUttarAIResult> {
-  return post("/v1/ai/turant-uttar", { birth, category, question, language, context });
+  return post(
+    "/v1/ai/turant-uttar",
+    { birth, category, question, language, context, ref_code: refCode },
+    siteToken ? { "X-Site-Token": siteToken } : undefined
+  );
 }

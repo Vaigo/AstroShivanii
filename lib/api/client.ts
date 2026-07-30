@@ -57,10 +57,11 @@ async function request<T>(
   return json.data ?? json;
 }
 
-export function post<T>(path: string, body: unknown): Promise<T> {
+export function post<T>(path: string, body: unknown, headers?: Record<string, string>): Promise<T> {
   return request<T>(path, {
     method: "POST",
     body: JSON.stringify(body),
+    headers,
   });
 }
 

@@ -9,6 +9,7 @@ import Link from "next/link";
 import Icon from "@/components/Icon";
 import { READINGS, readingName, getReading } from "@/lib/readings";
 import { WHATSAPP_NUMBER } from "@/lib/config";
+import { recordBookingIntent } from "@/lib/api/site";
 
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -56,6 +57,13 @@ function BookForm() {
     if (!reading) return;
     setLoading(true);
     setError("");
+
+    // Record the booking intent for the user's account history + admin panel
+    // (fire-and-forget — must never block or break the booking itself)
+    recordBookingIntent({
+      reading_slug: slug, name, email, whatsapp, dob, tob, notes,
+      amount_inr: reading.priceINR,
+    });
 
     try {
       /* 1. Ask backend to create a Razorpay order (secret stays on server) */

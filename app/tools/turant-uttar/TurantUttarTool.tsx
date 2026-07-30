@@ -11,6 +11,7 @@ import ResultCTA from "@/components/ResultCTA";
 import KundliChart from "@/components/KundliChart";
 import { waLink } from "@/lib/config";
 import { fetchKundli, fetchTurantUttarAI } from "@/lib/api/endpoints";
+import { getSiteToken } from "@/lib/api/site";
 import { resolveTier, getFactSheet, type FactSheet } from "@/lib/turant-uttar-engine";
 import { PLANET_HI } from "@/lib/hindi-labels";
 import {
@@ -198,7 +199,8 @@ function TurantUttarInner() {
     setStep("narrating");
     try {
       const result = await fetchTurantUttarAI(
-        birthData!, category!, questionText, lang, situation.trim() || undefined
+        birthData!, category!, questionText, lang, situation.trim() || undefined,
+        refCode, getSiteToken()
       );
       // Until the AI key is configured the backend returns a facts-only
       // template. Blend in our hand-written tier verdict so the answer

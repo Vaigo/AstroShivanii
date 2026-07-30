@@ -30,6 +30,7 @@ export default function Navbar() {
       <li><Link href="/guides">{t("nav.guides")}</Link></li>
       <li><Link href="/about">{t("nav.about")}</Link></li>
       <li><Link href="/contact">{t("nav.contact")}</Link></li>
+      <li><Link href="/account">{lang === "hi" ? "मेरा खाता" : "Account"}</Link></li>
     </>
   );
 
