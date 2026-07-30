@@ -200,6 +200,16 @@ function TurantUttarInner() {
       const result = await fetchTurantUttarAI(
         birthData!, category!, questionText, lang, situation.trim() || undefined
       );
+      // Until the AI key is configured the backend returns a facts-only
+      // template. Blend in our hand-written tier verdict so the answer
+      // still opens warm and human, then grounds itself in the chart facts.
+      if (result.narrated_by === "template" && category && tier) {
+        const warm = CONTENT[category][tier];
+        result.narrative = `${lang === "hi" ? warm.answer.hi : warm.answer.en}\n\n${result.narrative}`;
+        if (!result.remedies?.length && warm.remedy) {
+          result.remedies = [lang === "hi" ? warm.remedy.hi : warm.remedy.en];
+        }
+      }
       setNarration(result);
     } catch {
       setNarration(null); // falls back to the local template answer below
@@ -232,7 +242,8 @@ function TurantUttarInner() {
 
   return (
     <section className="section">
-      <div className="container" style={{ maxWidth: "720px" }}>
+      {/* Focused width while asking; generous width for reading the answer */}
+      <div className="container" style={{ maxWidth: step === "unlocked" ? "900px" : "720px" }}>
         <h1 className="section-heading">तुरंत उत्तर पाएं</h1>
         <p className="section-heading-hi devanagari">Instant Quick-Take Answer · ₹{PRICE}</p>
 
@@ -478,7 +489,7 @@ function TurantUttarInner() {
                   ascSignIndex={kundli.ascendant.sign_index}
                   ascDegrees={kundli.ascendant.degrees}
                   planets={kundli.planets}
-                  size={250}
+                  size={290}
                   highlightHouses={[facts.house]}
                 />
                 <p className="devanagari" style={{ fontSize: "0.75rem", color: "var(--saffron)", fontWeight: 700, marginTop: "0.4rem" }}>
@@ -490,7 +501,7 @@ function TurantUttarInner() {
 
               <div className="result-box" style={{ marginTop: 0 }}>
                 <div className="result-label">{isHi ? "आपकी कुंडली से" : "From Your Chart"}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.5rem", fontSize: "0.85rem" }} className={isHi ? "devanagari" : undefined}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.55rem", fontSize: "0.95rem" }} className={isHi ? "devanagari" : undefined}>
                   <span>
                     <strong style={{ color: "var(--muted)" }}>{isHi ? "प्रासंगिक भाव" : "Relevant house"}:</strong>{" "}
                     {isHi ? `${ORDINAL_HI[facts.house]} भाव` : `${facts.house}th house`}
@@ -520,7 +531,7 @@ function TurantUttarInner() {
                   <div className="result-label" style={{ marginBottom: "0.35rem" }}>
                     {isHi ? "ज्योतिष इस विषय को कैसे देखता है" : "How Astrology Reads This Topic"}
                   </div>
-                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", lineHeight: 1.7, margin: 0 }}>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "1rem", lineHeight: 1.75, margin: 0 }}>
                     {narration.topic_insight}
                   </p>
                 </div>
