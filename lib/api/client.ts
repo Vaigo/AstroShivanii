@@ -4,10 +4,12 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 // NOTE: this is a static-export site — any key here ships in the public JS bundle.
 // The internal key is therefore treated as rotatable and monitored server-side;
 // never reuse it for anything else.
+// `??` only falls through on null/undefined, not on "" — an unset GitHub
+// Actions secret bakes in as an empty string, which `??` alone would ship
+// as a broken `Bearer ` token instead of falling back. Filter empties first.
 const API_KEY =
-  process.env.NEXT_PUBLIC_API_KEY ??
-  process.env.NEXT_PUBLIC_API_TEST_KEY ??
-  "sk-test-dev";
+  [process.env.NEXT_PUBLIC_API_KEY, process.env.NEXT_PUBLIC_API_TEST_KEY, "sk-test-dev"]
+    .find((k) => !!k) as string;
 
 export class ApiError extends Error {
   constructor(
