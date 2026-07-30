@@ -34,9 +34,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 24 = the version the lock file was generated with (npm 11's
+      # optional-dep resolution differs from npm 10's; mixing them breaks npm ci)
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - run: npm ci
