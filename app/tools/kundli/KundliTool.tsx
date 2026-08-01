@@ -15,6 +15,7 @@ import { avakahada } from "@/lib/avakahada";
 import { fetchKundli, fetchMahadashaList } from "@/lib/api/endpoints";
 import type { BirthRequest, KundliFullResult, MahadashaListResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { useBackStep } from "@/lib/useBackStep";
 
 /** Muted, parchment-compatible hue per dasha lord — the ribbon must read as
  *  one artifact, not nine clashing blocks. */
@@ -98,6 +99,12 @@ export default function KundliTool() {
   useEffect(() => {
     if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [result]);
+
+  // Back button clears the result (returning to the form) instead of leaving the page.
+  useBackStep(!!result, "kundliResult", () => {
+    setResult(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   async function handleSubmit(birth: BirthRequest) {
     setLoading(true);

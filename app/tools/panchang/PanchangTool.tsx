@@ -10,6 +10,7 @@ import { choghadiya, horas, isPanchak, isBhadra, TimeSlot } from "@/lib/panchang
 import { fetchPanchang, fetchRahuKaal, fetchMuhurta, fetchFestivals } from "@/lib/api/endpoints";
 import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo, PanchangDayInfo } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { useBackStep } from "@/lib/useBackStep";
 
 function today(): string {
   return new Date().toISOString().split("T")[0];
@@ -357,6 +358,9 @@ export default function PanchangTool() {
     if (view === "month" && place) loadMonth(monthCursor.year, monthCursor.month, place);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, monthCursor, place]);
+
+  // Back button returns from the monthly calendar to the daily view instead of leaving the page.
+  useBackStep(view === "month", "panchangMonth", () => setView("day"));
 
   function handlePrevMonth() {
     setMonthCursor((c) => (c.month === 0 ? { year: c.year - 1, month: 11 } : { year: c.year, month: c.month - 1 }));

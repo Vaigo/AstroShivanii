@@ -12,6 +12,7 @@ import { SIGN_HI } from "@/lib/hindi-labels";
 import { fetchSadeSati } from "@/lib/api/endpoints";
 import type { BirthRequest, SadeSatiResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { useBackStep } from "@/lib/useBackStep";
 
 export default function SadeSatiTool() {
   const { t, lang } = useI18n();
@@ -24,6 +25,12 @@ export default function SadeSatiTool() {
   useEffect(() => {
     if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [result]);
+
+  // Back button clears the result (returning to the form) instead of leaving the page.
+  useBackStep(!!result, "sadeSatiResult", () => {
+    setResult(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   async function handleSubmit(birth: BirthRequest) {
     setLoading(true);

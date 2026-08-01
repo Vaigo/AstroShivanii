@@ -7,6 +7,7 @@ import { WHATSAPP_NUMBER } from "@/lib/config";
 import Icon, { IconName } from "@/components/Icon";
 import { calcMulank, calcBhagyank, calcNameNumber, calcLoShu, calcKua } from "@/lib/numerology-calc";
 import { PROFILES, KARMIC_DEBT, KARMIC_LESSONS, LO_SHU_GRID, PLANES, KUA_GROUP_INFO } from "@/lib/numerology-data";
+import { useBackStep } from "@/lib/useBackStep";
 
 interface Result {
   mulank:    ReturnType<typeof calcMulank>;
@@ -64,6 +65,12 @@ export default function NumerologyTool() {
   useEffect(() => {
     if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [result]);
+
+  // Back button clears the result (returning to the form) instead of leaving the page.
+  useBackStep(!!result, "numerologyResult", () => {
+    setResult(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   function calculate() {
     if (!dob || !name.trim() || !gender) return;

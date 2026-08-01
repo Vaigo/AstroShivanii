@@ -10,6 +10,7 @@ import ResultCTA from "@/components/ResultCTA";
 import { fetchAshtakoot, fetchMangalDosha } from "@/lib/api/endpoints";
 import type { BirthRequest, AshtakootResult, MangalDoshaResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { useBackStep } from "@/lib/useBackStep";
 
 const KOOTAS = [
   { key: "varna",        name: "Varna",        nameHi: "वर्ण",        max: 1, en: "Spiritual compatibility & ego-fit",              hi: "आध्यात्मिक तालमेल और स्वभाव-अहं का मेल" },
@@ -98,6 +99,13 @@ export default function MatchingTool() {
   useEffect(() => {
     if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [result]);
+
+  // Back button clears the result (returning to the forms) instead of leaving the page.
+  useBackStep(!!result, "matchResult", () => {
+    setResult(null);
+    setMangal(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   async function handleCalculate(e: React.FormEvent) {
     e.preventDefault();

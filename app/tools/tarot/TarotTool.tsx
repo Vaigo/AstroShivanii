@@ -8,6 +8,7 @@ import ResultCTA from "@/components/ResultCTA";
 import { fetchTarot } from "@/lib/api/endpoints";
 import type { TarotResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { useBackStep } from "@/lib/useBackStep";
 
 export default function TarotTool() {
   const { t, lang } = useI18n();
@@ -21,6 +22,12 @@ export default function TarotTool() {
   useEffect(() => {
     if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [result]);
+
+  // Back button clears the drawn spread (returning to the question) instead of leaving the page.
+  useBackStep(!!result, "tarotResult", () => {
+    setResult(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   async function handleDraw(e: React.FormEvent) {
     e.preventDefault();
