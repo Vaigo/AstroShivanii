@@ -342,24 +342,20 @@ export default function HomePage() {
           <Reveal>
             <PatrikaFrame>
               <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-                <div
+                <img
+                  src="/shivanii-profile.png"
+                  alt="Shivanii — ज्योतिषाचार्य शिवानी"
+                  width={120}
+                  height={120}
                   style={{
                     width: "120px",
                     height: "120px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, var(--maroon), var(--maroon-deep))",
-                    border: "3px solid var(--gold)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                     flexShrink: 0,
                     animation: "orbGlow 5s ease-in-out infinite",
-                    color: "var(--gold-bright)",
+                    objectFit: "cover",
                   }}
-                  aria-label="Placeholder for Shivanii's photo"
-                >
-                  <Icon name="user" size={48} strokeWidth={1.3} />
-                </div>
+                />
                 <div style={{ flex: 1, minWidth: "220px" }}>
                   <h2 style={{ marginBottom: "0.5rem" }}>{t("about.heading")}</h2>
                   <p className="devanagari" style={{ color: "var(--muted)", marginBottom: "1rem" }}>

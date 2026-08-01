@@ -42,7 +42,7 @@ export default function Footer() {
         <nav className="footer-links" aria-label="Free tools">
           <h4>Free Tools</h4>
           <ul>
-            <li><Link href="/tools/panchang">Daily Panchang</Link></li>
+            <li><Link href="/tools/panchang">Panchang</Link></li>
             <li><Link href="/tools/kundli">Kundli / Birth Chart</Link></li>
             <li><Link href="/tools/matching">Marriage Matching</Link></li>
             <li><Link href="/tools/rashifal">Daily Rashifal</Link></li>

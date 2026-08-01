@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 const TOOLS: Array<{ slug: string; icon: IconName; name: string; nameHi: string; desc: string }> = [
-  { slug: "panchang",   icon: "sun",    name: "Daily Panchang",        nameHi: "आज का पंचांग",          desc: "Tithi, nakshatra, Rahu Kaal, Abhijit muhurta — any date, any city" },
+  { slug: "panchang",   icon: "sun",    name: "Panchang",              nameHi: "पंचांग",                desc: "Tithi, nakshatra, Rahu Kaal, Abhijit muhurta — any date, any city, plus a monthly calendar view" },
   { slug: "kundli",     icon: "scroll", name: "Kundli / Birth Chart",  nameHi: "कुंडली / जन्म चार्ट",  desc: "North Indian chart, planetary positions, yogas, current dasha" },
   { slug: "matching",   icon: "rings",  name: "Marriage Matching",     nameHi: "गुण मिलान",             desc: "36-point Ashtakoot Guna Milan + Mangal Dosha check" },
   { slug: "rashifal",   icon: "star",   name: "Daily Rashifal",        nameHi: "दैनिक राशिफल",          desc: "Today's horoscope for your moon sign (rashi)" },

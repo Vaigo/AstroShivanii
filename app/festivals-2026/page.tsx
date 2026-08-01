@@ -147,7 +147,7 @@ export default async function FestivalsPage() {
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/tools/panchang" className="btn btn-ghost" style={{ color: "var(--gold-bright)", borderColor: "var(--gold)" }}>
-              आज का पंचांग देखें
+              पंचांग देखें
             </Link>
             <Link href="/book" className="btn btn-primary">
               व्यक्तिगत मुहूर्त परामर्श
