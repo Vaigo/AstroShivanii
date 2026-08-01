@@ -45,6 +45,23 @@ export default function TarotTool() {
   }
 
   const positions = isHi ? ["अतीत", "वर्तमान", "भविष्य"] : ["Past", "Present", "Future"];
+  const positionMeaning = isHi
+    ? ["जो ऊर्जा इस स्थिति को यहाँ तक लाई", "अभी आपके इर्द-गिर्द क्या सक्रिय है", "यही रुख रहा तो संभावित दिशा"]
+    : ["The energy that brought this here", "What is active around you now", "The likely direction if this course holds"];
+  const suitHi: Record<string, string> = {
+    major: "मेजर अर्काना — जीवन के बड़े मोड़",
+    wands: "वैंड्स (छड़ी) — कर्म, ऊर्जा, जुनून",
+    cups: "कप्स (प्याले) — भावनाएँ, रिश्ते",
+    swords: "स्वॉर्ड्स (तलवारें) — विचार, संघर्ष",
+    pentacles: "पेंटाकल्स (सिक्के) — धन, काम, भौतिक जीवन",
+  };
+  const suitEn: Record<string, string> = {
+    major: "Major Arcana — life's big turning points",
+    wands: "Wands — action, energy, passion",
+    cups: "Cups — emotions, relationships",
+    swords: "Swords — thoughts, conflict",
+    pentacles: "Pentacles — money, work, the material",
+  };
 
   return (
     <section className="section">
@@ -111,41 +128,57 @@ export default function TarotTool() {
               </p>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "1.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "1rem" }}>
               {result.cards.map((card, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: "linear-gradient(135deg, var(--maroon-deep), var(--maroon))",
-                    border: "2px solid var(--gold)",
-                    borderRadius: "4px",
-                    padding: "1.25rem 1rem",
-                    textAlign: "center",
-                    color: "var(--gold-bright)",
-                    position: "relative",
-                  }}
-                >
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--gold-pale)", marginBottom: "0.75rem" }}>
+                <div key={i} style={{ textAlign: "center" }}>
+                  <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", fontWeight: 800, letterSpacing: "0.06em", color: "var(--maroon-deep)", marginBottom: "0.1rem" }}>
                     {positions[i] ?? card.position}
                   </div>
-                  <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--muted-light)", marginBottom: "0.4rem" }}>
-                    {card.suit}
+                  <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.62rem", color: "var(--muted)", marginBottom: "0.5rem", minHeight: "2em", lineHeight: 1.3 }}>
+                    {positionMeaning[i] ?? ""}
                   </div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.25rem" }}>
+                  {/* Rider-Waite scan (public domain, 1909) — reversed cards render upside-down */}
+                  <img
+                    src={`/tarot/${card.id}.jpg`}
+                    alt={`${card.name} (${card.name_hi})${card.reversed ? " — reversed" : ""}`}
+                    width={300}
+                    height={519}
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      borderRadius: "5px",
+                      border: "2px solid var(--gold)",
+                      boxShadow: "0 6px 18px rgba(81,19,32,0.3)",
+                      transform: card.reversed ? "rotate(180deg)" : undefined,
+                      display: "block",
+                    }}
+                  />
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.9rem", fontWeight: 700, color: "var(--maroon-deep)", marginTop: "0.5rem" }}>
                     {card.name}
-                    {card.reversed && <span style={{ display: "block", fontSize: "0.7rem", color: "var(--saffron-light)" }}>↓ {isHi ? "उल्टा" : "Reversed"}</span>}
                   </div>
-                  <div className="devanagari" style={{ fontSize: "0.8rem", color: "var(--gold-pale)" }}>
+                  <div className="devanagari" style={{ fontSize: "0.8rem", color: "var(--ink-light)" }}>
                     {card.name_hi}
                   </div>
-                  {card.keywords && (
-                    <div style={{ marginTop: "0.75rem", fontSize: "0.68rem", color: "var(--muted-light)" }}>
-                      {card.keywords.slice(0, 3).join(" · ")}
-                    </div>
+                  {card.reversed && (
+                    <span className="devanagari" style={{ display: "inline-block", marginTop: "0.25rem", fontSize: "0.65rem", fontWeight: 700, color: "#8a2f24", border: "1px solid #c0392b", borderRadius: "10px", padding: "0.05rem 0.5rem" }}>
+                      ↓ {isHi ? "उल्टा कार्ड" : "Reversed"}
+                    </span>
                   )}
                 </div>
               ))}
             </div>
+
+            {/* Reversed cards worry people — say plainly what reversal means */}
+            {result.cards.some((c) => c.reversed) && (
+              <div className="kaal-box" style={{ marginBottom: "1rem" }}>
+                <strong className={isHi ? "devanagari" : undefined}>{isHi ? "उल्टा कार्ड क्या होता है?" : "What does a reversed card mean?"}</strong>
+                <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem" }}>
+                  {isHi
+                    ? "डरने की बात नहीं — उल्टे कार्ड का अर्थ है वही ऊर्जा अवरुद्ध, विलंबित या भीतर की ओर मुड़ी हुई है। यह 'बुरा फल' नहीं, ध्यान देने का संकेत है।"
+                    : "Nothing to fear — a reversed card means the same energy is blocked, delayed, or turned inward. It is a point of attention, not a 'bad omen'."}
+                </div>
+              </div>
+            )}
 
             {/* Per-card interpretations (real API fields: interpretation_en / interpretation_hi) */}
             {result.cards.map((card, i) => {
@@ -153,16 +186,40 @@ export default function TarotTool() {
               if (!text) return null;
               return (
                 <div key={`interp-${i}`} className="result-box" style={{ marginTop: "0.75rem" }}>
-                  <div className="result-label">
-                    {positions[i] ?? card.position} — {card.name}
-                    {card.reversed ? (isHi ? " (उल्टा)" : " (Reversed)") : ""}
+                  <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
+                    <img
+                      src={`/tarot/${card.id}.jpg`}
+                      alt=""
+                      aria-hidden="true"
+                      width={54}
+                      height={93}
+                      style={{ width: "54px", height: "auto", borderRadius: "3px", border: "1px solid var(--gold)", flexShrink: 0, transform: card.reversed ? "rotate(180deg)" : undefined }}
+                    />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div className="result-label">
+                        {positions[i] ?? card.position} — {isHi ? card.name_hi : card.name}
+                        {card.reversed ? (isHi ? " (उल्टा)" : " (Reversed)") : ""}
+                      </div>
+                      <p className={`devanagari`} style={{ fontSize: "0.72rem", color: "var(--muted)", margin: "0.1rem 0 0.4rem" }}>
+                        {isHi ? suitHi[card.suit] ?? card.suit : suitEn[card.suit] ?? card.suit}
+                      </p>
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.7 }}>
+                        {text}
+                      </p>
+                      {card.keywords && card.keywords.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginTop: "0.5rem" }}>
+                          {card.keywords.slice(0, 4).map((k) => (
+                            <span key={k} className="trait-chip" style={{ fontSize: "0.68rem" }}>{k}</span>
+                          ))}
+                        </div>
+                      )}
+                      {(card.element || card.domain) && (
+                        <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem" }}>
+                          {[card.element, card.domain].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.7 }}>
-                    {text}
-                  </p>
-                  <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.3rem" }}>
-                    {card.element} · {card.domain}
-                  </p>
                 </div>
               );
             })}
