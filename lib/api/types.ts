@@ -240,7 +240,9 @@ export interface PanchangFullResult {
   yoga: { index: number; name: string; progress: number; end_time: string };
   karana: { number: number; name: string; completion: number; end_time: string };
   vara: { index: number; name: string; lord: string; note?: string };
+  /** Purnimanta (North Indian) lunar month; masa_amanta = Amanta name. */
   masa?: { index: number; name: string; name_hi: string };
+  masa_amanta?: { index: number; name: string; name_hi: string };
   moon_phase: string;
   sun_rise: string;
   sun_set: string;
@@ -291,13 +293,17 @@ export interface MasaInfo {
   name_hi: string;  // e.g. "श्रावण"
 }
 
-/** Per-day tithi + lunar month, for labeling every calendar cell. */
+/** Per-day tithi + lunar month, for labeling every calendar cell.
+ *  masa/masa_hi are Purnimanta (North Indian standard — months end at
+ *  Purnima); masa_amanta* carry the Amanta (South/West) name. */
 export interface PanchangDayInfo {
   date: string;      // YYYY-MM-DD
   tithi: string;     // "Krishna Tritiya" / "Purnima"
   tithi_hi: string;  // "कृष्ण तृतीया" / "पूर्णिमा"
-  masa: string;      // "Shravana"
+  masa: string;      // "Shravana" (Purnimanta)
   masa_hi: string;   // "श्रावण"
+  masa_amanta?: string;
+  masa_amanta_hi?: string;
 }
 
 export interface FestivalsResult {
