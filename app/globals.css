@@ -1899,8 +1899,31 @@ a:hover { color: var(--saffron); }
   box-shadow: 0 10px 26px rgba(18, 92, 51, 0.55);
   color: #fff;
 }
+/* Direct-call bubble — stacked above WhatsApp, warm gold with dark glyph */
+.floating-call {
+  position: fixed;
+  bottom: 9.25rem; /* whatsapp (5.25rem) + 52px + gap */
+  right: 1.5rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f2c744;
+  color: #26233a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(138, 100, 20, 0.45);
+  z-index: 90;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.floating-call:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 26px rgba(138, 100, 20, 0.55);
+  color: #26233a;
+}
 @media (max-width: 768px) {
   .floating-whatsapp { bottom: 4.5rem; right: 1rem; width: 48px; height: 48px; }
+  .floating-call { bottom: 8.25rem; right: 1rem; width: 48px; height: 48px; }
 }
 
 .back-to-top {

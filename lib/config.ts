@@ -1,5 +1,6 @@
 /** Site-wide contact config — single source of truth. */
 export const WHATSAPP_NUMBER = "919172207635";
+export const PHONE_NUMBER = "+919172207635";   // tel: link — same number as WhatsApp
 export const CONTACT_EMAIL = "guide.shivanii@gmail.com";
 
 export function waLink(text: string): string {
