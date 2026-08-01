@@ -387,6 +387,11 @@ export interface SadeSatiResult {
   in_dhaiya: boolean;
   dhaiya_type: string | null;
   dhaiya_hi: string | null;
+  /** Combined bilingual strings (legacy); prefer remedies_hi/remedies_en. */
   remedies: string[];
+  remedies_hi?: string[];
+  remedies_en?: string[];
   note: string;
+  note_hi?: string;
+  note_en?: string;
 }

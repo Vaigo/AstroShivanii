@@ -134,6 +134,20 @@ export default function SadeSatiTool() {
                       : <>Phase: {result.current_phase} <span className="devanagari">({result.current_phase_hi})</span></>}
                   </p>
                 )}
+                {/* What this status actually MEANS — status-specific, honest, no fear */}
+                <p className={`result-explain${isHi ? " devanagari" : ""}`} style={{ maxWidth: "520px", margin: "0.85rem auto 0", textAlign: "center", borderTop: "none", paddingTop: 0 }}>
+                  {result.in_sade_sati
+                    ? (isHi
+                        ? <>शनि इस समय आपकी चंद्र राशि ({result.natal_moon_sign_hi}) के प्रभाव-क्षेत्र से गुज़र रहा है। साढ़े साती का अर्थ दंड नहीं — यह <span className="hl">अनुशासन, ज़िम्मेदारी और छँटाई</span> का दौर है: जो चीज़ें कमज़ोर नींव पर हैं, वे दबाव में आती हैं, और जो मेहनत ईमानदारी से होती है, वह स्थायी फल बनाती है। इस दौर में बड़े निर्णय सोच-समझकर लें, स्वास्थ्य-दिनचर्या नियमित रखें, और नीचे दिए चरण-विवरण से समझें कि अभी कौन-सा भाग चल रहा है।</>
+                        : <>Saturn is currently moving through the influence zone of your Moon sign ({result.natal_moon_sign}). Sade Sati is not a punishment — it is a period of <span className="hl">discipline, responsibility and pruning</span>: whatever rests on weak foundations comes under pressure, while honest sustained effort builds lasting results. Take big decisions deliberately, keep health routines steady, and use the phase table below to see exactly which part you are in.</>)
+                    : result.in_dhaiya
+                      ? (isHi
+                          ? <>यह साढ़े साती नहीं, <span className="hl">ढैया (लगभग 2.5 वर्ष)</span> है — {result.dhaiya_hi ?? ""}. चौथे भाव का शनि (कंटक) घर-मन-सुख की परीक्षा लेता है, आठवें भाव का शनि (अष्टम) अचानक बदलावों से जुड़ा है। प्रभाव साढ़े साती से हल्का, पर दिनचर्या व धैर्य वही माँगता है।</>
+                          : <>This is not Sade Sati but <span className="hl">Dhaiya (≈ 2.5 years)</span> — {result.dhaiya_type ?? ""} Saturn. The 4th-house transit (Kantaka) tests home, mind and comfort; the 8th-house transit (Ashtama) is linked to sudden changes. Lighter than Sade Sati, but it asks for the same steady routine and patience.</>)
+                      : (isHi
+                          ? <>अभी शनि आपकी चंद्र राशि ({result.natal_moon_sign_hi}) से साढ़े साती बनाने वाले भावों में नहीं है — <span className="hl">यह दौर आपके लिए सक्रिय नहीं है</span>। नीचे दी गई अगली अवधि नोट कर लें: साढ़े साती अचानक नहीं आती, शनि की धीमी चाल से वर्षों पहले उसकी तिथि निश्चित होती है — यही तैयारी का लाभ है।</>
+                          : <>Saturn is currently not in the houses that form Sade Sati from your Moon sign ({result.natal_moon_sign}) — <span className="hl">this period is not active for you</span>. Note the next window below: Sade Sati never arrives unannounced; Saturn's slow motion fixes its dates years in advance — which is exactly what makes preparation possible.</>)}
+                </p>
               </div>
 
               <div className="result-box">
@@ -216,13 +230,25 @@ export default function SadeSatiTool() {
                 </div>
               )}
 
-              {result.note && (
+              {result.previous_sade_sati && (
                 <div className="result-box">
-                  <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                    {result.note}
+                  <div className="result-label">{isHi ? "पिछली साढ़े साती" : "Previous Sade Sati"}</div>
+                  <div className="result-value" style={{ fontSize: "0.95rem" }}>
+                    {result.previous_sade_sati.start} → {result.previous_sade_sati.end}
+                  </div>
+                  <p className={`result-explain${isHi ? " devanagari" : ""}`}>
+                    {isHi
+                      ? "इन वर्षों को याद कीजिए — उस दौर में जीवन कैसा रहा, यही सबसे ईमानदार संकेत है कि आपका शनि आपसे कैसा व्यवहार करता है।"
+                      : "Think back to these years — how life actually felt then is the most honest indicator of how your Saturn treats you."}
                   </p>
                 </div>
               )}
+
+              <div className="result-box">
+                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
+                  {(isHi ? result.note_hi : result.note_en) ?? result.note}
+                </p>
+              </div>
 
               {result.remedies && result.remedies.length > 0 && (
                 <div className="result-box">
@@ -230,10 +256,15 @@ export default function SadeSatiTool() {
                     {isHi ? "सुझाए गए उपाय" : "Suggested Remedies"}
                   </div>
                   <ul style={{ paddingLeft: "1.2rem" }}>
-                    {result.remedies.map((r, i) => (
-                      <li key={i} className="devanagari" style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginBottom: "0.25rem" }}>{r}</li>
+                    {((isHi ? result.remedies_hi : result.remedies_en) ?? result.remedies).map((r, i) => (
+                      <li key={i} className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginBottom: "0.25rem" }}>{r}</li>
                     ))}
                   </ul>
+                  <p className={`result-explain${isHi ? " devanagari" : ""}`}>
+                    {isHi
+                      ? "ये सामान्य शास्त्रीय उपाय हैं — शनि सेवा और अनुशासन से प्रसन्न होता है, महँगे अनुष्ठानों से नहीं। कुंडली-विशेष उपाय के लिए जन्म-शनि की स्थिति देखना ज़रूरी है।"
+                      : "These are general classical remedies — Saturn responds to service and discipline, not expensive rituals. Chart-specific remedies need your natal Saturn examined."}
+                  </p>
                 </div>
               )}
 

@@ -23,6 +23,146 @@ const KOOTAS = [
   { key: "nadi",         name: "Nadi",          nameHi: "नाड़ी",        max: 8, en: "Health & progeny — the heaviest-weighted koota", hi: "स्वास्थ्य और संतान — सबसे भारी कूट" },
 ] as const;
 
+/* ── Per-koota detail: WHO has WHAT, and what a lost point actually means ── */
+
+const VAL_HI: Record<string, string> = {
+  // varna
+  Brahmin: "ब्राह्मण", Kshatriya: "क्षत्रिय", Vaishya: "वैश्य", Shudra: "शूद्र",
+  // vashya groups (API sends lowercase)
+  chatushpada: "चतुष्पाद (पशु)", manava: "मानव", jalchar: "जलचर", vanchar: "वनचर", keeta: "कीट",
+  // yoni animals
+  horse: "अश्व (घोड़ा)", elephant: "गज (हाथी)", sheep: "मेष (भेड़)", serpent: "सर्प", dog: "श्वान",
+  cat: "मार्जार (बिल्ली)", rat: "मूषक (चूहा)", cow: "गौ (गाय)", buffalo: "महिष (भैंसा)", tiger: "व्याघ्र (बाघ)",
+  deer: "मृग (हिरण)", monkey: "वानर (बंदर)", mongoose: "नकुल (नेवला)", lion: "सिंह",
+  // gana
+  Deva: "देव", Manushya: "मनुष्य", Rakshasa: "राक्षस",
+  // nadi
+  Adi: "आदि", Madhya: "मध्य", Antya: "अंत्य",
+  // moon-sign lords
+  Sun: "सूर्य", Moon: "चंद्र", Mars: "मंगल", Mercury: "बुध", Jupiter: "गुरु", Venus: "शुक्र", Saturn: "शनि",
+};
+const TARA_NAME_HI = ["", "जन्म", "सम्पत", "विपत", "क्षेम", "प्रत्यरि", "साधक", "वध", "मित्र", "परम मैत्र"];
+const TARA_NAME_EN = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhaka", "Vadha", "Mitra", "Param Maitra"];
+const BAD_TARA = new Set([3, 5, 7]);
+
+interface KootaDetail { pair: string | null; verdict: string; tone: "good" | "mid" | "bad" }
+
+function kootaDetail(key: string, r: AshtakootResult, isHi: boolean): KootaDetail {
+  const L = (en: string, hi: string) => (isHi ? hi : en);
+  const v = (s?: string) => (s ? (isHi ? VAL_HI[s] ?? s : s.charAt(0).toUpperCase() + s.slice(1)) : "—");
+  const boy = L("Boy", "वर"), girl = L("Girl", "वधू");
+
+  switch (key) {
+    case "varna": {
+      const k = r.varna;
+      const full = k.score >= k.max;
+      return {
+        pair: `${boy}: ${v(k.boy_varna)} · ${girl}: ${v(k.girl_varna)}`,
+        tone: full ? "good" : "mid",
+        verdict: full
+          ? L("Varna order is favorable — temperament-level respect comes naturally.",
+              "वर्ण-क्रम अनुकूल है — स्वभाव के स्तर पर परस्पर आदर सहज रहेगा।")
+          : L(`The girl's varna (${v(k.girl_varna)}) ranks above the boy's (${v(k.boy_varna)}) — tradition reads this as possible ego/values friction, needing conscious mutual respect.`,
+              `वधू का वर्ण (${v(k.girl_varna)}) वर के वर्ण (${v(k.boy_varna)}) से ऊँचा है — परंपरा में यह अहं/मूल्यों के टकराव का संकेत माना जाता है; परस्पर सम्मान सचेत रूप से बनाना होगा।`),
+      };
+    }
+    case "vashya": {
+      const k = r.vashya;
+      const full = k.score >= k.max;
+      return {
+        pair: `${boy}: ${v(k.boy_group)} · ${girl}: ${v(k.girl_group)}`,
+        tone: full ? "good" : k.score > 0 ? "mid" : "bad",
+        verdict: full
+          ? L("Natural mutual affection and influence — neither dominates.",
+              "स्वाभाविक परस्पर स्नेह-वश्यता — कोई किसी पर हावी नहीं।")
+          : L(`Different vashya groups (${v(k.boy_group)} vs ${v(k.girl_group)}) — influence flows unevenly; winning each other over will take patience.`,
+              `वश्य-वर्ग भिन्न हैं (${v(k.boy_group)} बनाम ${v(k.girl_group)}) — प्रभाव एकतरफ़ा रह सकता है; एक-दूसरे को समझाने-मनाने में धैर्य लगेगा।`),
+      };
+    }
+    case "tara": {
+      const k = r.tara;
+      const tb = k.tara_from_boy, tg = k.tara_from_girl;
+      const tn = (n?: number) => (n ? (isHi ? TARA_NAME_HI[n] : TARA_NAME_EN[n]) : "—");
+      const girlBad = tb !== undefined && BAD_TARA.has(tb);
+      const boyBad = tg !== undefined && BAD_TARA.has(tg);
+      const pair = `${L("Girl's tara", "वधू की तारा")}: ${tn(tb)}${girlBad ? L(" (inauspicious)", " (अशुभ)") : ""} · ${L("Boy's tara", "वर की तारा")}: ${tn(tg)}${boyBad ? L(" (inauspicious)", " (अशुभ)") : ""}`;
+      if (!girlBad && !boyBad) {
+        return { pair, tone: "good", verdict: L("Both directions fall in auspicious taras — mutual health and fortune are supported.", "दोनों दिशाओं की तारा शुभ है — परस्पर स्वास्थ्य-सौभाग्य को बल मिलता है।") };
+      }
+      const who = girlBad && boyBad ? L("both sides", "दोनों पक्षों") : girlBad ? girl : boy;
+      return {
+        pair, tone: girlBad && boyBad ? "bad" : "mid",
+        verdict: L(`The tara for ${who} falls in an inauspicious count (Vipat/Pratyari/Vadha) — tradition links this to health-and-fortune friction on that side; a deeper check is worthwhile.`,
+            `${who} की तारा अशुभ गणना (विपत/प्रत्यरि/वध) में पड़ती है — परंपरा इसे उस पक्ष के स्वास्थ्य-सौभाग्य से जोड़ती है; गहन जांच उचित रहेगी।`),
+      };
+    }
+    case "yoni": {
+      const k = r.yoni;
+      const pair = `${boy}: ${v(k.boy_yoni)} · ${girl}: ${v(k.girl_yoni)}`;
+      if (k.score >= 3) return { pair, tone: "good", verdict: L("Friendly yoni natures — instinctive and intimate compatibility is strong.", "योनियाँ मैत्रीपूर्ण हैं — सहज एवं अंतरंग तालमेल अच्छा रहेगा।") };
+      if (k.score === 2) return { pair, tone: "mid", verdict: L("Neutral yoni pairing — different instincts, workable with understanding.", "योनि-मेल सामान्य है — स्वभाव भिन्न, पर समझ से निभ सकता है।") };
+      return {
+        pair, tone: "bad",
+        verdict: L(`These yonis (${v(k.boy_yoni)} vs ${v(k.girl_yoni)}) are traditionally hostile natures — day-to-day temperament and intimacy need real patience from both.`,
+            `ये योनियाँ (${v(k.boy_yoni)} बनाम ${v(k.girl_yoni)}) परंपरा में परस्पर शत्रु मानी जाती हैं — दैनिक स्वभाव व अंतरंग तालमेल में दोनों ओर से धैर्य आवश्यक होगा।`),
+      };
+    }
+    case "graha_maitri": {
+      const k = r.graha_maitri;
+      const pair = `${boy}${L(" (moon-sign lord)", " का राशि-स्वामी")}: ${v(k.boy_moon_sign_lord)} · ${girl}: ${v(k.girl_moon_sign_lord)}`;
+      if (k.score >= 4) return { pair, tone: "good", verdict: L("The moon-sign lords are friends — mental wavelengths align easily.", "राशि-स्वामी परस्पर मित्र हैं — मानसिक तरंगदैर्घ्य सहज मिलती है।") };
+      if (k.score >= 1) return { pair, tone: "mid", verdict: L("Partly friendly lords — outlooks differ at times; talking things through matters.", "स्वामियों में आंशिक मैत्री — दृष्टिकोण कभी-कभी अलग होंगे; संवाद महत्वपूर्ण रहेगा।") };
+      return {
+        pair, tone: "bad",
+        verdict: L(`${v(k.boy_moon_sign_lord)} and ${v(k.girl_moon_sign_lord)} are traditionally enemy planets — mental compatibility needs deliberate effort, not assumption.`,
+            `${v(k.boy_moon_sign_lord)} और ${v(k.girl_moon_sign_lord)} परंपरा में शत्रु ग्रह हैं — मानसिक तालमेल अपने-आप नहीं, सप्रयास बनेगा।`),
+      };
+    }
+    case "gana": {
+      const k = r.gana;
+      const pair = `${boy}: ${v(k.boy_gana)} · ${girl}: ${v(k.girl_gana)}`;
+      if (k.score >= 5) return { pair, tone: "good", verdict: L("Gana temperaments align — core natures pull in the same direction.", "गण-मेल अच्छा है — मूल स्वभाव एक ही दिशा में चलते हैं।") };
+      if (k.score >= 3) return { pair, tone: "mid", verdict: L("Workable gana pairing — temperaments differ but complement with effort.", "गण-मेल मध्यम — स्वभाव भिन्न हैं पर प्रयास से पूरक बन सकते हैं।") };
+      return {
+        pair, tone: "bad",
+        verdict: L(`Gana dosha: ${boy} is ${v(k.boy_gana)}, ${girl} is ${v(k.girl_gana)} — tradition flags this pairing for temperament clashes; check cancellation before concluding.`,
+            `गण दोष: ${boy} ${v(k.boy_gana)} गण, ${girl} ${v(k.girl_gana)} गण — परंपरा इस जोड़ी को स्वभाव-टकराव से जोड़ती है; निष्कर्ष से पहले निवारण की जांच कराएँ।`),
+      };
+    }
+    case "bhakoot": {
+      const k = r.bhakoot;
+      const pair = r.person1 && r.person2
+        ? `${boy}${L(" (moon sign)", " की राशि")}: ${isHi ? r.person1.moon_sign_hi : r.person1.moon_sign} · ${girl}: ${isHi ? r.person2.moon_sign_hi : r.person2.moon_sign}`
+        : null;
+      if (k.score >= k.max) return { pair, tone: "good", verdict: L("Auspicious bhakoot — the moon signs support prosperity and family growth together.", "शुभ भकूट — दोनों राशियाँ मिलकर समृद्धि व पारिवारिक वृद्धि को बल देती हैं।") };
+      const d = k.difference;
+      const axis = d === 2 || d === 12
+        ? L("the 2-12 (Dwirdwadash) axis — traditionally financial strain and family friction", "2-12 (द्विर्द्वादश) अक्ष — परंपरा में आर्थिक तनाव व पारिवारिक खिंचाव")
+        : d === 6 || d === 8
+          ? L("the 6-8 (Shadashtak) axis — traditionally the heaviest, linked to health and longevity concerns", "6-8 (षडाष्टक) अक्ष — सबसे भारी, स्वास्थ्य-आयु से जुड़ा")
+          : L("the 5-9 (Nav-Pancham) axis — traditionally linked to progeny matters", "5-9 (नव-पंचम) अक्ष — संतान पक्ष से जुड़ा");
+      return {
+        pair, tone: "bad",
+        verdict: L(`Bhakoot dosha on ${axis}. Its cancellation rules (same sign-lord, friendly lords) are common — verify before treating it as final.`,
+            `भकूट दोष — ${axis}। इसके निवारण-नियम (एक ही राशि-स्वामी, मित्र स्वामी) प्रचलित हैं — अंतिम मानने से पहले जांच अवश्य कराएँ।`),
+      };
+    }
+    case "nadi": {
+      const k = r.nadi;
+      const pair = `${boy}: ${v(k.boy_nadi)} ${L("nadi", "नाड़ी")} · ${girl}: ${v(k.girl_nadi)} ${L("nadi", "नाड़ी")}`;
+      if (!k.nadi_dosha) return { pair, tone: "good", verdict: L("Different nadis — the heaviest koota scores full; health-and-progeny compatibility is supported.", "नाड़ियाँ भिन्न हैं — सबसे भारी कूट पूर्ण अंक पाता है; स्वास्थ्य-संतान पक्ष अनुकूल।") };
+      return {
+        pair, tone: "bad",
+        verdict: L(`Both share the ${v(k.boy_nadi)} nadi — Nadi dosha, traditionally linked to health and progeny. It also has the most cancellation rules of any dosha, so verify parihara before deciding.`,
+            `दोनों की नाड़ी एक ही (${v(k.boy_nadi)}) है — नाड़ी दोष, जो परंपरा में स्वास्थ्य-संतान से जुड़ा है। पर इसी दोष के निवारण-नियम सबसे अधिक हैं — निर्णय से पहले परिहार की जांच अनिवार्य है।`),
+      };
+    }
+  }
+  return { pair: null, verdict: "", tone: "mid" };
+}
+
+const TONE_COLOR = { good: "#1a7a3a", mid: "#8a6414", bad: "#8a2f24" } as const;
+
 /** Donut gauge for the /36 score — tick marks at the classical thresholds
  *  (18 acceptable · 24 good · 28 excellent) so "where do we fall" reads at
  *  a glance instead of needing the number explained. */
@@ -229,13 +369,34 @@ export default function MatchingTool() {
 
               <Divider />
 
-              {/* Koota breakdown */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.1rem" }}>
-                {KOOTAS.map(({ key, name, nameHi, max, en, hi }) => {
+              {/* Both charts' moon details — the raw inputs every koota is judged from */}
+              {result.person1 && result.person2 && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                  {([[isHi ? "वर (लड़का)" : "Boy (Groom)", result.person1], [isHi ? "वधू (लड़की)" : "Girl (Bride)", result.person2]] as const).map(([label, p]) => (
+                    <div key={label} className="result-box" style={{ margin: 0 }}>
+                      <div className="result-label">{label}</div>
+                      <div style={{ fontSize: "0.88rem" }} className={isHi ? "devanagari" : undefined}>
+                        <strong>{isHi ? "राशि" : "Moon sign"}:</strong> {isHi ? p.moon_sign_hi : p.moon_sign}
+                        {" · "}
+                        <strong>{isHi ? "नक्षत्र" : "Nakshatra"}:</strong> {p.nakshatra}
+                        {" "}
+                        <span style={{ color: "var(--muted)", fontSize: "0.85em" }}>
+                          ({isHi ? "स्वामी" : "lord"}: {isHi ? VAL_HI[p.nakshatra_lord] ?? p.nakshatra_lord : p.nakshatra_lord})
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Koota breakdown — who has what, and what a lost point means */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.1rem" }}>
+                {KOOTAS.map(({ key, name, nameHi, en, hi }) => {
                   const koota = result[key as keyof AshtakootResult] as { score: number; max: number } | undefined;
                   if (!koota) return null;
+                  const detail = kootaDetail(key, result, isHi);
                   return (
-                    <div key={key}>
+                    <div key={key} style={{ padding: "0.75rem", background: "rgba(201,154,58,0.05)", border: "1px solid rgba(201,154,58,0.25)", borderRadius: "3px" }}>
                       <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--maroon-deep)", marginBottom: "0.35rem" }}>
                         {isHi ? nameHi : name}{" "}
                         <span className="devanagari" style={{ fontWeight: 400, color: "var(--muted)", fontSize: "0.8em" }}>
@@ -246,8 +407,16 @@ export default function MatchingTool() {
                         )}
                       </div>
                       <ScoreBar score={koota.score} max={koota.max} />
-                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: "0.3rem", lineHeight: 1.4 }}>
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.3rem", lineHeight: 1.4 }}>
                         {isHi ? hi : en}
+                      </p>
+                      {detail.pair && (
+                        <p className="devanagari" style={{ fontSize: "0.78rem", fontWeight: 600, color: "var(--ink)", marginTop: "0.45rem", lineHeight: 1.5, borderTop: "1px dashed rgba(201,154,58,0.35)", paddingTop: "0.45rem" }}>
+                          {detail.pair}
+                        </p>
+                      )}
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.76rem", color: TONE_COLOR[detail.tone], marginTop: "0.25rem", lineHeight: 1.5 }}>
+                        {detail.verdict}
                       </p>
                     </div>
                   );
