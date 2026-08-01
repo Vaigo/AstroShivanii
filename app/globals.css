@@ -2097,7 +2097,10 @@ a:hover { color: var(--saffron); }
 }
 
 /* ─── Dasha timeline ribbon ─────────────────────────────────────────────────── */
-.dasha-ribbon-wrap { overflow-x: auto; padding-bottom: 0.4rem; }
+.dasha-ribbon-wrap { overflow-x: auto; padding-bottom: 0.4rem; scrollbar-width: thin; scrollbar-color: rgba(201, 154, 58, 0.55) rgba(201, 154, 58, 0.12); }
+.dasha-ribbon-wrap::-webkit-scrollbar { height: 6px; }
+.dasha-ribbon-wrap::-webkit-scrollbar-thumb { background: rgba(201, 154, 58, 0.55); border-radius: 3px; }
+.dasha-ribbon-wrap::-webkit-scrollbar-track { background: rgba(201, 154, 58, 0.12); border-radius: 3px; }
 .dasha-ribbon {
   display: flex;
   min-width: 640px;

@@ -78,15 +78,18 @@ export default function NumerologyTool() {
     const bhagyank = calcBhagyank(dob);
     const nameNum  = calcNameNumber(name);
     const kua      = calcKua(dob, gender);
+    // The complete-grid method: derived numbers are written into the grid
+    // with the DOB digits, so they fill cells, strengthen planes, and are
+    // never wrongly listed as karmic lessons (e.g. a Bhagyank 5 person
+    // cannot have 5 as a "missing" number). The Mulank is added ONLY for
+    // two-digit birth days — for days 1-9 the day digit IS the Mulank and
+    // is already in the grid; adding it again would double-count.
+    const day = parseInt(dob.split("-")[2], 10);
     setResult({
       mulank,
       bhagyank,
       nameNum,
-      // The complete-grid method: derived numbers are written into the grid
-      // with the DOB digits, so they fill cells, strengthen planes, and are
-      // never wrongly listed as karmic lessons (e.g. a Bhagyank 5 person
-      // cannot have 5 as a "missing" number).
-      loShu: calcLoShu(dob, [mulank.value, bhagyank.value, ...(nameNum.value > 0 ? [nameNum.value] : []), kua.value]),
+      loShu: calcLoShu(dob, [...(day >= 10 ? [mulank.value] : []), bhagyank.value, ...(nameNum.value > 0 ? [nameNum.value] : []), kua.value]),
       kua,
       name,
       dob,

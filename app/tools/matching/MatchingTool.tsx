@@ -11,6 +11,9 @@ import { fetchAshtakoot, fetchMangalDosha } from "@/lib/api/endpoints";
 import type { BirthRequest, AshtakootResult, MangalDoshaResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { NAKSHATRAS } from "@/lib/nakshatras";
+
+const nakHi = (name?: string) => (name ? NAKSHATRAS.find((n) => n.name === name)?.name_hi ?? name : "—");
 
 const KOOTAS = [
   { key: "varna",        name: "Varna",        nameHi: "वर्ण",        max: 1, en: "Spiritual compatibility & ego-fit",              hi: "आध्यात्मिक तालमेल और स्वभाव-अहं का मेल" },
@@ -276,8 +279,8 @@ export default function MatchingTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "1000px" }}>
-        <h1 className="section-heading">Marriage Matching</h1>
-        <p className="section-heading-hi devanagari">गुण मिलान · अष्टकूट</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "गुण मिलान · अष्टकूट" : "Marriage Matching"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Marriage Matching" : "गुण मिलान · अष्टकूट"}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           {isHi ? (
@@ -378,7 +381,7 @@ export default function MatchingTool() {
                       <div style={{ fontSize: "0.88rem" }} className={isHi ? "devanagari" : undefined}>
                         <strong>{isHi ? "राशि" : "Moon sign"}:</strong> {isHi ? p.moon_sign_hi : p.moon_sign}
                         {" · "}
-                        <strong>{isHi ? "नक्षत्र" : "Nakshatra"}:</strong> {p.nakshatra}
+                        <strong>{isHi ? "नक्षत्र" : "Nakshatra"}:</strong> {isHi ? nakHi(p.nakshatra) : p.nakshatra}
                         {" "}
                         <span style={{ color: "var(--muted)", fontSize: "0.85em" }}>
                           ({isHi ? "स्वामी" : "lord"}: {isHi ? VAL_HI[p.nakshatra_lord] ?? p.nakshatra_lord : p.nakshatra_lord})
@@ -427,27 +430,33 @@ export default function MatchingTool() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "0.75rem", marginTop: "1.25rem" }}>
                 {mangal && (
                   <div className={`kaal-box${!mangal.person1.has_mangal_dosha && !mangal.person2.has_mangal_dosha ? " good" : ""}`}>
-                    <strong>
-                      Mangal Dosha:{" "}
+                    <strong className={isHi ? "devanagari" : undefined}>
+                      {isHi ? "मंगल दोष: " : "Mangal Dosha: "}
                       {!mangal.person1.has_mangal_dosha && !mangal.person2.has_mangal_dosha
-                        ? "None — neither chart is Manglik ✓"
+                        ? (isHi ? "नहीं — दोनों में से कोई मांगलिक नहीं ✓" : "None — neither chart is Manglik ✓")
                         : mangal.mutual_cancellation
-                          ? "Present in both — mutually cancelled ✓"
-                          : `Person 1: ${mangal.person1.has_mangal_dosha ? "Yes" : "No"} · Person 2: ${mangal.person2.has_mangal_dosha ? "Yes" : "No"}`}
+                          ? (isHi ? "दोनों में है — परस्पर निरस्त ✓" : "Present in both — mutually cancelled ✓")
+                          : isHi
+                            ? `वर: ${mangal.person1.has_mangal_dosha ? "है" : "नहीं"} · वधू: ${mangal.person2.has_mangal_dosha ? "है" : "नहीं"}`
+                            : `Boy: ${mangal.person1.has_mangal_dosha ? "Yes" : "No"} · Girl: ${mangal.person2.has_mangal_dosha ? "Yes" : "No"}`}
                     </strong>
-                    <div style={{ fontSize: "0.78rem" }}>
+                    <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem" }}>
                       {!mangal.person1.has_mangal_dosha && !mangal.person2.has_mangal_dosha
-                        ? "मंगल दोष नहीं है — इस विषय में चिंता की आवश्यकता नहीं।"
-                        : "दोष दिखा? रुकिए — कई दोष cancellation से कटते हैं। निर्णय से पहले पूरी जांच कराएँ।"}
+                        ? (isHi ? "मंगल दोष नहीं है — इस विषय में चिंता की आवश्यकता नहीं।" : "No Mangal dosha — nothing to worry about on this front.")
+                        : (isHi ? "दोष दिखा? रुकिए — कई दोष निवारण (परिहार) से कटते हैं। निर्णय से पहले पूरी जांच कराएँ।" : "Dosha showing? Pause — many doshas cancel through parihara. Get a full check before deciding.")}
                     </div>
                   </div>
                 )}
                 <div className={`kaal-box${!result.nadi.nadi_dosha ? " good" : ""}`}>
-                  <strong>Nadi Dosha: {result.nadi.nadi_dosha ? "Present" : "None ✓"}</strong>
-                  <div style={{ fontSize: "0.78rem" }}>
+                  <strong className={isHi ? "devanagari" : undefined}>
+                    {isHi
+                      ? `नाड़ी दोष: ${result.nadi.nadi_dosha ? "है" : "नहीं ✓"}`
+                      : `Nadi Dosha: ${result.nadi.nadi_dosha ? "Present" : "None ✓"}`}
+                  </strong>
+                  <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem" }}>
                     {result.nadi.nadi_dosha
-                      ? "सबसे भारी कूट — पर इसके cancellation नियम भी सबसे अधिक हैं। भयभीत न हों, जांच कराएँ।"
-                      : "नाड़ी दोष नहीं है — स्वास्थ्य-संतान के इस प्रमुख कूट में मेल शुभ।"}
+                      ? (isHi ? "सबसे भारी कूट — पर इसके निवारण-नियम भी सबसे अधिक हैं। भयभीत न हों, जांच कराएँ।" : "The heaviest koota — but it also has the most cancellation rules. Don't panic; get it verified.")
+                      : (isHi ? "नाड़ी दोष नहीं है — स्वास्थ्य-संतान के इस प्रमुख कूट में मेल शुभ।" : "No Nadi dosha — this key health-and-progeny koota matches well.")}
                   </div>
                 </div>
               </div>

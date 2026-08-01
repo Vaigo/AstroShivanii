@@ -82,8 +82,10 @@ export interface Planet {
 
 export interface Yoga {
   name: string;
+  name_hi?: string;
   planets: string[];
   strength: string;
+  description_hi?: string;
   description: string;
 }
 

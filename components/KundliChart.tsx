@@ -87,7 +87,9 @@ export default function KundliChart({ ascSignIndex, ascDegrees, ascDms, planets,
     const abbr = ABBR[name];
     if (!abbr || !p.house) continue;
     const deg = shortDms(p.dms) ?? `${Math.round(p.degrees)}°`;
-    const label = `${abbr}${p.retrograde ? "(व)" : ""}${p.is_vargottama ? "★" : ""}${deg}`;
+    const dignity = p.is_exalted ? "↑" : p.is_debilitated ? "↓" : "";
+    const combust = p.is_combust ? "(अ)" : "";
+    const label = `${abbr}${p.retrograde ? "(व)" : ""}${dignity}${combust}${p.is_vargottama ? "★" : ""}${deg}`;
     push(houseOf(p), label, MODERN.has(name));
   }
 

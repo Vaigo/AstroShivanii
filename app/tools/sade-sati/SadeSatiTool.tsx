@@ -50,8 +50,8 @@ export default function SadeSatiTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "760px" }}>
-        <h1 className="section-heading">Sade Sati Check</h1>
-        <p className="section-heading-hi devanagari">साढ़े साती जांच</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "साढ़े साती जांच" : "Sade Sati Check"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Sade Sati Check" : "साढ़े साती जांच"}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           {isHi ? (
@@ -130,7 +130,7 @@ export default function SadeSatiTool() {
                 {result.current_phase && (
                   <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
                     {isHi
-                      ? <span className="devanagari">चरण: {result.current_phase_hi} ({result.current_phase})</span>
+                      ? <span className="devanagari">चरण: {result.current_phase_hi}</span>
                       : <>Phase: {result.current_phase} <span className="devanagari">({result.current_phase_hi})</span></>}
                   </p>
                 )}

@@ -17,6 +17,10 @@ import type { BirthRequest, KundliFullResult, MahadashaListResult } from "@/lib/
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 
+/** Classical planets only — exaltation/debilitation/combustion applies to
+ *  these, not the modern outer planets. */
+const ABBR_PLANETS = new Set(["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"]);
+
 /** Muted, parchment-compatible hue per dasha lord — the ribbon must read as
  *  one artifact, not nine clashing blocks. */
 const DASHA_COLOR: Record<string, string> = {
@@ -65,10 +69,22 @@ function DashaRibbon({ periods, isHi }: {
           })}
           {nowPct !== null && <div className="dasha-now" style={{ left: `${nowPct}%` }} aria-hidden="true" />}
         </div>
-        <div className="dasha-ribbon-years">
+        {/* The ▲ marker must sit UNDER the gold "today" line (nowPct), not
+            centered — centered it points at the wrong mahadasha entirely. */}
+        <div className="dasha-ribbon-years" style={{ position: "relative" }}>
           <span>{periods[0].start.slice(0, 4)}</span>
           {nowPct !== null && (
-            <span className="devanagari" style={{ color: "var(--maroon-deep)", fontWeight: 700 }}>
+            <span
+              className="devanagari"
+              style={{
+                position: "absolute",
+                left: `${Math.min(86, Math.max(10, nowPct))}%`,
+                transform: "translateX(-50%)",
+                color: "var(--maroon-deep)",
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+              }}
+            >
               ▲ {isHi ? "आप यहाँ हैं" : "You are here"}
             </span>
           )}
@@ -130,8 +146,8 @@ export default function KundliTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "760px" }}>
-        <h1 className="section-heading">Kundli / Birth Chart</h1>
-        <p className="section-heading-hi devanagari">कुंडली / जन्म चार्ट</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "कुंडली / जन्म चार्ट" : "Kundli / Birth Chart"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Kundli / Birth Chart" : "कुंडली / जन्म चार्ट"}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           {isHi ? (
@@ -210,8 +226,35 @@ export default function KundliTool() {
               </div>
               <p style={{ textAlign: "center", fontSize: "0.72rem", color: "var(--muted)", marginTop: "-0.5rem", marginBottom: "1rem" }}>
                 {chartMode === "moon" ? "चन्द्र कुंडली — भाव चंद्र राशि से गिने गए · " : ""}
-                (व)=वक्री · ★=वर्गोत्तम · ल=लग्न · अंक = राशि संख्या · astroshivanii.com
+                (व)=वक्री · ↑=उच्च · ↓=नीच · (अ)=अस्त · ★=वर्गोत्तम · ल=लग्न · अंक = राशि संख्या · astroshivanii.com
               </p>
+
+              {/* उच्च / नीच / अस्त ग्रह — the chart's strength story at a glance */}
+              {(() => {
+                const names = (pred: (p: { is_exalted?: boolean; is_debilitated?: boolean; is_combust?: boolean }) => boolean | undefined) =>
+                  Object.entries(result.planets)
+                    .filter(([n, p]) => ABBR_PLANETS.has(n) && pred(p))
+                    .map(([n]) => (isHi ? PLANET_HI[n] ?? n : n))
+                    .join(", ");
+                const uch = names((p) => p.is_exalted);
+                const neech = names((p) => p.is_debilitated);
+                const asta = names((p) => p.is_combust);
+                const none = isHi ? "कोई नहीं" : "none";
+                return (
+                  <div className="result-box" style={{ marginTop: 0 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.4rem", fontSize: "0.85rem" }} className={isHi ? "devanagari" : undefined}>
+                      <span><strong style={{ color: "#1a7a3a" }}>↑ {isHi ? "उच्च ग्रह" : "Exalted"}:</strong> {uch || none}</span>
+                      <span><strong style={{ color: "#8a2f24" }}>↓ {isHi ? "नीच ग्रह" : "Debilitated"}:</strong> {neech || none}</span>
+                      <span><strong style={{ color: "#8a6414" }}>(अ) {isHi ? "अस्त ग्रह" : "Combust"}:</strong> {asta || none}</span>
+                    </div>
+                    <p className={`result-explain${isHi ? " devanagari" : ""}`}>
+                      {isHi
+                        ? "उच्च ग्रह अपनी सर्वाधिक शक्ति में फल देता है; नीच ग्रह का फल संघर्षपूर्ण रहता है; अस्त ग्रह सूर्य के तेज़ में दबकर कमज़ोर फल देता है — विस्तृत अर्थ नीचे शब्दावली में।"
+                        : "An exalted planet gives its strongest results; a debilitated one struggles; a combust planet is muted by the Sun's glare — full meanings in the glossary below."}
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* Ascendant */}
               <div className="result-box" style={{ marginTop: 0 }}>
@@ -478,11 +521,13 @@ export default function KundliTool() {
                   </p>
                   {result.yogas.map((y) => (
                     <div key={y.name} style={{ marginBottom: "0.5rem", padding: "0.5rem", background: "rgba(201,154,58,0.08)", borderRadius: "2px" }}>
-                      <strong style={{ fontSize: "0.85rem", color: "var(--maroon-deep)" }}>{y.name}</strong>
+                      <strong className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--maroon-deep)" }}>{isHi ? y.name_hi ?? y.name : y.name}</strong>
                       <span style={{ fontSize: "0.75rem", color: "var(--muted)", marginLeft: "0.5rem" }}>
                         {isHi ? strengthHi(y.strength) : y.strength}
                       </span>
-                      <p style={{ fontSize: "0.78rem", color: "var(--ink-light)", marginTop: "0.2rem" }}>{y.description}</p>
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--ink-light)", marginTop: "0.2rem" }}>
+                        {isHi ? y.description_hi ?? y.description : y.description}
+                      </p>
                     </div>
                   ))}
                 </div>
