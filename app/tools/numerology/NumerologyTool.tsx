@@ -74,12 +74,20 @@ export default function NumerologyTool() {
 
   function calculate() {
     if (!dob || !name.trim() || !gender) return;
+    const mulank   = calcMulank(dob);
+    const bhagyank = calcBhagyank(dob);
+    const nameNum  = calcNameNumber(name);
+    const kua      = calcKua(dob, gender);
     setResult({
-      mulank:   calcMulank(dob),
-      bhagyank: calcBhagyank(dob),
-      nameNum:  calcNameNumber(name),
-      loShu:    calcLoShu(dob),
-      kua:      calcKua(dob, gender),
+      mulank,
+      bhagyank,
+      nameNum,
+      // The complete-grid method: derived numbers are written into the grid
+      // with the DOB digits, so they fill cells, strengthen planes, and are
+      // never wrongly listed as karmic lessons (e.g. a Bhagyank 5 person
+      // cannot have 5 as a "missing" number).
+      loShu: calcLoShu(dob, [mulank.value, bhagyank.value, ...(nameNum.value > 0 ? [nameNum.value] : []), kua.value]),
+      kua,
       name,
       dob,
     });
@@ -257,12 +265,14 @@ export default function NumerologyTool() {
                 </h2>
                 <p className={`num-section-sub${isHi ? " devanagari" : ""}`}>
                   {isHi
-                    ? <>आपकी जन्म तिथि के अंक इस <span className="hl">3×3 जादुई वर्ग</span> में रखे जाते हैं। जो अंक{" "}
+                    ? <>आपकी जन्म तिथि के अंकों के साथ <span className="hl">मूलांक, भाग्यांक, नामांक और कुआ अंक</span> भी इस{" "}
+                      <span className="hl">3×3 जादुई वर्ग</span> में रखे जाते हैं (सम्पूर्ण-ग्रिड पद्धति)। जो अंक{" "}
                       <span className="hl">उपस्थित</span> हैं वे आपकी शक्ति हैं — जो <span className="hl">अनुपस्थित</span> हैं
                       वे आपके कार्मिक पाठ।</>
-                    : <>The digits of your birth date are placed in this <span className="hl">3×3 magic square</span>.{" "}
-                      <span className="hl">Present numbers</span> = your strengths.{" "}
-                      <span className="hl">Missing numbers</span> = your karmic lessons to learn.</>}
+                    : <>The digits of your birth date — together with your <span className="hl">Mulank, Bhagyank, Name
+                      Number and Kua</span> (the complete-grid method) — are placed in this{" "}
+                      <span className="hl">3×3 magic square</span>. <span className="hl">Present numbers</span> = your
+                      strengths. <span className="hl">Missing numbers</span> = your karmic lessons to learn.</>}
                 </p>
 
                 <div className="lo-shu-wrap">
@@ -275,6 +285,7 @@ export default function NumerologyTool() {
                           const isMulank = num === r.mulank.value;
                           const isBhagyank = num === r.bhagyank.value;
                           const isNameNum = r.nameNum.value > 0 && num === r.nameNum.value;
+                          const isKua = num === r.kua.value;
                           return (
                             <div
                               key={`${ri}-${ci}`}
@@ -295,6 +306,7 @@ export default function NumerologyTool() {
                                 {isMulank && <span className="lsb lsb-m" title="Mulank">M</span>}
                                 {isBhagyank && <span className="lsb lsb-b" title="Bhagyank">B</span>}
                                 {isNameNum && <span className="lsb lsb-n" title="Name No.">N</span>}
+                                {isKua && <span className="lsb lsb-k" title="Kua">K</span>}
                               </div>
                             </div>
                           );
@@ -309,6 +321,8 @@ export default function NumerologyTool() {
                       <span><span className="lo-shu-leg missing" />  {isHi ? "अनुपस्थित" : "Missing"}</span>
                       <span><span className="lsb lsb-m" />  {isHi ? "मूलांक" : "Mulank"}</span>
                       <span><span className="lsb lsb-b" />  {isHi ? "भाग्यांक" : "Bhagyank"}</span>
+                      <span><span className="lsb lsb-n" />  {isHi ? "नामांक" : "Name No."}</span>
+                      <span><span className="lsb lsb-k" />  {isHi ? "कुआ अंक" : "Kua"}</span>
                     </div>
                   </div>
 

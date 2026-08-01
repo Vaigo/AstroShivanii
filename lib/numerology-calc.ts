@@ -15,7 +15,11 @@ function sumDigits(n: number): number {
 }
 
 function reduceWithKarmic(n: number): { value: number; karmicDebt?: number } {
-  if ([13, 14, 16, 19].includes(n)) return { value: sumDigits(n), karmicDebt: n };
+  // A karmic-debt total must STILL reduce to a single digit: 19 → 10 → 1
+  // (stopping at 10 crashed profile lookups, which only exist for 1-9).
+  if ([13, 14, 16, 19].includes(n)) {
+    return { value: reduceWithKarmic(sumDigits(n)).value, karmicDebt: n };
+  }
   if (n > 9) return reduceWithKarmic(sumDigits(n));
   return { value: n };
 }
@@ -62,8 +66,14 @@ export interface LoShuResult {
   karmicLessons: number[];            // = missing numbers
 }
 
-export function calcLoShu(dob: string): LoShuResult {
-  const digits = dob.replace(/-/g, "").split("").map(Number).filter(d => d >= 1 && d <= 9);
+/** `extras` = derived numbers written into the grid alongside the DOB digits
+ *  (मूलांक, भाग्यांक, नामांक, कुआ — the standard "complete grid" method), so
+ *  they strengthen planes and are never wrongly reported as karmic lessons. */
+export function calcLoShu(dob: string, extras: number[] = []): LoShuResult {
+  const digits = [
+    ...dob.replace(/-/g, "").split("").map(Number),
+    ...extras,
+  ].filter(d => d >= 1 && d <= 9);
 
   const counts: Record<number, number> = {};
   for (let i = 1; i <= 9; i++) counts[i] = 0;

@@ -1035,6 +1035,7 @@ a:hover { color: var(--saffron); }
 .lsb-m { background: var(--gold-bright); color: var(--maroon-deep); }
 .lsb-b { background: var(--saffron); color: var(--maroon-deep); }
 .lsb-n { background: #6a9fd8; color: #fff; }
+.lsb-k { background: #3d8b5f; color: #fff; }
 
 .lo-shu-legend {
   display: flex;
