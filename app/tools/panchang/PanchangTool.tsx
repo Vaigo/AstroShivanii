@@ -8,7 +8,7 @@ import PlaceSearch, { Place } from "@/components/PlaceSearch";
 import { utcOffsetHoursAt } from "@/lib/timezone";
 import { choghadiya, horas, isPanchak, isBhadra, TimeSlot } from "@/lib/panchang-calc";
 import { fetchPanchang, fetchRahuKaal, fetchMuhurta, fetchFestivals } from "@/lib/api/endpoints";
-import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo } from "@/lib/api/types";
+import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo, PanchangDayInfo } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 
 function today(): string {
@@ -112,9 +112,10 @@ const MASA_LABEL = (m: MasaInfo | undefined, isHi: boolean) => (m ? (isHi ? m.na
  *  festival name so they read as visually distinct at a glance, plus the
  *  Hindu lunar month(s) this Gregorian month overlaps, and a full-text
  *  festival list below (the grid necessarily truncates names). */
-function MonthCalendar({ year, month, festivals, masaStart, masaEnd, isHi, onPrev, onNext, onPickDay, isToday }: {
+function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, isHi, onPrev, onNext, onPickDay, isToday }: {
   year: number; month: number; // month: 0-indexed
   festivals: FestivalItem[];
+  dayInfos: Map<string, PanchangDayInfo>;
   masaStart?: MasaInfo; masaEnd?: MasaInfo;
   isHi: boolean;
   onPrev: () => void; onNext: () => void;
@@ -195,6 +196,9 @@ function MonthCalendar({ year, month, festivals, masaStart, masaEnd, isHi, onPre
           const lead = fests[0];
           const accent = lead ? festivalColor(lead) : null;
           const today = isToday(c.iso);
+          const info = dayInfos.get(c.iso);
+          // "कृष्ण तृतीया" → "कृ. तृतीया" — keeps the cell line short
+          const tithiShort = info?.tithi_hi.replace("शुक्ल ", "शु. ").replace("कृष्ण ", "कृ. ");
           const cls = ["pcal-cell", lead?.major ? "major" : "", today ? "today" : ""].filter(Boolean).join(" ");
           return (
             <button
@@ -202,11 +206,16 @@ function MonthCalendar({ year, month, festivals, masaStart, masaEnd, isHi, onPre
               key={c.iso}
               className={cls}
               onClick={() => onPickDay(c.iso)}
-              title={fests.map((f) => f.name).join(" · ")}
+              title={[info && `${info.masa_hi} ${info.tithi_hi}`, ...fests.map((f) => f.name)].filter(Boolean).join(" · ")}
               style={accent ? { borderTopColor: accent, background: lead?.major ? undefined : `${accent}14` } : undefined}
             >
               <span className="pcal-day">{c.day}</span>
               {today && <span className="pcal-today-chip devanagari">आज</span>}
+              {info && (
+                <span className="devanagari pcal-tithi">
+                  <span className="pcal-tithi-masa">{info.masa_hi} </span>{tithiShort}
+                </span>
+              )}
               {lead && (
                 <span className="devanagari pcal-fest-name" style={{ color: accent ?? "var(--maroon-deep)" }}>
                   {lead.major && "✦ "}{festLabel(lead, isHi)}
@@ -282,6 +291,7 @@ export default function PanchangTool() {
   const now = new Date();
   const [monthCursor, setMonthCursor] = useState<{ year: number; month: number }>({ year: now.getFullYear(), month: now.getMonth() });
   const [monthFestivals, setMonthFestivals] = useState<FestivalItem[]>([]);
+  const [monthDayInfos, setMonthDayInfos] = useState<Map<string, PanchangDayInfo>>(new Map());
   const [monthMasa, setMonthMasa] = useState<{ start?: MasaInfo; end?: MasaInfo }>({});
   const [monthLoading, setMonthLoading] = useState(false);
 
@@ -295,6 +305,7 @@ export default function PanchangTool() {
       const f = await fetchFestivals(monthStartIso, p.lat, p.lon, tz).catch(() => null);
       const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}`;
       setMonthFestivals((f?.festivals ?? []).filter((it) => it.date.startsWith(monthPrefix) && !WEEKLY_VRAT.test(it.name)));
+      setMonthDayInfos(new Map((f?.days ?? []).map((d) => [d.date, d])));
       setMonthMasa({ start: f?.masa_start, end: f?.masa_end });
     } finally {
       setMonthLoading(false);
@@ -381,7 +392,10 @@ export default function PanchangTool() {
 
   const items = panchang
     ? [
-        { label: "तिथि / Tithi", value: `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name}`, sub: `${Math.round(panchang.tithi.completion * 100)}% बीती · समाप्ति ${panchang.tithi.end_time}`, meaning: "चंद्र-सूर्य की दूरी से तय व्रत-त्योहार की तिथि" },
+        { label: "तिथि / Tithi", value: panchang.tithi.name_hi
+            ? (panchang.tithi.paksha_num === 15 ? panchang.tithi.name_hi : `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name_hi}`)
+            : `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name}`,
+          sub: `${Math.round(panchang.tithi.completion * 100)}% बीती · समाप्ति ${panchang.tithi.end_time}`, meaning: "चंद्र-सूर्य की दूरी से तय व्रत-त्योहार की तिथि" },
         { label: "वार / Day", value: panchang.vara.name, sub: `स्वामी: ${panchang.vara.lord}`, meaning: "दिन का स्वामी ग्रह — उसी ग्रह से जुड़े कार्य आज शुभ" },
         { label: "नक्षत्र / Nakshatra", value: `${panchang.nakshatra.name}`, sub: `${panchang.nakshatra.name_hi} · पाद ${panchang.nakshatra.pada} · स्वामी ${panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`, meaning: "आज चंद्रमा जिस नक्षत्र में है — मुहूर्त चुनने का मुख्य आधार" },
         { label: "योग / Yoga", value: panchang.yoga.name, sub: `समाप्ति ${panchang.yoga.end_time}`, meaning: "सूर्य-चंद्र के संयोग से बना योग — दिन की समग्र प्रकृति दर्शाता है" },
@@ -439,6 +453,7 @@ export default function PanchangTool() {
               year={monthCursor.year}
               month={monthCursor.month}
               festivals={monthFestivals}
+              dayInfos={monthDayInfos}
               masaStart={monthMasa.start}
               masaEnd={monthMasa.end}
               isHi={isHi}
@@ -464,6 +479,11 @@ export default function PanchangTool() {
           <h2 style={{ fontSize: "1.2rem", marginBottom: "0.25rem", textAlign: "center" }}>
             {panchang.date} — {shownPlace}
           </h2>
+          {panchang.masa && (
+            <p className="devanagari" style={{ textAlign: "center", color: "#8a5a17", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.2rem" }}>
+              {panchang.masa.name_hi} मास{panchang.tithi.name_hi ? ` · ${panchang.tithi.paksha === "Shukla" ? "शुक्ल पक्ष" : "कृष्ण पक्ष"} ${panchang.tithi.name_hi}` : ""}
+            </p>
+          )}
           <p className="devanagari" style={{ textAlign: "center", color: "var(--muted)", fontSize: "0.85rem", marginBottom: "0.75rem" }}>
             लाहिरी अयनांश · वास्तविक खगोलीय गणना
           </p>

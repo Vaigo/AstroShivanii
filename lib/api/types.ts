@@ -235,11 +235,12 @@ export interface TarotResult {
 
 export interface PanchangFullResult {
   date: string;
-  tithi: { number: number; paksha: string; name: string; paksha_num: number; completion: number; end_time: string };
+  tithi: { number: number; paksha: string; name: string; name_hi?: string; paksha_num: number; completion: number; end_time: string };
   nakshatra: { index: number; name: string; name_hi: string; lord: string; pada: number; progress: number; end_time: string };
   yoga: { index: number; name: string; progress: number; end_time: string };
   karana: { number: number; name: string; completion: number; end_time: string };
   vara: { index: number; name: string; lord: string; note?: string };
+  masa?: { index: number; name: string; name_hi: string };
   moon_phase: string;
   sun_rise: string;
   sun_set: string;
@@ -290,8 +291,18 @@ export interface MasaInfo {
   name_hi: string;  // e.g. "श्रावण"
 }
 
+/** Per-day tithi + lunar month, for labeling every calendar cell. */
+export interface PanchangDayInfo {
+  date: string;      // YYYY-MM-DD
+  tithi: string;     // "Krishna Tritiya" / "Purnima"
+  tithi_hi: string;  // "कृष्ण तृतीया" / "पूर्णिमा"
+  masa: string;      // "Shravana"
+  masa_hi: string;   // "श्रावण"
+}
+
 export interface FestivalsResult {
   festivals: FestivalItem[];
+  days?: PanchangDayInfo[];
   masa_start?: MasaInfo;
   masa_end?: MasaInfo;
 }
