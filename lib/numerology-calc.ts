@@ -85,6 +85,20 @@ export function calcLoShu(dob: string): LoShuResult {
   return { counts, present, missing, planes, karmicLessons: missing };
 }
 
+/* ─── Kua Number (Vaastu/Feng-Shui direction number, from birth year + gender) ── */
+export function calcKua(dob: string, gender: "male" | "female"): { value: number; group: "east" | "west" } {
+  const year = parseInt(dob.split("-")[0]);
+  let s = sumDigits(year % 100);
+  while (s > 9) s = sumDigits(s);
+  const post2000 = year >= 2000;
+  let kua = gender === "male" ? (post2000 ? 9 - s : 10 - s) : (post2000 ? 6 + s : 5 + s);
+  while (kua > 9) kua = sumDigits(kua);
+  if (kua <= 0) kua = 9;
+  if (kua === 5) kua = gender === "male" ? 2 : 8;
+  const group: "east" | "west" = [1, 3, 4, 9].includes(kua) ? "east" : "west";
+  return { value: kua, group };
+}
+
 /* ─── Grid position of a number ─────────────────────────────────────────────── */
 export function gridPosition(n: number): [number, number] | null {
   for (let r = 0; r < 3; r++)

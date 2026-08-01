@@ -15,6 +15,11 @@ interface BirthFormProps {
   embedded?: boolean;
   loading?: boolean;
   label?: string;
+  /** Kundli needs an exact time for a trustworthy chart — when true, the time
+   *  field drops the "(optional)" framing, becomes HTML-required, and blocks
+   *  submission without it. Default false preserves the sunrise-fallback
+   *  behavior (birth time optional + honest accuracy flag) everywhere else. */
+  requireTime?: boolean;
 }
 
 const DEFAULT_PLACE: Place = {
@@ -24,7 +29,7 @@ const DEFAULT_PLACE: Place = {
   tzName: "Asia/Kolkata",
 };
 
-export default function BirthForm({ onSubmit, onChange, embedded, loading, label }: BirthFormProps) {
+export default function BirthForm({ onSubmit, onChange, embedded, loading, label, requireTime }: BirthFormProps) {
   const { t } = useI18n();
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
@@ -38,6 +43,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
    *  not for "today" — a July London birth gets +1 (BST), a January one 0 (GMT). */
   function currentBirth(): BirthRequest | null {
     if (!dob) return null;
+    if (requireTime && !tob) return null;
     if (manual) {
       const lat = parseFloat(mLat), lon = parseFloat(mLon), tz = parseFloat(mTz);
       if ([lat, lon, tz].some(Number.isNaN)) return null;
@@ -91,14 +97,15 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
       </div>
 
       <div className="form-group">
-        <label className="form-label">{t("form.tobOptional")}</label>
+        <label className="form-label">{requireTime ? `${t("form.tob")} *` : t("form.tobOptional")}</label>
         <input
           type="time"
           className="form-input"
           value={tob}
           onChange={(e) => setTob(e.target.value)}
+          required={requireTime}
         />
-        <span className="form-hint">{t("form.noTimeTip")}</span>
+        {!requireTime && <span className="form-hint">{t("form.noTimeTip")}</span>}
       </div>
 
       {!manual ? (
@@ -160,7 +167,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
       <button
         type="submit"
         className="btn btn-primary"
-        disabled={loading || (!manual && !place)}
+        disabled={loading || (!manual && !place) || (requireTime && !tob)}
         style={{ width: "100%" }}
       >
         {loading ? t("form.calculating") : t("form.calculate")}

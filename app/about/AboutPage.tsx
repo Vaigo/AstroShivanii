@@ -16,26 +16,21 @@ export default function AboutPage() {
         <p className="section-heading-hi devanagari">{t("about.headingHi")}</p>
 
         <PatrikaFrame>
-          {/* Photo placeholder */}
           <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start", marginBottom: "2rem", flexWrap: "wrap" }}>
-            <div
+            <img
+              src="/shivanii-profile.png"
+              alt="Shivanii — ज्योतिषाचार्य शिवानी"
+              width={180}
+              height={180}
               style={{
-                width: "160px",
-                height: "160px",
+                width: "180px",
+                height: "180px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, var(--maroon), var(--maroon-deep))",
-                border: "4px solid var(--gold)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
                 flexShrink: 0,
                 boxShadow: "var(--shadow-card)",
-                color: "var(--gold-bright)",
+                objectFit: "cover",
               }}
-              aria-label="Placeholder for Shivanii's photo"
-            >
-              <Icon name="user" size={64} strokeWidth={1.3} />
-            </div>
+            />
             <div style={{ flex: 1, minWidth: "220px" }}>
               <h2 style={{ marginBottom: "0.3rem", fontSize: "1.6rem" }}>Shivanii</h2>
               <p className="devanagari" style={{ color: "var(--muted)", marginBottom: "1rem" }}>ज्योतिषाचार्य शिवानी</p>

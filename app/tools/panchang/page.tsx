@@ -67,7 +67,7 @@ export default function PanchangPage() {
           ]}
         />
 
-        <h1 className="section-heading">आज का पंचांग — Daily Panchang</h1>
+        <h1 className="section-heading">पंचांग — Panchang</h1>
         <p className="section-heading-hi devanagari">तिथि · वार · नक्षत्र · योग · करण · राहु काल</p>
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           <p className="devanagari" style={{ fontWeight: 600, color: "var(--maroon)", marginBottom: "0.4rem" }}>

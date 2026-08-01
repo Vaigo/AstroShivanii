@@ -280,8 +280,16 @@ export interface FestivalItem {
   significance: string;
 }
 
+export interface MasaInfo {
+  index: number;
+  name: string;     // e.g. "Shravana"
+  name_hi: string;  // e.g. "श्रावण"
+}
+
 export interface FestivalsResult {
   festivals: FestivalItem[];
+  masa_start?: MasaInfo;
+  masa_end?: MasaInfo;
 }
 
 /* ── Turant Uttar AI narration (/v1/ai/turant-uttar) ────────────────────── */

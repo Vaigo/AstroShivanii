@@ -299,6 +299,32 @@ export const LO_SHU_GRID = [
   [8, 1, 6],
 ];
 
+/* ─── Kua Groups (Vaastu/Feng-Shui) ──────────────────────────────────────────
+ * Each Kua number belongs to the East or West group, which shares a set of
+ * favorable facing directions (main door, work desk, bed head) in that
+ * tradition. Kua-specific Sheng-Chi/Tien-Yi/etc. sub-rankings are left to a
+ * personal consultation rather than asserted here per-number. */
+export const KUA_GROUP_INFO: Record<"east" | "west", { label: { en: string; hi: string }; directions: { en: string; hi: string }[] }> = {
+  east: {
+    label: { en: "East Group", hi: "पूर्व समूह" },
+    directions: [
+      { en: "North", hi: "उत्तर" },
+      { en: "South", hi: "दक्षिण" },
+      { en: "East", hi: "पूर्व" },
+      { en: "Southeast", hi: "दक्षिण-पूर्व" },
+    ],
+  },
+  west: {
+    label: { en: "West Group", hi: "पश्चिम समूह" },
+    directions: [
+      { en: "West", hi: "पश्चिम" },
+      { en: "Northwest", hi: "उत्तर-पश्चिम" },
+      { en: "Northeast", hi: "उत्तर-पूर्व" },
+      { en: "Southwest", hi: "दक्षिण-पश्चिम" },
+    ],
+  },
+};
+
 export const PLANES = [
   { key: "mental",    label: { en: "Mental Plane",    hi: "मानसिक समतल" },    numbers: [4, 9, 2], desc: { en: "Intellect, imagination, memory",  hi: "बुद्धि, कल्पना, स्मृति" } },
   { key: "emotional", label: { en: "Emotional Plane",  hi: "भावनात्मक समतल" }, numbers: [3, 5, 7], desc: { en: "Feelings, sensitivity, intuition", hi: "भावनाएं, संवेदनशीलता, अंतर्ज्ञान" } },

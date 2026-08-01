@@ -573,8 +573,9 @@ function TurantUttarInner() {
                 <KundliChart
                   ascSignIndex={kundli.ascendant.sign_index}
                   ascDegrees={kundli.ascendant.degrees}
+                  ascDms={kundli.ascendant.dms}
                   planets={kundli.planets}
-                  size={290}
+                  size={360}
                   highlightHouses={[facts.house]}
                 />
                 <p className="devanagari" style={{ fontSize: "0.75rem", color: "var(--saffron)", fontWeight: 700, marginTop: "0.4rem" }}>

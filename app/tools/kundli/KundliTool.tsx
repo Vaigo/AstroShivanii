@@ -153,7 +153,7 @@ export default function KundliTool() {
         {/* Form — centered */}
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
-            <BirthForm onSubmit={handleSubmit} loading={loading} />
+            <BirthForm onSubmit={handleSubmit} loading={loading} requireTime />
             {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
           </PatrikaFrame>
         </div>
@@ -196,6 +196,7 @@ export default function KundliTool() {
                 <KundliChart
                   ascSignIndex={result.ascendant.sign_index}
                   ascDegrees={result.ascendant.degrees}
+                  ascDms={result.ascendant.dms}
                   planets={result.planets}
                   mode={chartMode}
                 />
@@ -321,10 +322,13 @@ export default function KundliTool() {
                       </thead>
                       <tbody>
                         {Object.entries(result.planets).map(([name, p]) => {
-                          const strong = p.is_exalted || p.is_own_sign || p.is_mool_trikona;
+                          const strong = p.is_exalted || p.is_own_sign || p.is_mool_trikona || p.is_vargottama;
                           let dignityText = isHi ? dignityHi(p.dignity) : (p.dignity !== "N/A" ? p.dignity : "—");
-                          // A red chip must SAY why it's red — combustion isn't in the dignity string
-                          if (p.is_combust) dignityText = dignityText === "—" ? (isHi ? "अस्त" : "Combust") : `${dignityText} · ${isHi ? "अस्त" : "combust"}`;
+                          // A chip must SAY why it's colored — vargottama/combust aren't in the base dignity string
+                          const extras: string[] = [];
+                          if (p.is_vargottama) extras.push(isHi ? "वर्गोत्तम" : "Vargottama");
+                          if (p.is_combust) extras.push(isHi ? "अस्त" : "Combust");
+                          if (extras.length) dignityText = dignityText === "—" ? extras.join(" · ") : `${dignityText} · ${extras.join(" · ")}`;
                           return (
                           <tr key={name} style={{ borderBottom: "1px solid rgba(201,154,58,0.15)" }}>
                             <td style={{ padding: "0.35rem 0.5rem", fontWeight: 600, whiteSpace: "nowrap" }}>
@@ -352,6 +356,39 @@ export default function KundliTool() {
                         })}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* Glossary — what each dignity term/symbol in the table and chart actually means */}
+                  <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px dashed rgba(201,154,58,0.35)" }}>
+                    <div style={{ fontSize: "0.78rem", color: "var(--muted)", fontWeight: 700, marginBottom: "0.5rem" }}>
+                      {isHi ? "शब्दावली — इनका अर्थ" : "Glossary — what these mean"}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: "0.55rem", fontSize: "0.78rem", color: "var(--ink-light)" }} className={isHi ? "devanagari" : undefined}>
+                      <div><strong style={{ color: "var(--maroon-deep)" }}>℞ {isHi ? "वक्री (Retrograde)" : "Retrograde"}:</strong> {isHi
+                        ? "ग्रह पृथ्वी से देखने पर आकाश में पीछे जाता दिखता है — इसका फल सीधा नहीं, भीतर की ओर, पुनर्विचार व देरी से जुड़ा माना जाता है।"
+                        : "The planet appears to move backward as seen from Earth — its effect tends to be introspective, delayed, or asking for a second attempt rather than a straightforward result."}
+                      </div>
+                      <div><strong style={{ color: "var(--maroon-deep)" }}>★ {isHi ? "वर्गोत्तम (Vargottama)" : "Vargottama"}:</strong> {isHi
+                        ? "ग्रह जन्म-कुंडली (D1) और नवांश (D9) — दोनों में एक ही राशि में है। यह ग्रह की शक्ति को बहुत बढ़ाता है, मानो वह अपने ही घर में स्थिर बैठा हो।"
+                        : "The planet sits in the same sign in both the birth chart (D1) and the Navamsa (D9) — this significantly strengthens it, as if firmly anchored in its own house."}
+                      </div>
+                      <div><strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "उच्च (Exalted)" : "Exalted"}:</strong> {isHi
+                        ? "ग्रह उस राशि में है जहाँ उसे सर्वाधिक शक्ति और शुभता प्राप्त होती है — बहुत अच्छा फल देने वाली स्थिति।"
+                        : "The planet is in the sign where it functions at its highest strength and gives its most favorable results."}
+                      </div>
+                      <div><strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "नीच (Debilitated)" : "Debilitated"}:</strong> {isHi
+                        ? "ग्रह उस राशि में है जहाँ उसकी शक्ति सबसे कम होती है — फल कमज़ोर या संघर्षपूर्ण हो सकता है, पर सही उपाय से इसे संभाला जा सकता है।"
+                        : "The planet is in the sign where it functions weakest — results here can feel effortful, though remedies and awareness can ease this."}
+                      </div>
+                      <div><strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "अस्त (Combust)" : "Combust"}:</strong> {isHi
+                        ? "ग्रह सूर्य के बहुत निकट है, जिससे उसकी अपनी चमक और स्वतंत्र शक्ति सूर्य के तेज़ में दब जाती है — फल कमज़ोर या छुपा हुआ मिल सकता है।"
+                        : "The planet sits too close to the Sun, so its own light and independent strength are overpowered by the Sun's glare — its results can feel muted or hidden."}
+                      </div>
+                      <div><strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "मूल त्रिकोण / स्वराशि" : "Mool Trikona / Own Sign"}:</strong> {isHi
+                        ? "ग्रह अपनी ही राशि में या उसकी एक विशेष उप-स्थिति में बैठा है — यह भी एक बलवान, आरामदायक स्थिति है, उच्च जितनी प्रबल नहीं पर स्थिर व भरोसेमंद।"
+                        : "The planet is in a sign it rules, or a special sub-position within it — a strong, comfortable placement, a notch below exaltation but stable and dependable."}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

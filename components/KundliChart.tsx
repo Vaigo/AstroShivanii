@@ -25,6 +25,13 @@ const ABBR: Record<string, string> = {
 
 const MODERN = new Set(["Uranus", "Neptune", "Pluto"]);
 
+/** "5°43'47"" → "5°43'" — degree+minute only, no seconds (keeps chart labels
+ *  compact while still being more precise than a bare rounded degree). */
+function shortDms(dms: string | undefined): string | null {
+  const m = dms?.match(/^(-?\d+°\d+')/);
+  return m ? m[1] : null;
+}
+
 /** The 12 fixed house regions of the North Indian chart (square 2..398 with
  *  both diagonals + the midpoint diamond; diagonal×diamond intersections at
  *  (101,101)/(299,101)/(299,299)/(101,299)). Used only for highlighting. */
@@ -46,6 +53,9 @@ const HOUSE_POLY: Record<number, string> = {
 interface KundliChartProps {
   ascSignIndex: number;
   ascDegrees: number;
+  /** Full "D°M'S"" ascendant DMS string — shown as degree+minute on the chart
+   *  when available; falls back to a rounded ascDegrees if omitted. */
+  ascDms?: string;
   planets: Record<string, Planet>;
   size?: number;
   /** "lagna" (default) or "moon" — chandra kundli counts houses from the Moon sign. */
@@ -55,7 +65,7 @@ interface KundliChartProps {
   highlightHouses?: number[];
 }
 
-export default function KundliChart({ ascSignIndex, ascDegrees, planets, size = 320, mode = "lagna", highlightHouses }: KundliChartProps) {
+export default function KundliChart({ ascSignIndex, ascDegrees, ascDms, planets, size = 420, mode = "lagna", highlightHouses }: KundliChartProps) {
   // Chandra kundli: re-anchor everything to the Moon's sign.
   const moonSignIndex = planets.Moon?.sign_index ?? ascSignIndex;
   const anchorSign = mode === "moon" ? moonSignIndex : ascSignIndex;
@@ -71,17 +81,25 @@ export default function KundliChart({ ascSignIndex, ascDegrees, planets, size = 
   };
 
   if (mode === "lagna") {
-    push(1, `ल ${Math.round(ascDegrees)}°`, false);
+    push(1, `ल ${shortDms(ascDms) ?? `${Math.round(ascDegrees)}°`}`, false);
   }
   for (const [name, p] of Object.entries(planets)) {
     const abbr = ABBR[name];
     if (!abbr || !p.house) continue;
-    const label = `${abbr}${p.retrograde ? "(व)" : ""}${p.is_vargottama ? "★" : ""}${Math.round(p.degrees)}°`;
+    const deg = shortDms(p.dms) ?? `${Math.round(p.degrees)}°`;
+    const label = `${abbr}${p.retrograde ? "(व)" : ""}${p.is_vargottama ? "★" : ""}${deg}`;
     push(houseOf(p), label, MODERN.has(name));
   }
 
   return (
-    <svg width={size} height={size} viewBox="0 0 400 400" role="img" aria-label="जन्म कुंडली — North Indian chart">
+    <svg
+      width="100%"
+      height="auto"
+      viewBox="0 0 400 400"
+      style={{ maxWidth: size, display: "block" }}
+      role="img"
+      aria-label="जन्म कुंडली — North Indian chart"
+    >
       <rect x="2" y="2" width="396" height="396" fill="#fffdf6" stroke="#511320" strokeWidth="3" />
 
       {/* Question-relevant house(s), shaded before the frame lines draw over */}
@@ -101,7 +119,7 @@ export default function KundliChart({ ascSignIndex, ascDegrees, planets, size = 
         const signNum = ((anchorSign + house - 1) % 12) + 1;
         const [x, y] = SIGN_NUM_POS[house];
         return (
-          <text key={`s${house}`} x={x} y={y} fontSize="12" fill="#b3733a" textAnchor="middle" fontWeight="bold">
+          <text key={`s${house}`} x={x} y={y} fontSize="15" fill="#b3733a" textAnchor="middle" fontWeight="bold">
             {signNum}
           </text>
         );
@@ -114,8 +132,8 @@ export default function KundliChart({ ascSignIndex, ascDegrees, planets, size = 
           <text
             key={`${house}-${i}`}
             x={x}
-            y={y + i * 15}
-            fontSize="12.5"
+            y={y + i * 17}
+            fontSize="14.5"
             fill={p.modern ? "#6b5fa8" : "#1c2150"}
             textAnchor="middle"
             fontWeight="bold"

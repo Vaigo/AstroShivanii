@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import { WHATSAPP_NUMBER } from "@/lib/config";
 import Icon, { IconName } from "@/components/Icon";
-import { calcMulank, calcBhagyank, calcNameNumber, calcLoShu } from "@/lib/numerology-calc";
-import { PROFILES, KARMIC_DEBT, KARMIC_LESSONS, LO_SHU_GRID, PLANES } from "@/lib/numerology-data";
+import { calcMulank, calcBhagyank, calcNameNumber, calcLoShu, calcKua } from "@/lib/numerology-calc";
+import { PROFILES, KARMIC_DEBT, KARMIC_LESSONS, LO_SHU_GRID, PLANES, KUA_GROUP_INFO } from "@/lib/numerology-data";
 
 interface Result {
   mulank:    ReturnType<typeof calcMulank>;
   bhagyank:  ReturnType<typeof calcBhagyank>;
   nameNum:   ReturnType<typeof calcNameNumber>;
   loShu:     ReturnType<typeof calcLoShu>;
+  kua:       ReturnType<typeof calcKua>;
   name:      string;
   dob:       string;
 }
@@ -56,6 +57,7 @@ export default function NumerologyTool() {
 
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
+  const [gender, setGender] = useState<"male" | "female" | "">("");
   const [result, setResult] = useState<Result | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -64,12 +66,13 @@ export default function NumerologyTool() {
   }, [result]);
 
   function calculate() {
-    if (!dob) return;
+    if (!dob || !name.trim() || !gender) return;
     setResult({
       mulank:   calcMulank(dob),
       bhagyank: calcBhagyank(dob),
       nameNum:  calcNameNumber(name),
       loShu:    calcLoShu(dob),
+      kua:      calcKua(dob, gender),
       name,
       dob,
     });
@@ -128,13 +131,14 @@ export default function NumerologyTool() {
         <div className="patrika-frame" style={{ marginBottom: "2rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
             <div className="form-group">
-              <label className="form-label">{isHi ? "आपका नाम (वैकल्पिक)" : "Your Name (optional)"}</label>
+              <label className="form-label">{isHi ? "आपका नाम *" : "Your Name *"}</label>
               <input
                 className="form-input"
                 type="text"
-                placeholder={isHi ? "नाम अंक के लिए दर्ज करें" : "Enter for Name Number"}
+                placeholder={isHi ? "नाम दर्ज करें" : "Enter your name"}
                 value={name}
                 onChange={e => setName(e.target.value)}
+                required
               />
               <span className="form-hint">{isHi ? "नाम अंक = चाल्डियन पद्धति" : "Name Number uses Chaldean system"}</span>
             </div>
@@ -148,9 +152,23 @@ export default function NumerologyTool() {
                 max={new Date().toISOString().split("T")[0]}
               />
             </div>
+            <div className="form-group">
+              <label className="form-label">{isHi ? "लिंग *" : "Gender *"}</label>
+              <select
+                className="form-input"
+                value={gender}
+                onChange={e => setGender(e.target.value as "male" | "female" | "")}
+                required
+              >
+                <option value="">{isHi ? "चुनें" : "Select"}</option>
+                <option value="male">{isHi ? "पुरुष" : "Male"}</option>
+                <option value="female">{isHi ? "महिला" : "Female"}</option>
+              </select>
+              <span className="form-hint">{isHi ? "कुआ अंक (शुभ दिशा) के लिए ज़रूरी" : "Needed for Kua Number (favorable directions)"}</span>
+            </div>
           </div>
           <div style={{ textAlign: "center", marginTop: "1.25rem" }}>
-            <button className="btn btn-primary btn-lg" onClick={calculate} disabled={!dob}>
+            <button className="btn btn-primary btn-lg" onClick={calculate} disabled={!dob || !name.trim() || !gender}>
               {isHi ? "गणना करें" : "Calculate"}
             </button>
           </div>
@@ -203,6 +221,24 @@ export default function NumerologyTool() {
                         <span key={t} className="trait-chip">{t}</span>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* Kua Number — Vaastu/Feng-Shui direction number */}
+                <div className="result-box" style={{ marginTop: "1rem" }}>
+                  <div className="result-label">{isHi ? "कुआ अंक (वास्तु दिशा)" : "Kua Number (Vaastu Direction)"}</div>
+                  <div className="result-value">
+                    {r.kua.value} — {isHi ? KUA_GROUP_INFO[r.kua.group].label.hi : KUA_GROUP_INFO[r.kua.group].label.en}
+                  </div>
+                  <p className={`result-explain${isHi ? " devanagari" : ""}`}>
+                    {isHi
+                      ? "आपका कुआ अंक बताता है कि बैठक, पढ़ाई की मेज़ और बिस्तर के लिए कौन-सी दिशाएँ आपके लिए अधिक शुभ मानी जाती हैं। नीचे आपके समूह की अनुकूल दिशाएँ दी गई हैं:"
+                      : "Your Kua Number indicates which directions are traditionally more favorable for your desk, main door, and bed. Your group's favorable directions:"}
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.5rem" }}>
+                    {KUA_GROUP_INFO[r.kua.group].directions.map(d => (
+                      <span key={d.en} className="trait-chip">{isHi ? d.hi : d.en}</span>
+                    ))}
                   </div>
                 </div>
               </section>

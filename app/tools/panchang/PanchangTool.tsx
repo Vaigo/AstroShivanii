@@ -8,7 +8,7 @@ import PlaceSearch, { Place } from "@/components/PlaceSearch";
 import { utcOffsetHoursAt } from "@/lib/timezone";
 import { choghadiya, horas, isPanchak, isBhadra, TimeSlot } from "@/lib/panchang-calc";
 import { fetchPanchang, fetchRahuKaal, fetchMuhurta, fetchFestivals } from "@/lib/api/endpoints";
-import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem } from "@/lib/api/types";
+import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 
 function today(): string {
@@ -78,10 +78,191 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday }: {
   );
 }
 
+const WEEKDAY_HI = ["रवि", "सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि"];
+const MONTH_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
+/** Weekly weekday-vrats (every Somvar/Shanivar…) would mark almost every
+ *  Monday/Saturday — same reasoning as festivals-2026/page.tsx: list the
+ *  tithi-based ones distinctly, mention weekly vrats in prose instead. */
+const WEEKLY_VRAT = /^(Somvar|Mangalvar|Budhvar|Guruvar|Shukravar|Shanivar|Ravivar)/i;
+
+/** Category → accent color, so the calendar reads as colorful and each
+ *  festival TYPE is visually distinguishable, not just "festival vs not". */
+function festivalColor(name: string): string {
+  if (/Ekadashi/i.test(name))  return "#3d6b9c";  // Vishnu — blue
+  if (/Pradosh/i.test(name))   return "#b3423a";  // Shiva — deep red
+  if (/Chaturthi/i.test(name)) return "#d9822b";  // Ganesh — saffron
+  if (/Navami/i.test(name))    return "#a8455a";  // Devi/Rama — rose
+  if (/Purnima/i.test(name))   return "#c99a3a";  // full moon — bright gold
+  if (/Amavasya/i.test(name))  return "#5a5478";  // new moon — deep indigo
+  return "#8a6414";                                // generic — warm ochre
+}
+
+const MASA_LABEL = (m: MasaInfo | undefined, isHi: boolean) => (m ? (isHi ? m.name_hi : m.name) : null);
+
+/** Whole-month calendar grid — festival days get a colored accent bar + the
+ *  festival name so they read as visually distinct at a glance, plus the
+ *  Hindu lunar month(s) this Gregorian month overlaps, and a full-text
+ *  festival list below (the grid necessarily truncates names). */
+function MonthCalendar({ year, month, festivals, masaStart, masaEnd, isHi, onPrev, onNext, onPickDay, isToday }: {
+  year: number; month: number; // month: 0-indexed
+  festivals: FestivalItem[];
+  masaStart?: MasaInfo; masaEnd?: MasaInfo;
+  isHi: boolean;
+  onPrev: () => void; onNext: () => void;
+  onPickDay: (iso: string) => void;
+  isToday: (iso: string) => boolean;
+}) {
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const festByDate = new Map<string, FestivalItem[]>();
+  for (const f of festivals) {
+    if (!festByDate.has(f.date)) festByDate.set(f.date, []);
+    festByDate.get(f.date)!.push(f);
+  }
+
+  const cells: Array<{ day: number; iso: string } | null> = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, iso: `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}` });
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const masaA = MASA_LABEL(masaStart, isHi);
+  const masaB = MASA_LABEL(masaEnd, isHi);
+  const masaLabel = masaA && masaB ? (masaA === masaB ? masaA : `${masaA} – ${masaB}`) : masaA ?? masaB;
+
+  const sortedFests = [...festivals].sort((a, b) => a.date.localeCompare(b.date));
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.25rem", marginBottom: "0.4rem" }}>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onPrev} aria-label="पिछला महीना" style={{ fontSize: "1.1rem" }}>←</button>
+        <h3 className="devanagari" style={{ fontSize: "1.4rem", color: "var(--maroon-deep)", minWidth: "200px", textAlign: "center" }}>
+          {MONTH_HI[month]} {year}
+        </h3>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onNext} aria-label="अगला महीना" style={{ fontSize: "1.1rem" }}>→</button>
+      </div>
+      {masaLabel && (
+        <p className="devanagari" style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--saffron, #b3733a)", fontWeight: 700, marginBottom: "1rem" }}>
+          {isHi ? "विक्रम संवत् मास" : "Vikram Samvat masa"}: {masaLabel}
+        </p>
+      )}
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px", marginBottom: "0.5rem" }}>
+        {WEEKDAY_HI.map((w) => (
+          <div key={w} className="devanagari" style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--muted)", fontWeight: 700, padding: "0.3rem 0" }}>
+            {w}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px" }}>
+        {cells.map((c, i) => {
+          if (!c) return <div key={`b${i}`} />;
+          const fests = festByDate.get(c.iso) ?? [];
+          const hasFest = fests.length > 0;
+          const accent = hasFest ? festivalColor(fests[0].name) : null;
+          const today = isToday(c.iso);
+          return (
+            <button
+              type="button"
+              key={c.iso}
+              onClick={() => onPickDay(c.iso)}
+              title={fests.map((f) => f.name).join(" · ")}
+              style={{
+                textAlign: "left",
+                minHeight: "92px",
+                overflow: "hidden",
+                padding: "0.4rem 0.4rem 0.3rem",
+                borderRadius: "4px",
+                cursor: "pointer",
+                borderTop: accent ? `4px solid ${accent}` : today ? "4px solid var(--maroon)" : "4px solid transparent",
+                border: !accent && !today ? "1px solid rgba(201,154,58,0.3)" : undefined,
+                borderLeft: accent ? "1px solid rgba(201,154,58,0.3)" : today ? "1px solid rgba(201,154,58,0.3)" : undefined,
+                borderRight: accent ? "1px solid rgba(201,154,58,0.3)" : today ? "1px solid rgba(201,154,58,0.3)" : undefined,
+                borderBottom: accent ? "1px solid rgba(201,154,58,0.3)" : today ? "1px solid rgba(201,154,58,0.3)" : undefined,
+                background: accent ? `${accent}18` : "transparent",
+                fontFamily: "inherit",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div style={{ fontSize: "1rem", fontWeight: today ? 800 : 600, color: today ? "var(--maroon)" : "var(--ink)" }}>
+                {c.day}
+              </div>
+              {hasFest && (
+                <div
+                  className="devanagari"
+                  style={{
+                    fontSize: "0.68rem", color: accent ?? "var(--maroon-deep)", fontWeight: 700,
+                    lineHeight: 1.25, marginTop: "0.15rem",
+                    display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical",
+                    overflow: "hidden", wordBreak: "break-word",
+                  }}
+                >
+                  {fests[0].name}
+                  {fests.length > 1 && ` +${fests.length - 1}`}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.4rem 1rem", marginTop: "0.9rem" }}>
+        {[
+          ["Ekadashi", isHi ? "एकादशी" : "Ekadashi"], ["Pradosh", isHi ? "प्रदोष" : "Pradosh"],
+          ["Chaturthi", isHi ? "चतुर्थी" : "Chaturthi"], ["Navami", isHi ? "नवमी" : "Navami"],
+          ["Purnima", isHi ? "पूर्णिमा" : "Purnima"], ["Amavasya", isHi ? "अमावस्या" : "Amavasya"],
+        ].map(([key, label]) => (
+          <span key={key} style={{ fontSize: "0.72rem", color: "var(--muted)", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "2px", background: festivalColor(key) }} />
+            {label}
+          </span>
+        ))}
+      </div>
+      <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem", textAlign: "center" }}>
+        {isHi ? "किसी भी तिथि पर क्लिक करें उसका पूरा पंचांग देखने के लिए" : "Click any date to see its full daily panchang"}
+      </p>
+
+      {/* Full-text list below — the grid necessarily truncates long names */}
+      {sortedFests.length > 0 && (
+        <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px dashed rgba(201,154,58,0.35)" }}>
+          <h4 className="devanagari" style={{ fontSize: "1rem", color: "var(--maroon-deep)", marginBottom: "0.6rem" }}>
+            {isHi ? `${MONTH_HI[month]} ${year} के व्रत एवं त्यौहार` : `Vrats & Festivals — ${MONTH_HI[month]} ${year}`}
+          </h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+            {sortedFests.map((f, i) => (
+              <button
+                type="button"
+                key={i}
+                onClick={() => onPickDay(f.date)}
+                style={{
+                  display: "flex", gap: "0.75rem", alignItems: "baseline", fontSize: "0.85rem",
+                  borderLeft: `3px solid ${festivalColor(f.name)}`, background: `${festivalColor(f.name)}0f`,
+                  padding: "0.4rem 0.6rem", borderRadius: "0 3px 3px 0", textAlign: "left", cursor: "pointer",
+                  fontFamily: "inherit", width: "100%",
+                }}
+              >
+                <strong style={{ color: festivalColor(f.name), whiteSpace: "nowrap" }}>
+                  {parseInt(f.date.slice(8, 10), 10)} {MONTH_HI[month]}
+                </strong>
+                <span style={{ fontWeight: 600 }}>{f.name}</span>
+                <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>{f.significance}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const DEFAULT_PLACE: Place = { label: "New Delhi", lat: 28.6139, lon: 77.209, tzName: "Asia/Kolkata" };
 
 export default function PanchangTool() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const isHi = lang === "hi";
   const [date, setDate] = useState(today());
   const [place, setPlace] = useState<Place | null>(DEFAULT_PLACE);
   const [shownPlace, setShownPlace] = useState<string>(DEFAULT_PLACE.label);
@@ -91,6 +272,30 @@ export default function PanchangTool() {
   const [kaal, setKaal] = useState<RahuKaalResult | null>(null);
   const [abhijit, setAbhijit] = useState<MuhurtaSlot | null>(null);
   const [festivals, setFestivals] = useState<FestivalItem[]>([]);
+
+  // Monthly calendar view — separate from the single-day view above.
+  const [view, setView] = useState<"day" | "month">("day");
+  const now = new Date();
+  const [monthCursor, setMonthCursor] = useState<{ year: number; month: number }>({ year: now.getFullYear(), month: now.getMonth() });
+  const [monthFestivals, setMonthFestivals] = useState<FestivalItem[]>([]);
+  const [monthMasa, setMonthMasa] = useState<{ start?: MasaInfo; end?: MasaInfo }>({});
+  const [monthLoading, setMonthLoading] = useState(false);
+
+  const loadMonth = useCallback(async (year: number, month: number, p: Place) => {
+    const monthStartIso = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+    const tz = utcOffsetHoursAt(p.tzName, monthStartIso, "12:00");
+    setMonthLoading(true);
+    try {
+      // The API returns the next 30 days from monthStartIso — a couple of
+      // early-next-month entries may spill in; keep only this month's dates.
+      const f = await fetchFestivals(monthStartIso, p.lat, p.lon, tz).catch(() => null);
+      const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+      setMonthFestivals((f?.festivals ?? []).filter((it) => it.date.startsWith(monthPrefix) && !WEEKLY_VRAT.test(it.name)));
+      setMonthMasa({ start: f?.masa_start, end: f?.masa_end });
+    } finally {
+      setMonthLoading(false);
+    }
+  }, []);
 
   const load = useCallback(async (d: string, p: Place) => {
     // Offset resolved for the REQUESTED date in the place's IANA zone —
@@ -129,6 +334,25 @@ export default function PanchangTool() {
     e.preventDefault();
     // Scroll only on user-requested loads, not the automatic first load.
     if (place) load(date, place).then(() => {
+      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  useEffect(() => {
+    if (view === "month" && place) loadMonth(monthCursor.year, monthCursor.month, place);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, monthCursor, place]);
+
+  function handlePrevMonth() {
+    setMonthCursor((c) => (c.month === 0 ? { year: c.year - 1, month: 11 } : { year: c.year, month: c.month - 1 }));
+  }
+  function handleNextMonth() {
+    setMonthCursor((c) => (c.month === 11 ? { year: c.year + 1, month: 0 } : { year: c.year, month: c.month + 1 }));
+  }
+  function handlePickDay(iso: string) {
+    setDate(iso);
+    setView("day");
+    if (place) load(iso, place).then(() => {
       resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
@@ -180,22 +404,57 @@ export default function PanchangTool() {
             />
           </div>
           <PlaceSearch value={place} onSelect={setPlace} label="स्थान / City" placeholder="Type any city… e.g. Kanpur, Dubai, London" />
-          <button type="submit" className="btn btn-primary" disabled={loading || !place}>
-            {loading ? t("form.calculating") : "पंचांग देखें / Show Panchang"}
-          </button>
+          {view === "day" && (
+            <button type="submit" className="btn btn-primary" disabled={loading || !place}>
+              {loading ? t("form.calculating") : "पंचांग देखें / Show Panchang"}
+            </button>
+          )}
         </form>
+
+        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1rem" }}>
+          <button type="button" className={`btn btn-sm ${view === "day" ? "btn-secondary" : "btn-ghost"}`} onClick={() => setView("day")}>
+            दैनिक पंचांग / Daily
+          </button>
+          <button type="button" className={`btn btn-sm ${view === "month" ? "btn-secondary" : "btn-ghost"}`} onClick={() => setView("month")}>
+            मासिक पंचांग / Monthly
+          </button>
+        </div>
       </PatrikaFrame>
 
       {error && <p className="form-error">{error}</p>}
 
-      {loading && !panchang && (
+      {view === "month" && (
+        <PatrikaFrame style={{ marginBottom: "1.5rem" }}>
+          {monthLoading ? (
+            <div style={{ textAlign: "center", padding: "2rem" }}>
+              <div className="spinner" />
+              <p style={{ color: "var(--muted)" }}>{t("form.loading")}</p>
+            </div>
+          ) : (
+            <MonthCalendar
+              year={monthCursor.year}
+              month={monthCursor.month}
+              festivals={monthFestivals}
+              masaStart={monthMasa.start}
+              masaEnd={monthMasa.end}
+              isHi={isHi}
+              onPrev={handlePrevMonth}
+              onNext={handleNextMonth}
+              onPickDay={handlePickDay}
+              isToday={(iso) => iso === today()}
+            />
+          )}
+        </PatrikaFrame>
+      )}
+
+      {view === "day" && loading && !panchang && (
         <div style={{ textAlign: "center", padding: "2rem" }}>
           <div className="spinner" />
           <p style={{ color: "var(--muted)" }}>{t("form.loading")}</p>
         </div>
       )}
 
-      {panchang && (
+      {view === "day" && panchang && (
         <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
         <PatrikaFrame>
           <h2 style={{ fontSize: "1.2rem", marginBottom: "0.25rem", textAlign: "center" }}>
