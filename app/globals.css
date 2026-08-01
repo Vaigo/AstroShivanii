@@ -2532,6 +2532,61 @@ a:hover { color: var(--saffron); }
   .back-to-top { bottom: 1rem; right: 1rem; width: 42px; height: 42px; }
 }
 
+/* ─── Monthly Panchang calendar ─────────────────────────────────────────────── */
+.pcal-head { display: flex; align-items: center; justify-content: center; gap: 1.25rem; margin-bottom: 0.35rem; }
+.pcal-month { font-size: 1.5rem; color: var(--maroon-deep); min-width: 210px; text-align: center; }
+.pcal-masa { text-align: center; font-size: 0.9rem; color: #8a5a17; font-weight: 700; margin-bottom: 1.1rem; }
+.pcal-dow-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 6px; }
+.pcal-dow {
+  text-align: center; font-size: 0.85rem; font-weight: 700; padding: 0.45rem 0;
+  background: linear-gradient(160deg, var(--maroon-deep), var(--maroon));
+  color: var(--gold-pale); border-radius: 3px; letter-spacing: 0.5px;
+}
+.pcal-dow.sun { color: #ffcf87; }
+.pcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.pcal-cell {
+  position: relative; text-align: left; min-height: 96px; padding: 0.45rem 0.45rem 0.35rem;
+  border-radius: 4px; cursor: pointer; border: 1px solid rgba(201, 154, 58, 0.28);
+  border-top-width: 4px; border-top-color: transparent;
+  background: rgba(255, 253, 246, 0.5); font-family: inherit;
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s, border-color 0.18s;
+}
+.pcal-cell:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(110, 30, 42, 0.18); border-color: var(--gold); border-top-color: inherit; }
+.pcal-cell .pcal-day { font-size: 1rem; font-weight: 600; color: var(--ink); }
+.pcal-cell.today { border-color: var(--maroon); border-width: 2px; border-top-width: 4px; }
+.pcal-cell.today .pcal-day { color: var(--maroon); font-weight: 800; }
+.pcal-today-chip {
+  position: absolute; top: 5px; right: 5px; font-size: 0.58rem; line-height: 1.4;
+  background: var(--maroon); color: var(--gold-pale); padding: 1px 7px; border-radius: 9px; font-weight: 700;
+}
+.pcal-cell.major { background: linear-gradient(160deg, rgba(224, 138, 46, 0.15), rgba(201, 154, 58, 0.26)); }
+.pcal-fest-name {
+  font-size: 0.68rem; font-weight: 700; line-height: 1.22; margin-top: 0.18rem;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: break-word;
+}
+.pcal-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1rem; margin-top: 0.9rem; }
+.pcal-fest-row {
+  display: flex; gap: 0.8rem; align-items: flex-start; width: 100%; text-align: left;
+  padding: 0.5rem 0.65rem; border-radius: 0 4px 4px 0; cursor: pointer; font-family: inherit;
+  border: none; border-left: 3px solid var(--gold); background: rgba(201, 154, 58, 0.07);
+  transition: transform 0.15s var(--ease-out), box-shadow 0.15s;
+}
+.pcal-fest-row:hover { transform: translateX(3px); box-shadow: 0 3px 10px rgba(110, 30, 42, 0.14); }
+.pcal-date-chip {
+  flex-shrink: 0; width: 56px; text-align: center; border-radius: 5px; padding: 0.3rem 0.15rem;
+  background: linear-gradient(160deg, var(--maroon-deep), var(--maroon)); color: var(--gold-bright);
+}
+.pcal-date-chip .dnum { font-size: 1.15rem; font-weight: 800; line-height: 1.1; display: block; }
+.pcal-date-chip .dvar { font-size: 0.62rem; color: var(--gold-pale); display: block; }
+@media (max-width: 600px) {
+  .pcal-cell { min-height: 72px; padding: 0.3rem; }
+  .pcal-fest-name { font-size: 0.58rem; -webkit-line-clamp: 2; }
+  .pcal-month { font-size: 1.15rem; min-width: 150px; }
+  .pcal-dow { font-size: 0.72rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

@@ -276,8 +276,12 @@ export interface MuhurtaResult {
 
 export interface FestivalItem {
   date: string;          // YYYY-MM-DD
-  name: string;          // "Shukla Ekadashi (एकादशी)"
+  name: string;          // "Raksha Bandhan" / "Shukla Ekadashi (एकादशी)"
+  name_hi?: string;      // "रक्षाबंधन"
   significance: string;
+  /** True for named major festivals (Diwali, Holi, Teej, Navratri, Makar
+   *  Sankranti …) as opposed to routine tithi vrats. */
+  major?: boolean;
 }
 
 export interface MasaInfo {
