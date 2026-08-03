@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-const PRICE = 1011;
+const PRICE = 1100;
 
 type Step = "birth" | "teaser" | "events" | "paywall" | "computing" | "result";
 

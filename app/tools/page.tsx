@@ -106,7 +106,7 @@ export default function ToolsPage() {
               </div>
               <div style={{ flex: 1, minWidth: 220 }}>
                 <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", marginBottom: "0.5rem" }}>
-                  ₹1011 · जन्म समय शुद्धिकरण
+                  ₹1100 · जन्म समय शुद्धिकरण
                 </span>
                 <h2 style={{ fontSize: "1.25rem", marginBottom: "0.2rem" }}>जन्म समय पता नहीं?</h2>
                 <p style={{ color: "var(--muted)", fontSize: "0.9rem", margin: 0 }}>

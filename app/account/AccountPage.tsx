@@ -325,7 +325,7 @@ export default function AccountPage() {
                 {isHi ? "अभी तक कोई समय-शुद्धिकरण नहीं किया।" : "No time rectification done yet."}
               </p>
               <Link href="/tools/time-rectification" className="btn btn-primary btn-sm devanagari">
-                {isHi ? "जन्म समय शुद्धिकरण शुरू करें ₹1011" : "Start Time Rectification ₹1011"}
+                {isHi ? "जन्म समय शुद्धिकरण शुरू करें ₹1100" : "Start Time Rectification ₹1100"}
               </Link>
             </PatrikaFrame>
           ) : (

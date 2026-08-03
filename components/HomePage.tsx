@@ -238,7 +238,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── जन्म समय शुद्धिकरण — ₹1011, the rung above तुरंत उत्तर ── */}
+      {/* ── जन्म समय शुद्धिकरण — ₹1100, the rung above तुरंत उत्तर ── */}
       <section className="section" style={{ paddingTop: "1rem", paddingBottom: "3rem" }}>
         <div className="container" style={{ maxWidth: "900px" }}>
           <Reveal>
@@ -249,7 +249,7 @@ export default function HomePage() {
                 </div>
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", marginBottom: "0.5rem" }}>
-                    ₹1011 · जन्म समय शुद्धिकरण
+                    ₹1100 · जन्म समय शुद्धिकरण
                   </span>
                   <h2 style={{ fontSize: "1.25rem", marginBottom: "0.2rem" }}>
                     {isHi ? "जन्म समय पता नहीं?" : "Don't know your exact birth time?"}
