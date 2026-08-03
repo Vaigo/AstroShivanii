@@ -321,3 +321,53 @@ export function matchCategory(text: string): CategoryKey | null {
   }
   return null;
 }
+
+/** A question naming ANOTHER real tool/product on the site ("tell me about
+ *  time rectification", "kundli PDF report kaise milega") — तुरंत उत्तर has
+ *  no category for these; without this check they'd silently fall back to
+ *  FALLBACK_CATEGORY and run the full paid flow for a question the category
+ *  answer bank was never written to address. Checked BEFORE the generic
+ *  meta-question check below, since these are more specific. */
+export interface FeatureRedirect { href: string; label: { en: string; hi: string }; }
+
+const FEATURE_PATTERNS: Array<{ test: RegExp; redirect: FeatureRedirect }> = [
+  {
+    test: /rectif|जन्म\s*समय\s*शुद्धिकरण|exact\s*(birth\s*)?time|birth\s*time.*(unknown|wrong|galat)|(जन्म\s*)?समय.*(पता\s*नहीं|गलत)/i,
+    redirect: { href: "/tools/time-rectification", label: { en: "Time Rectification — ₹1011", hi: "जन्म समय शुद्धिकरण — ₹1011" } },
+  },
+  {
+    test: /pdf\s*report|kundli\s*report|कुंडली.*रिपोर्ट|पूर्ण\s*कुंडली/i,
+    redirect: { href: "/readings/birth-chart", label: { en: "Full Kundli PDF Report — ₹999", hi: "पूर्ण कुंडली PDF रिपोर्ट — ₹999" } },
+  },
+];
+
+export function matchFeatureRedirect(text: string): FeatureRedirect | null {
+  const hit = FEATURE_PATTERNS.find((f) => f.test.test(text));
+  return hit ? hit.redirect : null;
+}
+
+/** A question about the PLATFORM/AI itself ("is this AI?", "what is
+ *  GrahaAPI?", "are you a chatbot?") rather than a personal astrology
+ *  question — same silent-fallback risk as above, but there's no single
+ *  tool to redirect to, so this gets a short static explainer instead.
+ *  Word-boundaries matter here: naive substring matching on "ai" would
+ *  false-positive on the Hindi word "hai" (है, "is") in almost every
+ *  Hinglish sentence — every pattern below is boundary-safe. */
+const META_PATTERNS: RegExp[] = [
+  /\bai\b/i,
+  /\bapi\b/i,
+  /chatbot/i,
+  /\bbot\b/i,
+  /grahaapi/i,
+  /astro\s*shivanii\s*ai/i,
+  /real\s+astrologer/i,
+  /असली\s+ज्योतिषी/,
+  /कृत्रिम\s*बुद्धि/,
+  /रोबोट/,
+  /who\s+are\s+you/i,
+  /कौन\s+हो/,
+];
+
+export function isMetaQuestion(text: string): boolean {
+  return META_PATTERNS.some((re) => re.test(text));
+}

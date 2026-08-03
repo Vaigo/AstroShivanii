@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import BirthForm from "@/components/BirthForm";
 import PatrikaFrame from "@/components/PatrikaFrame";
@@ -21,8 +22,8 @@ declare global {
 import { resolveTier, getFactSheet, type FactSheet } from "@/lib/turant-uttar-engine";
 import { PLANET_HI } from "@/lib/hindi-labels";
 import {
-  CATEGORIES, CONTENT, FALLBACK_CATEGORY, matchCategory,
-  type CategoryKey, type Tier,
+  CATEGORIES, CONTENT, FALLBACK_CATEGORY, matchCategory, matchFeatureRedirect, isMetaQuestion,
+  type CategoryKey, type Tier, type FeatureRedirect,
 } from "@/lib/turant-uttar-data";
 import type { BirthRequest, KundliFullResult, TurantUttarAIResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
@@ -60,6 +61,7 @@ function TurantUttarInner() {
   const [category, setCategory] = useState<CategoryKey | null>(null);
   const [questionText, setQuestionText] = useState("");
   const [customText, setCustomText] = useState("");
+  const [notice, setNotice] = useState<{ kind: "meta" } | { kind: "feature"; redirect: FeatureRedirect } | null>(null);
   const [error, setError] = useState("");
   const [tier, setTier] = useState<Tier | null>(null);
   const [kundli, setKundli] = useState<KundliFullResult | null>(null);
@@ -165,9 +167,22 @@ function TurantUttarInner() {
 
   function submitCustom(e: React.FormEvent) {
     e.preventDefault();
-    if (!customText.trim()) return;
-    setQuestionText(customText.trim());
-    setCategory(matchCategory(customText) ?? FALLBACK_CATEGORY);
+    const text = customText.trim();
+    if (!text) return;
+    // Neither of these is answerable from a birth chart at all — without
+    // this check they'd silently fall back to FALLBACK_CATEGORY and run
+    // the full paid flow for a question the category answer bank was
+    // never written to address.
+    const featureHit = matchFeatureRedirect(text);
+    if (featureHit) { setNotice({ kind: "feature", redirect: featureHit }); return; }
+    if (isMetaQuestion(text)) { setNotice({ kind: "meta" }); return; }
+    proceedWithCustom(text);
+  }
+
+  function proceedWithCustom(text: string) {
+    setNotice(null);
+    setQuestionText(text);
+    setCategory(matchCategory(text) ?? FALLBACK_CATEGORY);
     setStep("birth");
   }
 
@@ -356,7 +371,7 @@ function TurantUttarInner() {
                     className="form-input"
                     type="text"
                     value={customText}
-                    onChange={(e) => setCustomText(e.target.value)}
+                    onChange={(e) => { setCustomText(e.target.value); setNotice(null); }}
                     placeholder={isHi ? "अपना प्रश्न यहां लिखें…" : "Type your question here…"}
                     maxLength={200}
                   />
@@ -365,6 +380,42 @@ function TurantUttarInner() {
                   {isHi ? "आगे बढ़ें" : "Continue"}
                 </button>
               </form>
+
+              {notice?.kind === "feature" && (
+                <div className="tu-teaser-box" style={{ marginTop: "0.9rem" }}>
+                  <p className={isHi ? "devanagari" : undefined}>
+                    {isHi
+                      ? "यह तुरंत उत्तर से अलग, अपना एक टूल है — वहां सीधे जाएं:"
+                      : "That's actually a separate tool on our site — go there directly:"}
+                  </p>
+                  <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                    <Link href={notice.redirect.href} className="btn btn-primary btn-sm">
+                      {isHi ? notice.redirect.label.hi : notice.redirect.label.en}
+                    </Link>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => proceedWithCustom(customText.trim())}>
+                      {isHi ? "नहीं, यह प्रश्न यहीं पूछना है" : "No, ask this here anyway"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {notice?.kind === "meta" && (
+                <div className="tu-teaser-box" style={{ marginTop: "0.9rem" }}>
+                  <p className={isHi ? "devanagari" : undefined}>
+                    {isHi
+                      ? "तुरंत उत्तर आपकी अपनी जन्म-कुंडली पर आधारित व्यक्तिगत उत्तर है — यह हमारे बारे में सामान्य सवालों का जवाब नहीं देता। हमारे कुछ उत्तर लिखने में Astro Shivanii AI सहायता करता है, पर हर तथ्य आपकी असली कुंडली की गणना से ही आता है।"
+                      : "तुरंत उत्तर gives a personal answer from your own birth chart — it isn't built to answer general questions about us. Astro Shivanii AI helps write some answers, but every fact still comes from your real chart's calculation."}
+                  </p>
+                  <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                    <Link href="/faq" className="btn btn-ghost btn-sm">
+                      {isHi ? "अधिक जानें — FAQ" : "Learn more — FAQ"}
+                    </Link>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => proceedWithCustom(customText.trim())}>
+                      {isHi ? "नहीं, यही मेरा प्रश्न है — आगे बढ़ें" : "No, this really is my question — continue"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </PatrikaFrame>
           </div>
         )}
