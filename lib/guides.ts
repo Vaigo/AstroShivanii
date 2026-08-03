@@ -379,6 +379,63 @@ export const GUIDES: Guide[] = [
     tryTool: { href: "/tools/kundli", label: "Try the free Kundli — works without birth time" },
     bookReading: { href: "/readings/bhrigu-nadi-deep", label: "Book a Bhrigu Nadi reading (no birth time needed)" },
   },
+  {
+    slug: "what-is-baal-kundli",
+    icon: "leaf",
+    title: "What is a Baal Kundli? Naming Syllable & Baby Chart Explained",
+    titleHi: "बाल कुंडली क्या है?",
+    description:
+      "A Baal Kundli is your baby's birth chart read for a parent — the auspicious naming syllable, temperament, health tendencies, and why remedies for an infant differ from an adult's.",
+    readMins: 5,
+    updated: "2026-08-03",
+    intro: [
+      "A Baal Kundli (बाल कुंडली) is simply a Kundli — the same real astronomical calculation as any birth chart — read specifically for a baby or young child, and for the parent reading it on their behalf.",
+      "The chart itself doesn't change with age. What should change is how it's read: a newborn can't personally chant a mantra or observe a fast, and a chart's first planetary period (mahadasha) is mathematically computed backward from before birth — both of which read as errors if nobody explains them.",
+    ],
+    sections: [
+      {
+        h: "नामाक्षर — the naming syllable",
+        p: [
+          "Classical Jyotish assigns four syllables to each of the 27 nakshatras (one per pada, the quarter the Moon occupies at birth). By tradition, a name beginning with this syllable is considered auspicious and aligned with the child's nakshatra.",
+          "This is the single most practical thing most parents want from a baby's chart — our free Baal Kundli tool surfaces it as the first result, computed directly from the Moon's nakshatra and pada at birth.",
+        ],
+      },
+      {
+        h: "Why a newborn's first Mahadasha can show a date before their birth",
+        p: [
+          "Vimshottari dasha periods are fixed lengths per planet (Saturn 19 years, Mars 7, and so on). At birth, the Moon is already partway through its nakshatra, so the FIRST mahadasha's nominal start date is calculated backward from that balance — meaning it is completely normal, not a mistake, for it to land before the birth date itself. A correctly-written report leads with how much of that period remains from birth, not the pre-birth start date alone.",
+        ],
+      },
+      {
+        h: "Remedies (उपाय) for an infant vs. an adult",
+        p: [
+          "A generic remedy list written for an adult — mantra counts, weekly fasts, gemstone-wearing instructions — is meaningless addressed directly to a baby, who can do none of these. For a child, every remedy should be reframed as something the PARENTS perform on the child's behalf, with personal practice introduced gradually as the child grows old enough to understand it.",
+        ],
+      },
+      {
+        h: "What to look for besides the naming syllable",
+        p: [
+          "Temperament and instinctive nature (Lagna and Moon nakshatra), health tendencies to stay aware of — not diagnoses — and the natural direction of interests and learning style are all readable from the same chart, framed as long-range potential rather than immediate predictions.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Can I make a Baal Kundli without an exact birth time?",
+        a: "Yes — a sunrise chart can be cast from just the date and place, same as any Kundli. The naming syllable (from the Moon's nakshatra) is usually still reliable; Lagna-dependent results are marked approximate without an exact time.",
+      },
+      {
+        q: "Is the naming syllable a strict rule?",
+        a: "No — it's a classical tradition, not a requirement. Many families use it as one input among several (family names, sound, meaning) rather than the deciding factor.",
+      },
+      {
+        q: "At what age should personal remedies (mantra, fasting) start?",
+        a: "There's no fixed age in classical texts — most families introduce simple practices gradually as a child grows old enough to understand and willingly participate, with parents performing remedies on the child's behalf before that.",
+      },
+    ],
+    tryTool: { href: "/tools/baal-kundli", label: "Create your child's free Baal Kundli" },
+    bookReading: { href: "/readings/birth-chart", label: "Get your child's chart read personally by Shivanii" },
+  },
 ];
 
 export function getGuide(slug: string): Guide | undefined {
