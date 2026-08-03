@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 const TOOLS: Array<{ slug: string; icon: IconName; name: string; nameHi: string; desc: string }> = [
   { slug: "panchang",   icon: "sun",    name: "Panchang",              nameHi: "पंचांग",                desc: "Tithi, nakshatra, Rahu Kaal, Abhijit muhurta — any date, any city, plus a monthly calendar view" },
   { slug: "kundli",     icon: "scroll", name: "Kundli / Birth Chart",  nameHi: "कुंडली / जन्म चार्ट",  desc: "North Indian chart, planetary positions, yogas, current dasha" },
+  { slug: "baal-kundli", icon: "leaf",  name: "Baal Kundli",           nameHi: "बाल कुंडली",           desc: "Free baby & child birth chart — naming syllable, temperament, health tendencies" },
   { slug: "matching",   icon: "rings",  name: "Marriage Matching",     nameHi: "गुण मिलान",             desc: "36-point Ashtakoot Guna Milan + Mangal Dosha check" },
   { slug: "rashifal",   icon: "star",   name: "Daily Rashifal",        nameHi: "दैनिक राशिफल",          desc: "Today's horoscope for your moon sign (rashi)" },
   { slug: "numerology", icon: "hash",   name: "Numerology",            nameHi: "अंक ज्योतिष",           desc: "Mulank, Bhagyank, Name Number, Lo Shu Grid, Karmic Numbers" },
@@ -93,6 +94,29 @@ export default function ToolsPage() {
                 या अपना प्रश्न लिखें →
               </Link>
             </p>
+          </PatrikaFrame>
+        </Reveal>
+
+        {/* ── जन्म समय शुद्धिकरण — featured, paid tool ── */}
+        <Reveal>
+          <PatrikaFrame style={{ marginBottom: "2.5rem", border: "1.5px solid var(--gold)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
+              <div className="service-card-icon" style={{ flexShrink: 0 }}>
+                <Icon name="clock" size={26} />
+              </div>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", marginBottom: "0.5rem" }}>
+                  ₹1011 · जन्म समय शुद्धिकरण
+                </span>
+                <h2 style={{ fontSize: "1.25rem", marginBottom: "0.2rem" }}>जन्म समय पता नहीं?</h2>
+                <p style={{ color: "var(--muted)", fontSize: "0.9rem", margin: 0 }}>
+                  अपने जीवन की कुछ निश्चित घटनाएं बताएं — हम दशा-गणना से आपका सही जन्म समय (और आवश्यकता होने पर तारीख) निकालते हैं
+                </p>
+              </div>
+              <Link href="/tools/time-rectification" className="btn btn-primary">
+                शुरू करें →
+              </Link>
+            </div>
           </PatrikaFrame>
         </Reveal>
 
