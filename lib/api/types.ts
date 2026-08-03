@@ -397,3 +397,99 @@ export interface SadeSatiResult {
   note_hi?: string;
   note_en?: string;
 }
+
+/* ── Rectification (/v1/rectification/* — sourced directly from
+   backend/app/routers/rectification.py, added this session, not a captured
+   live response — kept accurate to the actual return dicts in that file) ── */
+
+export interface AscendantOptionsRequest {
+  dob: string;   // YYYY-MM-DD
+  lat: number;
+  lon: number;
+  tz: number;
+}
+
+export interface AscendantWindow {
+  sign: string;
+  sign_hi: string;
+  start_local: string;   // HH:MM
+  end_local: string;     // HH:MM
+  ruling_planet: string;
+  element: string;
+  quality: string;
+  body_features: string[];
+  personality: string[];
+  career_indicators: string[];
+  health_areas: string[];
+  hi: string;
+}
+
+export interface AscendantOptionsResult {
+  dob: string;
+  lat: number; lon: number; tz: number;
+  total_ascendants: number;
+  ascendant_windows: AscendantWindow[];
+  note_en: string;
+  note_hi: string;
+}
+
+export type RectEventType =
+  | "marriage" | "divorce" | "child_birth" | "job_start" | "job_loss" | "promotion"
+  | "accident" | "illness" | "surgery" | "death_relative" | "foreign_travel"
+  | "property" | "education" | "business" | "spiritual" | "financial_gain"
+  | "financial_loss" | "relocation" | "legal_trouble" | "award";
+
+export interface RectEvent {
+  date: string;   // YYYY-MM-DD
+  type: RectEventType;
+  note?: string;
+}
+
+export interface RectCandidate {
+  date: string;      // YYYY-MM-DD — the day this candidate tests (equals dob when day_unknown=false)
+  tob: string;        // HH:MM
+  ascendant: string;
+  ascendant_hi: string;
+  ascendant_lord: string;
+  moon_nakshatra: string;
+  house_lords: Record<string, string>;
+  score: number;
+  confidence_pct: number;
+  event_breakdown: Array<{ date: string; type: RectEventType; score: number; relevant_houses: number[] }>;
+}
+
+export interface EventScoreResult {
+  dob: string;
+  day_unknown: boolean;
+  days_scanned: number;
+  approx_tob: string;
+  search_range: string;
+  step_minutes: number;
+  events_used: number;
+  candidates_tested: number;
+  top_candidates: RectCandidate[];
+  best_match: RectCandidate | null;
+  disclaimer_en: string;
+  disclaimer_hi: string;
+}
+
+export interface KpRulingWindow {
+  tob: string;
+  lagna_sign: string;
+  lagna_sign_lord: string;
+  lagna_nak_lord: string;
+  lagna_sub_lord: string;
+  matches_ruling_planets: boolean;
+}
+
+export interface KpRulingResult {
+  dob: string;
+  approx_tob: string;
+  query_moment: string;
+  ruling_planets: string[];
+  ruling_planet_detail: Record<string, string>;
+  candidate_windows: KpRulingWindow[];
+  matched_windows: KpRulingWindow[];
+  note_en: string;
+  note_hi: string;
+}

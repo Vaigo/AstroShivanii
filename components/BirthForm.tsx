@@ -20,6 +20,17 @@ interface BirthFormProps {
    *  submission without it. Default false preserves the sunrise-fallback
    *  behavior (birth time optional + honest accuracy flag) everywhere else. */
   requireTime?: boolean;
+  /** True if only year+month of birth are known (Time Rectification's
+   *  day-unknown mode) — swaps the date field for a month picker, and the
+   *  `dob` emitted via onChange/onSubmit becomes YYYY-MM (no day), not the
+   *  usual YYYY-MM-DD. Place-search/coords/time fields are unaffected. */
+  dayUnknown?: boolean;
+  /** Hides the birth-time field entirely. For Time Rectification, where the
+   *  time is exactly what's being solved for — the default "(optional) /
+   *  we'll use sunrise" framing is actively wrong there, since no sunrise
+   *  fallback is involved; the caller collects its own explicit "guess"
+   *  field elsewhere instead. */
+  hideTob?: boolean;
 }
 
 const DEFAULT_PLACE: Place = {
@@ -29,8 +40,9 @@ const DEFAULT_PLACE: Place = {
   tzName: "Asia/Kolkata",
 };
 
-export default function BirthForm({ onSubmit, onChange, embedded, loading, label, requireTime }: BirthFormProps) {
-  const { t } = useI18n();
+export default function BirthForm({ onSubmit, onChange, embedded, loading, label, requireTime, dayUnknown, hideTob }: BirthFormProps) {
+  const { t, lang } = useI18n();
+  const isHi = lang === "hi";
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
   const [place, setPlace] = useState<Place | null>(DEFAULT_PLACE);
@@ -38,6 +50,11 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
   const [mLat, setMLat] = useState("28.6139");
   const [mLon, setMLon] = useState("77.2090");
   const [mTz, setMTz] = useState("5.5");
+
+  // dayUnknown mode: dob is YYYY-MM (no day) — utcOffsetHoursAt needs a full
+  // date to resolve historical DST, so probe with day=15 (mid-month) for the
+  // tz lookup only. The `dob` value actually sent up stays YYYY-MM.
+  const tzProbeDate = dayUnknown && dob ? `${dob}-15` : dob;
 
   /** The tz sent to the API is resolved for the BIRTH DATE (historical DST),
    *  not for "today" — a July London birth gets +1 (BST), a January one 0 (GMT). */
@@ -55,7 +72,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
       tob: tob || undefined,
       lat: place.lat,
       lon: place.lon,
-      tz: utcOffsetHoursAt(place.tzName, dob, tob || undefined),
+      tz: utcOffsetHoursAt(place.tzName, tzProbeDate, tob || undefined),
     };
   }
 
@@ -74,7 +91,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
   }
 
   const resolvedOffset =
-    !manual && place && dob ? utcOffsetHoursAt(place.tzName, dob, tob || undefined) : null;
+    !manual && place && dob ? utcOffsetHoursAt(place.tzName, tzProbeDate, tob || undefined) : null;
 
   const fields = (
     <>
@@ -85,28 +102,32 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
       )}
 
       <div className="form-group">
-        <label className="form-label">{t("form.dob")}</label>
+        <label className="form-label">
+          {dayUnknown ? (isHi ? "जन्म वर्ष व महीना" : "Birth year & month") : t("form.dob")}
+        </label>
         <input
-          type="date"
+          type={dayUnknown ? "month" : "date"}
           className="form-input"
           value={dob}
           onChange={(e) => setDob(e.target.value)}
           required
-          max={new Date().toISOString().split("T")[0]}
+          max={dayUnknown ? new Date().toISOString().slice(0, 7) : new Date().toISOString().split("T")[0]}
         />
       </div>
 
-      <div className="form-group">
-        <label className="form-label">{requireTime ? `${t("form.tob")} *` : t("form.tobOptional")}</label>
-        <input
-          type="time"
-          className="form-input"
-          value={tob}
-          onChange={(e) => setTob(e.target.value)}
-          required={requireTime}
-        />
-        {!requireTime && <span className="form-hint">{t("form.noTimeTip")}</span>}
-      </div>
+      {!hideTob && (
+        <div className="form-group">
+          <label className="form-label">{requireTime ? `${t("form.tob")} *` : t("form.tobOptional")}</label>
+          <input
+            type="time"
+            className="form-input"
+            value={tob}
+            onChange={(e) => setTob(e.target.value)}
+            required={requireTime}
+          />
+          {!requireTime && <span className="form-hint">{t("form.noTimeTip")}</span>}
+        </div>
+      )}
 
       {!manual ? (
         <>

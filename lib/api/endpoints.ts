@@ -15,10 +15,27 @@ import type {
   MangalDoshaResult,
   FestivalsResult,
   MahadashaListResult,
+  AscendantOptionsRequest,
+  AscendantOptionsResult,
+  KpRulingResult,
 } from "./types";
 
 export function fetchKundli(birth: BirthRequest): Promise<KundliFullResult> {
   return post("/v1/kundli/full", birth);
+}
+
+/** Free birth-time-rectification teaser — all 12 ascendant windows for the
+ *  birth day with traits, used to seed a starting approx_tob guess. */
+export function fetchAscendantOptions(req: AscendantOptionsRequest): Promise<AscendantOptionsResult> {
+  return post("/v1/rectification/ascendant-options", req);
+}
+
+/** KP ruling-planet corroboration for one already-resolved candidate time —
+ *  a free, independent second signal shown alongside the paid result. */
+export function fetchKpRulingPlanets(req: {
+  dob: string; approx_tob: string; lat: number; lon: number; tz: number;
+}): Promise<KpRulingResult> {
+  return post("/v1/rectification/kp-ruling-planets", req);
 }
 
 /** Full Vimshottari mahadasha sequence — powers the dasha timeline ribbon. */

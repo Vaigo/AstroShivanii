@@ -6,7 +6,7 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "as-site-token";
 const USER_KEY = "as-site-user";
 
-import type { BirthRequest, TurantUttarAIResult } from "./types";
+import type { BirthRequest, TurantUttarAIResult, EventScoreResult, RectEvent } from "./types";
 
 export interface SiteUser { id: number; email: string; name: string; created_at?: number; }
 
@@ -20,6 +20,15 @@ export interface SiteBooking {
   id: number; reading_slug: string; name: string; whatsapp: string;
   dob: string; tob: string; notes: string; amount_inr: number | null;
   status: string; created_at: number; user_email?: string; email?: string;
+  /** Only set for the kundli-report product — 'ready' means the PDF can be downloaded. */
+  report_status?: string | null;
+}
+
+export interface RectificationOrder {
+  id: number; ref_code: string | null; dob: string; day_unknown: number;
+  approx_tob: string; events_count: number; best_date: string | null;
+  best_tob: string | null; confidence_pct: number | null;
+  amount_inr: number; status: string; created_at: number;
 }
 
 export class SiteApiError extends Error {
@@ -72,7 +81,7 @@ export async function siteLogin(email: string, password: string) {
 
 /* ── profile ── */
 export function fetchHistory() {
-  return siteFetch<{ orders: TuOrder[]; bookings: SiteBooking[]; total_spent_inr: number }>(
+  return siteFetch<{ orders: TuOrder[]; bookings: SiteBooking[]; rectifications: RectificationOrder[]; total_spent_inr: number }>(
     "/v1/site/me/history", { headers: { "X-Site-Token": getSiteToken() ?? "" } });
 }
 
@@ -103,8 +112,11 @@ export function fetchTurantUttarAI(
 export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
 
 export function createPaymentOrder(body: {
-  kind: "booking" | "turant-uttar"; slug: string;
+  kind: "booking" | "turant-uttar" | "time-rectification"; slug: string;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
+  // birth place — required for the birth-chart/kundli-report product so the
+  // auto-generated PDF uses an accurate chart; harmless to omit elsewhere.
+  lat?: number; lon?: number; tz?: number; gender?: "male" | "female";
 }) {
   return siteFetch<CreatedOrder>("/v1/site/payments/create-order", {
     body, headers: { "X-Site-Token": getSiteToken() ?? "" },
@@ -115,6 +127,19 @@ export function verifyPayment(body: {
   razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string;
 }) {
   return siteFetch<{ verified: boolean }>("/v1/site/payments/verify", { body });
+}
+
+/** Time Rectification's compute step — hard-gated server-side on a verified
+ *  razorpay_order_id (no self-attest fallback, unlike तुरंत उत्तर). */
+export function fetchRectificationResult(body: {
+  dob: string; day_unknown: boolean; approx_tob: string;
+  time_range_minutes?: number; step_minutes?: number;
+  lat: number; lon: number; tz: number; events: RectEvent[];
+  name?: string; ref_code?: string; razorpay_order_id: string;
+}): Promise<EventScoreResult> {
+  return siteFetch<EventScoreResult>("/v1/site/rectification", {
+    body, headers: { "X-Site-Token": getSiteToken() ?? "" },
+  });
 }
 
 /* ── admin ── */
@@ -137,3 +162,43 @@ export const adminOverview = (key: string) => siteFetch<AdminOverview>("/v1/site
 export const adminUsers = (key: string) => siteFetch<{ users: AdminUserRow[] }>("/v1/site/admin/users", { headers: adminHeaders(key) });
 export const adminOrders = (key: string) => siteFetch<{ orders: TuOrder[] }>("/v1/site/admin/orders", { headers: adminHeaders(key) });
 export const adminBookings = (key: string) => siteFetch<{ bookings: SiteBooking[] }>("/v1/site/admin/bookings", { headers: adminHeaders(key) });
+
+/* ── kundli deluxe PDF reports ── */
+export interface ReportJob {
+  id: number; booking_id: number; status: string; error: string | null;
+  created_at: number; updated_at: number; approved_at: number | null;
+  name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; amount_inr?: number;
+}
+
+export const adminReports = (key: string) => siteFetch<{ reports: ReportJob[] }>("/v1/site/admin/reports", { headers: adminHeaders(key) });
+export const adminReportApprove = (key: string, jobId: number) =>
+  siteFetch<{ status: string }>(`/v1/site/admin/reports/${jobId}/approve`, { method: "POST", headers: adminHeaders(key) });
+export const adminReportReject = (key: string, jobId: number) =>
+  siteFetch<{ status: string }>(`/v1/site/admin/reports/${jobId}/reject`, { method: "POST", headers: adminHeaders(key) });
+
+/** Both PDF endpoints require an auth header a plain <a href> can't send —
+ *  fetch as a blob client-side, then hand the browser a local object URL. */
+async function fetchPdfBlob(path: string, headers: Record<string, string>): Promise<string> {
+  const res = await fetch(`${BASE}${path}`, { headers });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    const err = json?.error ?? json?.detail ?? {};
+    throw new SiteApiError(err.code ?? "ERROR", err.message ?? `HTTP ${res.status}`);
+  }
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+export const adminPreviewReportUrl = (key: string, jobId: number) =>
+  fetchPdfBlob(`/v1/site/admin/reports/${jobId}/preview`, adminHeaders(key));
+
+export async function downloadMyReport(bookingId: number, filename = "kundli-report.pdf") {
+  const url = await fetchPdfBlob(`/v1/site/reports/${bookingId}/download`, { "X-Site-Token": getSiteToken() ?? "" });
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
