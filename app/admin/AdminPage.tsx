@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import {
   adminOverview, adminUsers, adminOrders, adminBookings,
-  type AdminOverview, type AdminUserRow, type TuOrder, type SiteBooking,
+  adminReports, adminReportApprove, adminReportReject, adminPreviewReportUrl,
+  type AdminOverview, type AdminUserRow, type TuOrder, type SiteBooking, type ReportJob,
 } from "@/lib/api/site";
 
 const KEY_STORAGE = "as-admin-key";
@@ -41,7 +42,7 @@ function Bars({ rows, labelKey, max }: { rows: Array<Record<string, unknown>>; l
   );
 }
 
-type Tab = "overview" | "users" | "orders" | "bookings";
+type Tab = "overview" | "users" | "orders" | "bookings" | "reports";
 
 export default function AdminPage() {
   const [key, setKey] = useState("");
@@ -53,7 +54,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [orders, setOrders] = useState<TuOrder[]>([]);
   const [bookings, setBookings] = useState<SiteBooking[]>([]);
+  const [reports, setReports] = useState<ReportJob[]>([]);
   const [loading, setLoading] = useState(false);
+  const [busyReportId, setBusyReportId] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = window.sessionStorage.getItem(KEY_STORAGE);
@@ -64,8 +67,10 @@ export default function AdminPage() {
   async function loadAll(k: string) {
     setLoading(true); setError("");
     try {
-      const [o, u, or_, b] = await Promise.all([adminOverview(k), adminUsers(k), adminOrders(k), adminBookings(k)]);
-      setOv(o); setUsers(u.users); setOrders(or_.orders); setBookings(b.bookings);
+      const [o, u, or_, b, rep] = await Promise.all([
+        adminOverview(k), adminUsers(k), adminOrders(k), adminBookings(k), adminReports(k),
+      ]);
+      setOv(o); setUsers(u.users); setOrders(or_.orders); setBookings(b.bookings); setReports(rep.reports);
       setAuthed(true);
       window.sessionStorage.setItem(KEY_STORAGE, k);
     } catch {
@@ -74,6 +79,35 @@ export default function AdminPage() {
       window.sessionStorage.removeItem(KEY_STORAGE);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePreview(jobId: number) {
+    try {
+      const url = await adminPreviewReportUrl(key, jobId);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      setError("Could not load PDF preview");
+    }
+  }
+
+  async function handleApprove(jobId: number) {
+    setBusyReportId(jobId);
+    try {
+      await adminReportApprove(key, jobId);
+      await loadAll(key);
+    } finally {
+      setBusyReportId(null);
+    }
+  }
+
+  async function handleReject(jobId: number) {
+    setBusyReportId(jobId);
+    try {
+      await adminReportReject(key, jobId);
+      await loadAll(key);
+    } finally {
+      setBusyReportId(null);
     }
   }
 
@@ -117,12 +151,15 @@ export default function AdminPage() {
         </div>
 
         <div style={{ display: "flex", gap: "0.5rem", margin: "1rem 0 1.5rem", flexWrap: "wrap" }}>
-          {(["overview", "users", "orders", "bookings"] as const).map((tb) => (
+          {(["overview", "users", "orders", "bookings", "reports"] as const).map((tb) => (
             <button key={tb} className={`btn btn-sm ${tab === tb ? "btn-secondary" : "btn-ghost"}`} onClick={() => setTab(tb)}>
               {tb[0].toUpperCase() + tb.slice(1)}
               {tb === "users" && ` (${users.length})`}
               {tb === "orders" && ` (${orders.length})`}
               {tb === "bookings" && ` (${bookings.length})`}
+              {tb === "reports" && reports.filter((r) => r.status === "pending_review").length > 0
+                ? ` (${reports.filter((r) => r.status === "pending_review").length} pending)`
+                : tb === "reports" ? ` (${reports.length})` : ""}
             </button>
           ))}
           <button className="btn btn-ghost btn-sm" onClick={() => loadAll(key)} disabled={loading}>⟳ Refresh</button>
@@ -243,6 +280,54 @@ export default function AdminPage() {
                     </tr>
                   ))}
                   {bookings.length === 0 && <tr><td style={td} colSpan={7}>No bookings yet</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          </PatrikaFrame>
+        )}
+
+        {tab === "reports" && (
+          <PatrikaFrame style={{ padding: "0.75rem", overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820 }}>
+                <thead><tr>
+                  <th style={th}>Requested</th><th style={th}>Customer</th><th style={th}>Birth</th>
+                  <th style={th}>Status</th><th style={th}>₹</th><th style={th}>Actions</th>
+                </tr></thead>
+                <tbody>
+                  {reports.map((r) => (
+                    <tr key={r.id}>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{fmt(r.created_at)}</td>
+                      <td style={td}>{r.name || "—"}<br /><span style={{ color: "var(--muted)", fontSize: "0.72rem" }}>{r.email || r.whatsapp}</span></td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{r.dob}{r.tob ? ` ${r.tob}` : ""}</td>
+                      <td style={{
+                        ...td, fontWeight: 700,
+                        color: r.status === "ready" ? "#1a7a3a"
+                          : r.status === "failed" ? "#b3423a"
+                          : r.status === "pending_review" ? "var(--saffron)"
+                          : "var(--muted)",
+                      }}>
+                        {r.status}
+                        {r.status === "failed" && r.error && (
+                          <div style={{ fontWeight: 400, fontSize: "0.72rem", color: "var(--muted)", maxWidth: 220 }}>{r.error}</div>
+                        )}
+                      </td>
+                      <td style={{ ...td, fontWeight: 700 }}>{r.amount_inr ?? "—"}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>
+                        {r.status === "pending_review" && (
+                          <>
+                            <button className="btn btn-ghost btn-sm" onClick={() => handlePreview(r.id)} style={{ marginRight: 6 }}>Preview</button>
+                            <button className="btn btn-secondary btn-sm" disabled={busyReportId === r.id} onClick={() => handleApprove(r.id)} style={{ marginRight: 6 }}>Approve</button>
+                            <button className="btn btn-ghost btn-sm" disabled={busyReportId === r.id} onClick={() => handleReject(r.id)}>Reject</button>
+                          </>
+                        )}
+                        {r.status === "ready" && (
+                          <button className="btn btn-ghost btn-sm" onClick={() => handlePreview(r.id)}>View</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {reports.length === 0 && <tr><td style={td} colSpan={6}>No reports yet</td></tr>}
                 </tbody>
               </table>
             </div>

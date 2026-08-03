@@ -10,6 +10,8 @@ import Icon from "@/components/Icon";
 import { READINGS, readingName, getReading } from "@/lib/readings";
 import { WHATSAPP_NUMBER } from "@/lib/config";
 import { createPaymentOrder, verifyPayment, SiteApiError } from "@/lib/api/site";
+import BirthForm from "@/components/BirthForm";
+import type { BirthRequest } from "@/lib/api/types";
 
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
 
@@ -34,6 +36,8 @@ function BookForm() {
   const [whatsapp, setWhatsapp] = useState("");
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
+  const [birthPlace, setBirthPlace] = useState<BirthRequest | null>(null);
+  const [gender, setGender] = useState<"male" | "female" | "">("");
   const [notes, setNotes] = useState("");
   const [callSlot, setCallSlot] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,6 +46,10 @@ function BookForm() {
 
   const reading = getReading(slug);
   const isLive = slug === "live-consultation";
+  // The deluxe kundli PDF report generates automatically from an exact
+  // chart — it needs real lat/lon/timezone, not just a date, plus gender
+  // for correct Hindi grammar and spouse-karaka selection in the report.
+  const isKundliReport = slug === "birth-chart";
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -63,8 +71,13 @@ function BookForm() {
       let order;
       try {
         order = await createPaymentOrder({
-          kind: "booking", slug, name, email, whatsapp, dob, tob,
+          kind: "booking", slug, name, email, whatsapp,
+          dob: isKundliReport ? (birthPlace?.dob ?? "") : dob,
+          tob: isKundliReport ? (birthPlace?.tob ?? "") : tob,
           notes: callSlot ? `${notes}\n[Call slot: ${callSlot}]` : notes,
+          ...(isKundliReport && birthPlace
+            ? { lat: birthPlace.lat, lon: birthPlace.lon, tz: birthPlace.tz, gender: gender || undefined }
+            : {}),
         });
       } catch (err) {
         // Never surface raw API error codes at the payment moment — always
@@ -127,11 +140,15 @@ function BookForm() {
           <Icon name="check" size={28} />
         </div>
         <h2 style={{ marginBottom: "0.75rem" }} className={isHi ? "devanagari" : undefined}>
-          {isHi ? "बुकिंग की पुष्टि हो गई!" : "Booking Confirmed!"}
+          {isKundliReport
+            ? (isHi ? "भुगतान सफल — आपकी रिपोर्ट तैयार हो रही है" : "Payment successful — your report is being prepared")
+            : (isHi ? "बुकिंग की पुष्टि हो गई!" : "Booking Confirmed!")}
         </h2>
-        <p style={{ color: "var(--ink-light)", marginBottom: "1.25rem" }}>
-          {t("book.success")}
-        </p>
+        {!isKundliReport && (
+          <p style={{ color: "var(--ink-light)", marginBottom: "1.25rem" }}>
+            {t("book.success")}
+          </p>
+        )}
         {/* What happens next — kills the "did it actually work?" anxiety */}
         <ol
           className={isHi ? "devanagari" : undefined}
@@ -141,11 +158,26 @@ function BookForm() {
             lineHeight: 1.7, display: "grid", gap: "0.4rem",
           }}
         >
-          <li>{isHi ? "आपकी बुकिंग शिवानी जी तक पहुंच गई है।" : "Your booking has reached Shivanii."}</li>
-          <li>{isHi ? "वे 24 घंटे के भीतर आपके WhatsApp नंबर पर संदेश करेंगी।" : "She will message you on WhatsApp within 24 hours."}</li>
-          <li>{isHi ? "पाठन 24–48 घंटे में मिलेगा (लाइव कॉल का समय आपसी सहमति से तय होगा)।" : "Your reading arrives in 24–48 hours (live calls are scheduled together)."}</li>
+          {isKundliReport ? (
+            <>
+              <li>{isHi ? "आपकी कुंडली के सभी 27 खंड अभी तैयार किए जा रहे हैं — इसमें कुछ मिनट लगेंगे।" : "All 27 sections of your kundli are being prepared now — this takes a few minutes."}</li>
+              <li>{isHi ? "तैयार होते ही शिवानी जी इसे अंतिम स्वीकृति देंगी।" : "Once ready, Shivanii gives it her final sign-off."}</li>
+              <li>{isHi ? "स्वीकृति मिलते ही आपके \"मेरा खाता\" पेज पर डाउनलोड बटन दिखेगा — हम आपको WhatsApp पर सूचित करेंगे।" : "As soon as it's approved, a download button appears on your Account page — we'll notify you on WhatsApp."}</li>
+            </>
+          ) : (
+            <>
+              <li>{isHi ? "आपकी बुकिंग शिवानी जी तक पहुंच गई है।" : "Your booking has reached Shivanii."}</li>
+              <li>{isHi ? "वे 24 घंटे के भीतर आपके WhatsApp नंबर पर संदेश करेंगी।" : "She will message you on WhatsApp within 24 hours."}</li>
+              <li>{isHi ? "पाठन 24–48 घंटे में मिलेगा (लाइव कॉल का समय आपसी सहमति से तय होगा)।" : "Your reading arrives in 24–48 hours (live calls are scheduled together)."}</li>
+            </>
+          )}
         </ol>
-        <Link href="/" className="btn btn-primary">{isHi ? "होम पर वापस जाएं" : "Back to Home"}</Link>
+        {isKundliReport && (
+          <Link href="/account" className="btn btn-primary" style={{ marginBottom: "0.75rem" }}>
+            {isHi ? "मेरा खाता देखें" : "Go to My Account"}
+          </Link>
+        )}
+        <Link href="/" className={isKundliReport ? "btn btn-ghost" : "btn btn-primary"}>{isHi ? "होम पर वापस जाएं" : "Back to Home"}</Link>
       </PatrikaFrame>
     );
   }
@@ -191,16 +223,30 @@ function BookForm() {
 
         {/* Birth details */}
         <Divider />
-        <div className="form-2col">
-          <div className="form-group">
-            <label className="form-label" htmlFor="dob">{t("form.dob")}</label>
-            <input id="dob" type="date" className="form-input" required value={dob} onChange={(e) => setDob(e.target.value)} />
+        {isKundliReport ? (
+          <>
+            <BirthForm embedded onChange={setBirthPlace} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="gender">{isHi ? "लिंग (सही व्याकरण एवं विश्लेषण हेतु)" : "Gender (for correct grammar & analysis in the report)"}</label>
+              <select id="gender" className="form-select" value={gender} onChange={(e) => setGender(e.target.value as "male" | "female" | "")}>
+                <option value="">{isHi ? "चुनें" : "Select"}</option>
+                <option value="male">{isHi ? "पुरुष" : "Male"}</option>
+                <option value="female">{isHi ? "महिला" : "Female"}</option>
+              </select>
+            </div>
+          </>
+        ) : (
+          <div className="form-2col">
+            <div className="form-group">
+              <label className="form-label" htmlFor="dob">{t("form.dob")}</label>
+              <input id="dob" type="date" className="form-input" required value={dob} onChange={(e) => setDob(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="tob">{t("form.tobOptional")}</label>
+              <input id="tob" type="time" className="form-input" value={tob} onChange={(e) => setTob(e.target.value)} />
+            </div>
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="tob">{t("form.tobOptional")}</label>
-            <input id="tob" type="time" className="form-input" value={tob} onChange={(e) => setTob(e.target.value)} />
-          </div>
-        </div>
+        )}
 
         {isLive && (
           <div className="form-group">
@@ -248,6 +294,8 @@ function BookForm() {
               <span style={{ color: "var(--muted)", display: "block", fontSize: "0.78rem" }}>
                 {isLive
                   ? (isHi ? "30 मिनट लाइव — बुकिंग के बाद समय तय होगा" : "30 min live — slot scheduled after booking")
+                  : isKundliReport
+                  ? (isHi ? "भुगतान के कुछ ही मिनटों में तैयार, शिवानी जी की अंतिम स्वीकृति के साथ आपके अकाउंट में" : "Ready within minutes of payment, in your account after Shivanii's final sign-off")
                   : (isHi ? "24–48 घंटे में WhatsApp/ईमेल पर" : "Delivered on WhatsApp/email in 24–48 hrs")}
               </span>
             </span>
@@ -257,7 +305,7 @@ function BookForm() {
           </div>
         )}
 
-        <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: "100%", fontSize: "1.05rem" }}>
+        <button type="submit" className="btn btn-primary" disabled={loading || (isKundliReport && !birthPlace)} style={{ width: "100%", fontSize: "1.05rem" }}>
           {loading ? t("book.paying") : `${t("book.pay")} — ₹${reading?.priceINR.toLocaleString("en-IN") ?? ""}`}
         </button>
 
