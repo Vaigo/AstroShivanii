@@ -21,16 +21,25 @@ const READINGS: Array<{
   price: string;
   key: string;
   mostLoved?: boolean;
+  tag?: { en: string; hi: string };
 }> = [
-  { slug: "ask-one-question",   icon: "question",  price: "₹499",   key: "prashna" },
+  { slug: "ask-one-question",   icon: "question",  price: "₹499",   key: "prashna",
+    tag: { en: "Focused", hi: "केंद्रित" } },
   { slug: "birth-chart",        icon: "scroll",    price: "₹999",   key: "kundli", mostLoved: true },
-  { slug: "marriage-matching",  icon: "rings",     price: "₹1,299", key: "matching" },
-  { slug: "career-money",       icon: "briefcase", price: "₹1,199", key: "career" },
-  { slug: "live-consultation",  icon: "phone",     price: "₹1,999", key: "live" },
-  { slug: "annual-forecast",    icon: "calendar",  price: "₹1,499", key: "varshphal" },
-  { slug: "lal-kitab-remedies", icon: "book",      price: "₹899",   key: "lalkitab" },
-  { slug: "kp-precision",       icon: "target",    price: "₹1,499", key: "kp" },
-  { slug: "bhrigu-nadi-deep",   icon: "leaf",      price: "₹3,999", key: "bhrigu" },
+  { slug: "marriage-matching",  icon: "rings",     price: "₹1,299", key: "matching",
+    tag: { en: "36-Point", hi: "36 गुण" } },
+  { slug: "career-money",       icon: "briefcase", price: "₹1,199", key: "career",
+    tag: { en: "Dasha-Based", hi: "दशा-आधारित" } },
+  { slug: "live-consultation",  icon: "phone",     price: "₹1,999", key: "live",
+    tag: { en: "Live Call", hi: "लाइव संवाद" } },
+  { slug: "annual-forecast",    icon: "calendar",  price: "₹1,499", key: "varshphal",
+    tag: { en: "Full Year", hi: "पूरे वर्ष का" } },
+  { slug: "lal-kitab-remedies", icon: "book",      price: "₹899",   key: "lalkitab",
+    tag: { en: "Remedy-Focused", hi: "उपाय-केंद्रित" } },
+  { slug: "kp-precision",       icon: "target",    price: "₹1,499", key: "kp",
+    tag: { en: "Precise Timing", hi: "सटीक समय" } },
+  { slug: "bhrigu-nadi-deep",   icon: "leaf",      price: "₹3,999", key: "bhrigu",
+    tag: { en: "Most In-Depth", hi: "सबसे गहन" } },
 ];
 
 const FREE_TOOLS: Array<{ slug: string; icon: IconName; key: string }> = [
@@ -275,8 +284,12 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <Reveal>
-            <h2 className="section-heading">{t("services.heading")}</h2>
-            <p className="section-heading-hi devanagari">{t("services.headingHi")}</p>
+            <h2 className="section-heading">
+              <span className="premium-accent">Premium</span> {t("services.heading").replace(/^Premium\s*/, "")}
+            </h2>
+            <p className="section-heading-hi devanagari">
+              <span className="premium-accent">Premium</span> {t("services.headingHi").replace(/^Premium\s*/, "")}
+            </p>
             <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", color: "var(--maroon)", fontWeight: 600, fontSize: "0.92rem", marginTop: "-0.5rem", marginBottom: "2rem" }}>
               {t("services.attract")}
             </p>
@@ -287,12 +300,16 @@ export default function HomePage() {
             {READINGS.map((r, i) => (
               <Reveal key={r.slug} delay={i * 55}>
                 <div className="service-card" style={{ height: "100%" }}>
-                  {r.mostLoved && (
+                  {r.mostLoved ? (
                     <span
                       className="badge"
                       style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 1 }}
                     >
                       {t("pricing.mostLoved")}
+                    </span>
+                  ) : r.tag && (
+                    <span className="service-card-eyebrow">
+                      {isHi ? r.tag.hi : r.tag.en}
                     </span>
                   )}
                   <div className="service-card-icon">
