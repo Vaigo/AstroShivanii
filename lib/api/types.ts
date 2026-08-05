@@ -493,3 +493,369 @@ export interface KpRulingResult {
   note_en: string;
   note_hi: string;
 }
+
+/* ── Lal Kitab (/v1/lalkitab/full) ───────────────────────────────────────── */
+
+export interface LalKitabLagna {
+  sign: string;
+  sign_hi: string;
+  sign_index: number;
+  sidereal: number;
+}
+
+export interface LalKitabPlanetEntry {
+  house: number;
+  sign: string;
+  sign_hi: string;
+  sign_index: number;
+  longitude: number;
+  degree_in_sign: number;
+  dms: string;
+  retrograde: boolean;
+  speed: number;
+  pakka_ghar: number[];
+  in_pakka_ghar: boolean;
+}
+
+export interface LalKitabDebt {
+  name: string;
+  name_hi: string;
+  indicator: string;
+  remedy: string;
+  active: boolean;
+}
+
+export interface LalKitabPrediction {
+  planet: string;
+  house: number;
+  sign: string;
+  in_pakka_ghar: boolean;
+  prediction: string;
+}
+
+export interface LalKitabUpaya {
+  planet: string;
+  house: number | null;
+  reason: string;
+  upayas: string[];
+}
+
+export interface LalKitabPakkaGharEntry {
+  pakka_ghar: number[];
+  placed_in_house: number;
+  in_pakka_ghar: boolean;
+  sign: string;
+}
+
+export interface LalKitabFullResult {
+  lagna: LalKitabLagna;
+  chart: Record<string, LalKitabPlanetEntry>;
+  debts: LalKitabDebt[];
+  predictions: LalKitabPrediction[];
+  upayas: LalKitabUpaya[];
+  pakka_ghar: Record<string, LalKitabPakkaGharEntry>;
+}
+
+/* ── Lucky Colors (/v1/remedies/colors) — no Hindi fields on this endpoint ── */
+
+export interface LuckyColorsResult {
+  lagna: string;
+  lagna_lord: string;
+  nakshatra_lord: string;
+  auspicious_colors: string[];
+  inauspicious_colors: string[];
+  note: string;
+}
+
+/* ── Special Yogas / Kaal Sarpa (/v1/rajyog/special-yogas) ──────────────── */
+
+export interface SpecialYoga {
+  name: string;
+  name_hi: string;
+  type: string;
+  planets: string[];
+  strength: string;
+  effect_en: string;
+  effect_hi: string;
+  /** Only present on "Kaal Sarpa Yoga". */
+  direction?: "Udit Golardha (Rahu→Ketu)" | "Anudit Golardha (Ketu→Rahu)";
+}
+
+export interface SpecialYogasResult {
+  special_yogas: SpecialYoga[];
+  count: number;
+}
+
+/* ── Shared numerology request bodies (/v1/numerology/*) ───────────────── */
+
+export interface DobRequest {
+  dob: string;
+  name?: string;
+  system?: "chaldean" | "pythagorean";
+}
+
+export interface NumerologyRequest {
+  /** Key must be present (may be ""); Personal Year's handler never reads it. */
+  name: string;
+  dob: string;
+  system?: "chaldean" | "pythagorean";
+}
+
+/* ── Favorable Alphabet / Cornerstone (/v1/numerology/first-letter) ─────── */
+
+export interface CornerstoneLetter {
+  letter: string;
+  value: number;
+  meaning_en: string;
+  meaning_hi: string;
+  ruling_planet: string;
+  ruling_planet_hi: string;
+  gemstone: string;
+  gemstone_hi: string;
+  colour: string;
+}
+
+/** No _hi fields on ruling_planet/gemstone — asymmetric with CornerstoneLetter by API design. */
+export interface CapstoneLetter {
+  letter: string;
+  value: number;
+  meaning_en: string;
+  meaning_hi: string;
+  ruling_planet: string;
+  gemstone: string;
+  colour: string;
+}
+
+export interface FirstLetterResult {
+  name: string;
+  first_letter: string;
+  last_letter: string;
+  cornerstone: CornerstoneLetter;
+  capstone: CapstoneLetter;
+  career_resonance: string;
+  recommended_careers: string[];
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+/* ── Personal Year (/v1/numerology/personal-year) ───────────────────────── */
+
+export interface PersonalYearAdjacent {
+  year: number;
+  number: number;
+  theme: string;
+}
+
+export interface PersonalYearMeaning {
+  title: string;
+  hi: string;
+  en: string;
+  strengths: string[];
+  challenges: string[];
+  lucky_color: string;
+  ruling_planet: string;
+}
+
+export interface PersonalYearResult {
+  current_year: number;
+  personal_year: number;
+  theme: string;
+  meaning: PersonalYearMeaning;
+  ruling_planet: string;
+  ruling_planet_hi: string;
+  gemstone: string;
+  gemstone_hi: string;
+  colour: string;
+  colour_hi: string;
+  mantra: string;
+  mantra_devanagari: string;
+  favourable_days: string[];
+  previous_year: PersonalYearAdjacent;
+  next_year: PersonalYearAdjacent;
+  advice_en: string;
+  advice_hi: string;
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+/* ── Karmic Debt (/v1/numerology/karmic-debt) ────────────────────────────── */
+
+export type KarmicDebtPosition = "birth_day" | "bhagyank_pre_reduction" | "name_number";
+
+export interface KarmicDebtFound {
+  position: KarmicDebtPosition;
+  number: number;
+  info: { en: string; hi: string };
+}
+
+export interface KarmicDebtResult {
+  dob: string;
+  name: string | null;
+  karmic_debts_found: KarmicDebtFound[];
+  has_karmic_debt: boolean;
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+/* ── Missing/Repeated Numbers (/v1/numerology/missing-numbers) ──────────── */
+
+export interface MissingLesson {
+  en: string;
+  hi: string;
+  ruling_planet: string;
+  ruling_planet_hi: string;
+  gemstone: string;
+  gemstone_hi: string;
+  colour: string;
+  remedy_en: string;
+  remedy_hi: string;
+}
+
+/** NOT the same shape as MissingLesson — fewer fields, no _hi/colour/remedy. */
+export interface RepeatedStrength {
+  en: string;
+  hi: string;
+  ruling_planet: string;
+  gemstone: string;
+}
+
+export interface MissingNumbersResult {
+  dob: string;
+  missing_numbers: number[];
+  repeated_numbers: number[];
+  missing_lessons: Record<string, MissingLesson>;
+  repeated_strengths: Record<string, RepeatedStrength>;
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+/* ── Weekly Rashifal (/v1/rashifal/weekly) ───────────────────────────────── */
+
+/** rashi is the ENGLISH rashi name (e.g. "Scorpio"), not an index. */
+export interface BySignRequest {
+  rashi: string;
+  date?: string;
+  tz?: number;
+}
+
+export interface WeeklyRashifalDay {
+  date: string;
+  weekday: string;
+  overall_stars: number;
+  domain_stars: { career: number; health: number; finance: number; love: number; spirit: number };
+  overall_hi: string;
+  overall_en: string;
+  lucky_number: number;
+  auspicious_hours: string[];
+  saturn_influence: string | null;
+}
+
+export interface WeeklyRashifalResult {
+  rashi_en: string;
+  rashi_hi: string;
+  week_start: string;
+  week_end: string;
+  week_average_stars: number;
+  best_day: string | null;
+  summary_hi: string;
+  summary_en: string;
+  days: WeeklyRashifalDay[];
+}
+
+/* ── Numerology Compatibility Suite (premium, /v1/site/numerology-suite) ── */
+
+export interface LoveBlock {
+  mulank_love: Record<string, unknown> & { number: number };
+  bhagyank_love: Record<string, unknown> & { number: number };
+  compatible_numbers: number[];
+  incompatible_numbers: number[];
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+export interface CareerBlock {
+  mulank_careers: Record<string, unknown> & { number: number };
+  bhagyank_careers: Record<string, unknown> & { number: number };
+  combo_theme: Record<string, unknown>;
+  strongest_careers: string[] | null;
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+export interface BusinessBlock {
+  best_business_partners: number[];
+  good_business_partners: number[];
+  challenging_partners: number[];
+  compatibility_scores: Record<string, number>;
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+export interface MarriageBlock {
+  mulank_marriage: Record<string, unknown> & { number: number };
+  bhagyank_marriage: Record<string, unknown> & { number: number };
+  soul_urge_marriage: (Record<string, unknown> & { number: number }) | null;
+  compatible_partner_numbers: number[];
+  favourable_years_for_marriage: number[];
+  interpretation_en: string;
+  interpretation_hi: string;
+}
+
+export interface NumerologySuiteResult {
+  dob: string;
+  name: string | null;
+  mulank: number;
+  bhagyank: number;
+  love: LoveBlock;
+  career: CareerBlock;
+  business: BusinessBlock;
+  marriage: MarriageBlock;
+  narrative_en: string;
+  narrative_hi: string;
+}
+
+/* ── Yearly Horoscope / Varshphal (premium, /v1/site/varshphal-yearly) ──── */
+
+export interface VarshphalPredictions {
+  career: string;
+  finance: string;
+  health: string;
+  relationships: string;
+  spiritual: string;
+  year_lord_influence: string;
+}
+
+export interface VarshphalYearlyResult {
+  year: number;
+  predictions: VarshphalPredictions;
+  overall_year_score: number;
+  varshesha: string;
+  varshesha_role: string;
+  muntha_house: number;
+  note: string;
+}
+
+/* ── Varshphal free teaser endpoints (/v1/varshphal/year-lord, /muntha) ──── */
+
+export interface VarshphalYearLordResult {
+  year: number;
+  solar_return_date: string;
+  varshesha: string;
+  varshesha_role: string;
+  varshesha_quality: string;
+  varshesha_sign: string;
+  varshesha_sign_hi: string;
+  varshesha_house: number;
+  note: string;
+}
+
+export interface VarshphalMunthaResult {
+  year: number;
+  muntha_sign: string;
+  muntha_sign_hi: string;
+  muntha_house_from_varsha_lagna: number;
+  muntha_lord: string;
+  muntha_lord_sign: string;
+  effect: string;
+  note: string;
+}

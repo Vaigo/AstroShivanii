@@ -44,11 +44,23 @@ export default function Footer() {
           <ul>
             <li><Link href="/tools/panchang">Panchang</Link></li>
             <li><Link href="/tools/kundli">Kundli / Birth Chart</Link></li>
+            <li><Link href="/tools/baal-kundli">Baal Kundli</Link></li>
             <li><Link href="/tools/matching">Marriage Matching</Link></li>
             <li><Link href="/tools/rashifal">Daily Rashifal</Link></li>
             <li><Link href="/tools/numerology">Numerology</Link></li>
             <li><Link href="/tools/sade-sati">Sade Sati Check</Link></li>
             <li><Link href="/tools/tarot">Tarot Reading</Link></li>
+            <li><Link href="/tools/lal-kitab">Lal Kitab Calculator</Link></li>
+            <li><Link href="/tools/lucky-colors">Lucky Color Calculator</Link></li>
+            <li><Link href="/tools/kaal-sarp-dosha">Kaal Sarp Dosha Checker</Link></li>
+            <li><Link href="/tools/favorable-alphabet">Favorable Alphabet</Link></li>
+            <li><Link href="/tools/personal-year">Personal Year Number</Link></li>
+            <li><Link href="/tools/karmic-debt">Karmic Debt & Missing Numbers</Link></li>
+            <li><Link href="/tools/turant-uttar">तुरंत उत्तर</Link></li>
+            <li><Link href="/tools/time-rectification">Time Rectification</Link></li>
+            <li><Link href="/tools/numerology-suite">Numerology Suite</Link></li>
+            <li><Link href="/tools/varshphal-yearly">Yearly Horoscope</Link></li>
+            <li><Link href="/tools">All Free Tools →</Link></li>
           </ul>
         </nav>
 

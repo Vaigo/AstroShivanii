@@ -1897,6 +1897,25 @@ a:hover { color: var(--saffron); }
 .kaal-box.good { border-left-color: #1a7a3a; background: rgba(26, 122, 58, 0.06); }
 .kaal-box.good strong { color: #1a7a3a; }
 
+@media (max-width: 640px) {
+  .panchang-hero-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Wide data tables (Lal Kitab, Weekly Rashifal) scroll within their own
+   overflow-x:auto wrapper on narrow screens — this hint makes that obvious
+   instead of the table just looking cut off/broken. Desktop never needs it. */
+.scroll-hint { display: none; }
+@media (max-width: 640px) {
+  .scroll-hint {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.3rem;
+    font-style: italic;
+  }
+}
+
 /* ─── Back to top ───────────────────────────────────────────────────────────── */
 /* ─── Floating WhatsApp bubble ─────────────────────────────────────────────── */
 .floating-whatsapp {

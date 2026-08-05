@@ -10,7 +10,7 @@ const { chromium } = require("playwright");
   });
   page.on("pageerror", (e) => msgs.push(`[pageerror] ${e.message.slice(0, 500)}`));
 
-  const pages = ["/", "/tools/kundli", "/tools/matching", "/tools/sade-sati", "/tools/rashifal", "/tools/tarot", "/tools/numerology", "/readings/birth-chart", "/book", "/faq", "/guides/what-is-kundli", "/about", "/contact"];
+  const pages = ["/", "/tools/kundli", "/tools/matching", "/tools/sade-sati", "/tools/rashifal", "/tools/tarot", "/tools/numerology", "/tools/lal-kitab", "/tools/lucky-colors", "/tools/kaal-sarp-dosha", "/tools/favorable-alphabet", "/tools/personal-year", "/tools/karmic-debt", "/readings/birth-chart", "/book", "/faq", "/guides/what-is-kundli", "/about", "/contact"];
   for (const p of pages) {
     msgs.length = 0;
     await page.goto("http://localhost:3001" + p, { waitUntil: "networkidle" });

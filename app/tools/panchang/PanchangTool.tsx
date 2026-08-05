@@ -5,15 +5,24 @@ import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import ResultCTA from "@/components/ResultCTA";
 import PlaceSearch, { Place } from "@/components/PlaceSearch";
-import { utcOffsetHoursAt } from "@/lib/timezone";
-import { choghadiya, horas, isPanchak, isBhadra, TimeSlot } from "@/lib/panchang-calc";
+import { utcOffsetHoursAt, nowMinutesInZone, todayInZone } from "@/lib/timezone";
+import { choghadiya, horas, isPanchak, isBhadra, toHHMM, TimeSlot } from "@/lib/panchang-calc";
+import DayNightDonut from "@/components/panchang/DayNightDonut";
+import CurrentStatusBanner from "@/components/panchang/CurrentStatusBanner";
+import MoonSignPanel from "@/components/panchang/MoonSignPanel";
+import HeavenlyPulse from "@/components/panchang/HeavenlyPulse";
+import ChoghadiyaGrid from "@/components/panchang/ChoghadiyaGrid";
 import { fetchPanchang, fetchRahuKaal, fetchMuhurta, fetchFestivals } from "@/lib/api/endpoints";
 import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo, PanchangDayInfo } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 
-function today(): string {
-  return new Date().toISOString().split("T")[0];
+/** Today's date AS OBSERVED in `tzName` — never `toISOString()`'s UTC date,
+ *  which silently returns YESTERDAY for any IST-side viewer for the ~5.5
+ *  hours between 18:30 and 24:00 UTC (00:00–05:30 IST). Defaults to
+ *  DEFAULT_PLACE's zone for call sites before a place has been chosen. */
+function today(tzName: string = DEFAULT_PLACE.tzName): string {
+  return todayInZone(tzName, new Date());
 }
 
 function toMins(hhmm: string): number {
@@ -24,11 +33,15 @@ function toMins(hhmm: string): number {
 /** Sunrise→sunset drawn as one band: red = the three kaal windows to avoid,
  *  green = Abhijit muhurta, maroon line = "now" (when viewing today).
  *  Answers "when is today safe?" as a picture instead of four boxes. */
-function DayStrip({ sunrise, sunset, kaal, abhijit, isToday }: {
+function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace }: {
   sunrise: string; sunset: string;
   kaal: RahuKaalResult | null;
   abhijit: MuhurtaSlot | null;
   isToday: boolean;
+  /** Minutes-since-midnight IN THE QUERIED PLACE'S timezone — NOT the
+   *  browser's own clock, which would misplace the "now" marker for anyone
+   *  checking a city in a different timezone than their own device. */
+  nowMinInPlace: number;
 }) {
   const t0 = toMins(sunrise), t1 = toMins(sunset);
   const span = t1 - t0;
@@ -45,16 +58,33 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday }: {
   }
   if (abhijit) windows.push({ from: abhijit.start, to: abhijit.end, label: "अभिजीत", cls: "shubh" });
 
-  const now = new Date();
-  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const nowMins = nowMinInPlace;
   const showNow = isToday && nowMins > t0 && nowMins < t1;
+
+  // Labels must be hidden by actual PIXEL width, not a fixed percentage — a
+  // window at 10% of a ~700px desktop strip has room for a label, but 10%
+  // of a ~330px mobile strip (~33px) doesn't fit even "गुलिक" without
+  // butting up against its neighbor, reading as cramped/overlapping text.
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [stripWidth, setStripWidth] = useState(0);
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el) return;
+    const update = () => setStripWidth(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const MIN_LABEL_PX = 42;
 
   return (
     <div className="day-strip-wrap">
-      <div className="day-strip" style={{ marginTop: showNow ? "1.3rem" : 0 }}>
+      <div className="day-strip" ref={stripRef} style={{ marginTop: showNow ? "1.3rem" : 0 }}>
         {windows.map((w) => {
           const left = pct(w.from);
           const width = Math.max(pct(w.to) - left, 1.5);
+          const widthPx = (width / 100) * stripWidth;
           return (
             <div
               key={`${w.label}-${w.from}`}
@@ -62,7 +92,7 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday }: {
               style={{ left: `${left}%`, width: `${width}%` }}
               title={`${w.label}: ${w.from}–${w.to}`}
             >
-              {width > 9 && w.label}
+              {widthPx > MIN_LABEL_PX && w.label}
             </div>
           );
         })}
@@ -287,9 +317,20 @@ export default function PanchangTool() {
   const [abhijit, setAbhijit] = useState<MuhurtaSlot | null>(null);
   const [festivals, setFestivals] = useState<FestivalItem[]>([]);
 
+  // Single ticking clock shared by the donut, status banner and choghadiya
+  // grid — so all three always agree on "now" and none of them drift
+  // independently. 30s is coarse enough to be cheap, fine enough that a
+  // minute-granularity countdown never looks stale by more than half a minute.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  const nowMinInPlace = place ? nowMinutesInZone(place.tzName, now) : 0;
+  const placeIsToday = place && panchang ? panchang.date === todayInZone(place.tzName, now) : false;
+
   // Monthly calendar view — separate from the single-day view above.
   const [view, setView] = useState<"day" | "month">("day");
-  const now = new Date();
   const [monthCursor, setMonthCursor] = useState<{ year: number; month: number }>({ year: now.getFullYear(), month: now.getMonth() });
   const [monthFestivals, setMonthFestivals] = useState<FestivalItem[]>([]);
   const [monthDayInfos, setMonthDayInfos] = useState<Map<string, PanchangDayInfo>>(new Map());
@@ -464,7 +505,7 @@ export default function PanchangTool() {
               onPrev={handlePrevMonth}
               onNext={handleNextMonth}
               onPickDay={handlePickDay}
-              isToday={(iso) => iso === today()}
+              isToday={(iso) => iso === today(place?.tzName)}
             />
           )}
         </PatrikaFrame>
@@ -492,6 +533,60 @@ export default function PanchangTool() {
             लाहिरी अयनांश · वास्तविक खगोलीय गणना
           </p>
 
+          {/* ── Heavenly Pulse — quick-glance strip, additive to the detailed grid below ── */}
+          <div style={{ marginBottom: "1rem" }}>
+            <HeavenlyPulse
+              sunrise={panchang.sun_rise}
+              sunset={panchang.sun_set}
+              tithi={isHi ? (panchang.tithi.name_hi ?? panchang.tithi.name) : panchang.tithi.name}
+              nakshatra={isHi ? panchang.nakshatra.name_hi : panchang.nakshatra.name}
+              rahuKaal={kaal ? `${kaal.rahu_kaal.start}–${kaal.rahu_kaal.end}` : "—"}
+              isHi={isHi}
+            />
+          </div>
+
+          {/* ── Donut + live status (left) · Moon sign (right) ── */}
+          {chog && (
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1rem", marginBottom: "1.25rem" }} className="panchang-hero-grid">
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <DayNightDonut
+                  sunrise={panchang.sun_rise}
+                  sunset={panchang.sun_set}
+                  kaal={kaal}
+                  abhijit={abhijit}
+                  nowMinInPlace={nowMinInPlace}
+                  nowLabel={toHHMM(nowMinInPlace)}
+                  placeLabel={shownPlace}
+                  showNowMarker={placeIsToday}
+                  isHi={isHi}
+                />
+                {placeIsToday ? (
+                  <CurrentStatusBanner
+                    day={chog.day}
+                    night={chog.night}
+                    sunrise={panchang.sun_rise}
+                    nowMinInPlace={nowMinInPlace}
+                    isHi={isHi}
+                  />
+                ) : (
+                  <div className="result-box" style={{ textAlign: "center", margin: 0 }}>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--muted)", margin: 0 }}>
+                      {isHi
+                        ? "यह किसी अन्य तिथि का पंचांग है — \"अभी सक्रिय\" स्थिति केवल आज के लिए दिखाई जाती है।"
+                        : "This is another date's panchang — \"Currently Active\" status only shows for today."}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <MoonSignPanel
+                nakshatraIndex={panchang.nakshatra.index}
+                pada={panchang.nakshatra.pada}
+                moonPhase={panchang.moon_phase}
+                isHi={isHi}
+              />
+            </div>
+          )}
+
           <div className="panchang-grid">
             {items.map((it) => (
               <div key={it.label} className="result-box" style={{ margin: 0 }}>
@@ -512,7 +607,8 @@ export default function PanchangTool() {
             sunset={panchang.sun_set}
             kaal={kaal}
             abhijit={abhijit}
-            isToday={panchang.date === today()}
+            isToday={placeIsToday}
+            nowMinInPlace={nowMinInPlace}
           />
 
           {abhijit && (
@@ -557,30 +653,21 @@ export default function PanchangTool() {
             </div>
           )}
 
-          {/* चोघड़िया */}
+          {/* चोघड़िया — day/night toggle, active period highlighted when viewing today */}
           {chog && (
             <div style={{ marginTop: "1.25rem" }}>
-              <h3 style={{ fontSize: "1.05rem", color: "var(--maroon-deep)", marginBottom: "0.5rem" }}>
-                चोघड़िया — दिन <span style={{ fontSize: "0.75rem", color: "var(--muted)", fontWeight: 400 }}>({panchang.sun_rise} से {panchang.sun_set})</span>
+              <h3 style={{ fontSize: "1.05rem", color: "var(--maroon-deep)", marginBottom: "0.5rem", textAlign: "center" }}>
+                चोघड़िया / Choghadiya
               </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "0.45rem" }}>
-                {chog.day.map((s, i) => (
-                  <div key={`d${i}`} style={slotStyle(s.quality)}>
-                    <strong>{s.name}</strong><br />{s.start}–{s.end}
-                  </div>
-                ))}
-              </div>
-              <h3 style={{ fontSize: "1.05rem", color: "var(--maroon-deep)", margin: "0.9rem 0 0.5rem" }}>
-                चोघड़िया — रात्रि <span style={{ fontSize: "0.75rem", color: "var(--muted)", fontWeight: 400 }}>({panchang.sun_set} से अगले सूर्योदय तक, लगभग)</span>
-              </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "0.45rem" }}>
-                {chog.night.map((s, i) => (
-                  <div key={`n${i}`} style={slotStyle(s.quality)}>
-                    <strong>{s.name}</strong><br />{s.start}–{s.end}
-                  </div>
-                ))}
-              </div>
-              <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem" }}>
+              <ChoghadiyaGrid
+                day={chog.day}
+                night={chog.night}
+                sunrise={panchang.sun_rise}
+                sunset={panchang.sun_set}
+                nowMinInPlace={placeIsToday ? nowMinInPlace : null}
+                isHi={isHi}
+              />
+              <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.5rem" }}>
                 हरा = शुभ (अमृत, शुभ, लाभ) · पीला = सामान्य (चल — यात्रा हेतु ठीक) · लाल = टालें (उद्वेग, काल, रोग)
               </p>
             </div>

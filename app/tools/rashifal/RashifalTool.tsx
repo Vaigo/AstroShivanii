@@ -5,8 +5,8 @@ import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
-import { fetchRashifal } from "@/lib/api/endpoints";
-import type { RashiPrediction } from "@/lib/api/types";
+import { fetchRashifal, fetchWeeklyRashifal } from "@/lib/api/endpoints";
+import type { RashiPrediction, WeeklyRashifalResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 
@@ -42,19 +42,22 @@ export default function RashifalTool() {
   const { t, lang } = useI18n();
   const isHi = lang === "hi";
   const [selectedRashi, setSelectedRashi] = useState("Aries");
+  const [view, setView] = useState<"daily" | "weekly">("daily");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<RashiPrediction | null>(null);
+  const [weeklyResult, setWeeklyResult] = useState<WeeklyRashifalResult | null>(null);
   const [forDate, setForDate] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [result]);
+    if (result || weeklyResult) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [result, weeklyResult]);
 
   // Back button clears the result (returning to the rashi picker) instead of leaving the page.
-  useBackStep(!!result, "rashifalResult", () => {
+  useBackStep(!!result || !!weeklyResult, "rashifalResult", () => {
     setResult(null);
+    setWeeklyResult(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -63,14 +66,20 @@ export default function RashifalTool() {
     setLoading(true);
     setError("");
     setResult(null);
+    setWeeklyResult(null);
     try {
       const today = new Date().toISOString().split("T")[0];
-      // The API returns all 12 rashis for the date; pick the selected one.
-      const data = await fetchRashifal(today);
-      const mine = data.rashifal.find((r) => r.rashi_en === selectedRashi) ?? null;
-      if (!mine) throw new ApiError(500, "NOT_FOUND", "Rashi not found in response");
-      setForDate(data.date);
-      setResult(mine);
+      if (view === "weekly") {
+        const data = await fetchWeeklyRashifal(selectedRashi, today);
+        setWeeklyResult(data);
+      } else {
+        // The API returns all 12 rashis for the date; pick the selected one.
+        const data = await fetchRashifal(today);
+        const mine = data.rashifal.find((r) => r.rashi_en === selectedRashi) ?? null;
+        if (!mine) throw new ApiError(500, "NOT_FOUND", "Rashi not found in response");
+        setForDate(data.date);
+        setResult(mine);
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("form.error"));
     } finally {
@@ -102,6 +111,23 @@ export default function RashifalTool() {
           )}
         </div>
 
+        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+          <button
+            type="button"
+            className={`btn btn-sm ${view === "daily" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setView("daily")}
+          >
+            {isHi ? "आज" : "Today"}
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${view === "weekly" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setView("weekly")}
+          >
+            {isHi ? "इस सप्ताह" : "This Week"}
+          </button>
+        </div>
+
         <PatrikaFrame style={{ marginBottom: "1.5rem" }}>
           <form onSubmit={handleCalculate}>
             <p className="form-label" style={{ marginBottom: "0.75rem" }}>{t("form.rashi")}</p>
@@ -124,7 +150,11 @@ export default function RashifalTool() {
               ))}
             </div>
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: "100%" }}>
-              {loading ? t("form.calculating") : isHi ? "आज का राशिफल देखें" : "Get Today's Rashifal"}
+              {loading
+                ? t("form.calculating")
+                : view === "weekly"
+                  ? (isHi ? "इस सप्ताह का राशिफल देखें" : "Get This Week's Rashifal")
+                  : (isHi ? "आज का राशिफल देखें" : "Get Today's Rashifal")}
             </button>
           </form>
         </PatrikaFrame>
@@ -227,6 +257,78 @@ export default function RashifalTool() {
                 hi: "राशिफल आपकी राशि के सभी लोगों के लिए है। आपकी अपनी कुंडली — दशा, गोचर, भाव — आपकी कहानी कहती है।",
               }}
               waText={`Namaste Shivanii ji! I read today's ${result.rashi_en} rashifal on your website. I would like a personal reading of my own chart.`}
+              reading={{ href: "/readings/birth-chart", labelEn: "Book Birth Chart Reading ₹999", labelHi: "कुंडली विश्लेषण बुक करें ₹999" }}
+            />
+          </PatrikaFrame>
+          </div>
+        )}
+
+        {weeklyResult && !loading && (
+          <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
+          <PatrikaFrame>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div>
+                <h2 style={{ fontSize: "1.4rem", marginBottom: "0.2rem" }}>
+                  {weeklyResult.rashi_en}{" "}
+                  <span className="devanagari" style={{ color: "var(--muted)", fontSize: "0.85em" }}>
+                    {weeklyResult.rashi_hi}
+                  </span>
+                </h2>
+                <span style={{ color: "var(--muted)", fontSize: "0.82rem" }}>
+                  {weeklyResult.week_start} → {weeklyResult.week_end}
+                </span>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <StarRating rating={weeklyResult.week_average_stars} />
+                {weeklyResult.best_day && (
+                  <span style={{ fontSize: "0.78rem", color: "var(--saffron)", fontWeight: 700, display: "block" }}>
+                    {isHi ? "सर्वोत्तम दिन" : "Best Day"}: {weeklyResult.best_day}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <Divider />
+
+            <div className="result-box" style={{ marginTop: "0.75rem" }}>
+              <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
+                {isHi ? weeklyResult.summary_hi : weeklyResult.summary_en}
+              </p>
+            </div>
+
+            <div style={{ overflowX: "auto", marginTop: "1rem" }}>
+              <table style={{ width: "100%", fontSize: "0.82rem", borderCollapse: "collapse", minWidth: "560px" }}>
+                <thead>
+                  <tr style={{ textAlign: "left", borderBottom: "1px solid rgba(201,154,58,0.3)" }}>
+                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "दिन" : "Day"}</th>
+                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "समग्र" : "Overall"}</th>
+                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "सारांश" : "Summary"}</th>
+                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "शुभ अंक" : "Lucky #"}</th>
+                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "शुभ मुहूर्त" : "Auspicious Hours"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {weeklyResult.days.map((d) => (
+                    <tr key={d.date} style={{ borderBottom: "1px solid rgba(201,154,58,0.12)" }}>
+                      <td style={{ padding: "0.4rem 0.5rem", fontWeight: 600 }}>{d.weekday}<br /><span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{d.date}</span></td>
+                      <td style={{ padding: "0.4rem 0.5rem" }}><StarRating rating={d.overall_stars} /></td>
+                      <td style={{ padding: "0.4rem 0.5rem", color: "var(--ink-light)" }} className={isHi ? "devanagari" : undefined}>{isHi ? d.overall_hi : d.overall_en}</td>
+                      <td style={{ padding: "0.4rem 0.5rem" }}>{d.lucky_number}</td>
+                      <td style={{ padding: "0.4rem 0.5rem", color: "var(--muted)" }}>{d.auspicious_hours.join(" · ")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="scroll-hint">{isHi ? "← अधिक देखने के लिए स्वाइप करें →" : "← Swipe to see more →"}</p>
+
+            <Divider />
+            <ResultCTA
+              hook={{
+                en: "A weekly rashifal is for everyone born under your moon sign. Your own chart — dasha, transits, houses — tells YOUR story.",
+                hi: "साप्ताहिक राशिफल आपकी राशि के सभी लोगों के लिए है। आपकी अपनी कुंडली आपकी कहानी कहती है।",
+              }}
+              waText={`Namaste Shivanii ji! I read this week's ${weeklyResult.rashi_en} rashifal on your website. I would like a personal reading of my own chart.`}
               reading={{ href: "/readings/birth-chart", labelEn: "Book Birth Chart Reading ₹999", labelHi: "कुंडली विश्लेषण बुक करें ₹999" }}
             />
           </PatrikaFrame>

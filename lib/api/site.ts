@@ -6,7 +6,7 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "as-site-token";
 const USER_KEY = "as-site-user";
 
-import type { BirthRequest, TurantUttarAIResult, EventScoreResult, RectEvent } from "./types";
+import type { BirthRequest, TurantUttarAIResult, EventScoreResult, RectEvent, NumerologySuiteResult, VarshphalYearlyResult } from "./types";
 
 export interface SiteUser { id: number; email: string; name: string; created_at?: number; }
 
@@ -112,7 +112,7 @@ export function fetchTurantUttarAI(
 export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
 
 export function createPaymentOrder(body: {
-  kind: "booking" | "turant-uttar" | "time-rectification"; slug: string;
+  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly"; slug: string;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
   // birth place — required for the birth-chart/kundli-report product so the
   // auto-generated PDF uses an accurate chart; harmless to omit elsewhere.
@@ -138,6 +138,29 @@ export function fetchRectificationResult(body: {
   name?: string; ref_code?: string; razorpay_order_id: string;
 }): Promise<EventScoreResult> {
   return siteFetch<EventScoreResult>("/v1/site/rectification", {
+    body, headers: { "X-Site-Token": getSiteToken() ?? "" },
+  });
+}
+
+/** Numerology Compatibility Suite's compute step — hard-gated server-side on
+ *  a verified razorpay_order_id (no self-attest fallback), same pattern as
+ *  Time Rectification. */
+export function fetchNumerologySuiteResult(body: {
+  dob: string; name?: string; system?: "chaldean" | "pythagorean";
+  ref_code?: string; razorpay_order_id: string;
+}): Promise<NumerologySuiteResult> {
+  return siteFetch<NumerologySuiteResult>("/v1/site/numerology-suite", {
+    body, headers: { "X-Site-Token": getSiteToken() ?? "" },
+  });
+}
+
+/** Yearly Horoscope (Varshphal)'s compute step — hard-gated server-side on a
+ *  verified razorpay_order_id, same pattern as Time Rectification. */
+export function fetchVarshphalYearlyResult(body: {
+  dob: string; tob?: string; lat: number; lon: number; tz: number;
+  year?: number; ref_code?: string; razorpay_order_id: string;
+}): Promise<VarshphalYearlyResult> {
+  return siteFetch<VarshphalYearlyResult>("/v1/site/varshphal-yearly", {
     body, headers: { "X-Site-Token": getSiteToken() ?? "" },
   });
 }

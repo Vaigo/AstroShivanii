@@ -44,3 +44,26 @@ export function utcOffsetHoursAt(tzName: string, dateStr: string, timeStr?: stri
 export function utcOffsetForPlace(lat: number, lon: number, dateStr: string, timeStr?: string): number {
   return utcOffsetHoursAt(timezoneNameFor(lat, lon), dateStr, timeStr);
 }
+
+/** Minutes-since-midnight of `at`, AS OBSERVED in `tzName` — not the
+ *  browser's own timezone. Powers live "now" markers/countdowns that must
+ *  reflect the queried place's clock, not the visitor's device. */
+export function nowMinutesInZone(tzName: string, at: Date): number {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone: tzName, hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  });
+  const parts: Record<string, string> = {};
+  for (const p of dtf.formatToParts(at)) if (p.type !== "literal") parts[p.type] = p.value;
+  return Number(parts.hour) * 60 + Number(parts.minute);
+}
+
+/** "YYYY-MM-DD" of `at` AS OBSERVED in `tzName` — for deciding whether the
+ *  panchang currently on screen is "today" IN THAT PLACE, not the browser's. */
+export function todayInZone(tzName: string, at: Date): string {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone: tzName, year: "numeric", month: "2-digit", day: "2-digit",
+  });
+  const parts: Record<string, string> = {};
+  for (const p of dtf.formatToParts(at)) if (p.type !== "literal") parts[p.type] = p.value;
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}

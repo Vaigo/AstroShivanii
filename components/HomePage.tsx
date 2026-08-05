@@ -43,13 +43,20 @@ const READINGS: Array<{
 ];
 
 const FREE_TOOLS: Array<{ slug: string; icon: IconName; key: string }> = [
-  { slug: "panchang",     icon: "sun",     key: "panchang" },
-  { slug: "kundli",       icon: "scroll",  key: "kundli" },
-  { slug: "matching",     icon: "rings",   key: "matching" },
-  { slug: "rashifal",     icon: "star",    key: "rashifal" },
-  { slug: "sade-sati",    icon: "planet",  key: "sadeSati" },
-  { slug: "numerology",   icon: "hash",    key: "numerology" },
-  { slug: "tarot",        icon: "cards",   key: "tarot" },
+  { slug: "panchang",            icon: "sun",      key: "panchang" },
+  { slug: "kundli",              icon: "scroll",   key: "kundli" },
+  { slug: "baal-kundli",         icon: "leaf",     key: "baalKundli" },
+  { slug: "matching",            icon: "rings",    key: "matching" },
+  { slug: "rashifal",            icon: "star",     key: "rashifal" },
+  { slug: "sade-sati",           icon: "planet",   key: "sadeSati" },
+  { slug: "numerology",          icon: "hash",     key: "numerology" },
+  { slug: "tarot",               icon: "cards",    key: "tarot" },
+  { slug: "lal-kitab",           icon: "book",     key: "lalKitab" },
+  { slug: "lucky-colors",        icon: "droplet",  key: "luckyColors" },
+  { slug: "kaal-sarp-dosha",     icon: "shield",   key: "kaalSarpDosha" },
+  { slug: "favorable-alphabet",  icon: "type",     key: "favorableAlphabet" },
+  { slug: "personal-year",       icon: "calendar", key: "personalYear" },
+  { slug: "karmic-debt",         icon: "eye",      key: "karmicDebt" },
 ];
 
 export default function HomePage() {
@@ -274,6 +281,54 @@ export default function HomePage() {
                 </Link>
               </div>
             </PatrikaFrame>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── अंक ज्योतिष सूट + वार्षिक भविष्यफल — instant-compute paid tools ── */}
+      <section className="section" style={{ paddingTop: "0", paddingBottom: "3rem" }}>
+        <div className="container" style={{ maxWidth: "900px" }}>
+          <Reveal>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
+              <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                  <div className="service-card-icon"><Icon name="hash" size={24} /></div>
+                  <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                    ₹299 · अंक ज्योतिष सूट
+                  </span>
+                  <h2 style={{ fontSize: "1.15rem", margin: 0 }}>
+                    {isHi ? "प्रेम, करियर, व्यापार, विवाह" : "Love, Career, Business, Marriage"}
+                  </h2>
+                  <p className={isHi ? "devanagari" : undefined} style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                    {isHi
+                      ? "आपके मूलांक व भाग्यांक से चार-आयामी अंक ज्योतिष रिपोर्ट, एक साथ"
+                      : "A 4-in-1 numerology report from your Mulank and Bhagyank, instantly"}
+                  </p>
+                  <Link href="/tools/numerology-suite" className="btn btn-primary" style={{ width: "100%" }}>
+                    {isHi ? "शुरू करें →" : "Get Started →"}
+                  </Link>
+                </div>
+              </PatrikaFrame>
+              <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                  <div className="service-card-icon"><Icon name="calendar" size={24} /></div>
+                  <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                    ₹1,499 · वार्षिक भविष्यफल
+                  </span>
+                  <h2 style={{ fontSize: "1.15rem", margin: 0 }}>
+                    {isHi ? "आपका आने वाला वर्ष कैसा रहेगा?" : "What does your coming year hold?"}
+                  </h2>
+                  <p className={isHi ? "devanagari" : undefined} style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                    {isHi
+                      ? "वर्षफल (सौर वापसी कुंडली) से करियर, धन, स्वास्थ्य व रिश्तों का पूर्ण विश्लेषण"
+                      : "A full Varshphal (solar-return) forecast — career, finance, health & relationships"}
+                  </p>
+                  <Link href="/tools/varshphal-yearly" className="btn btn-primary" style={{ width: "100%" }}>
+                    {isHi ? "शुरू करें →" : "Get Started →"}
+                  </Link>
+                </div>
+              </PatrikaFrame>
+            </div>
           </Reveal>
         </div>
       </section>

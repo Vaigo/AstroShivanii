@@ -13,11 +13,11 @@ export interface TimeSlot {
 }
 
 /* ── helpers ── */
-function toMin(hhmm: string): number {
+export function toMin(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;
 }
-function toHHMM(min: number): string {
+export function toHHMM(min: number): string {
   const m = ((Math.round(min) % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
@@ -107,6 +107,91 @@ export function horas(
       quality: HORA_QUALITY[lord],
     };
   });
+}
+
+/* ── Moon sign from nakshatra ─────────────────────────────────────────────── */
+
+/** Vedic moon-sign (rashi) index, 0=Aries…11=Pisces, from nakshatra + pada.
+ *  9 padas exactly span one rashi (27 nakshatras × 4 padas = 108 = 12 × 9) —
+ *  Panchang's /full response gives nakshatra+pada but no rashi field. */
+export function rashiIndexFromNakshatra(nakshatraIndex: number, pada: number): number {
+  return Math.floor((nakshatraIndex * 4 + (pada - 1)) / 9) % 12;
+}
+
+/* ── Live Choghadiya status (active slot + countdown to next) ───────────── */
+
+export interface ActiveChogSlot {
+  slot: TimeSlot;
+  period: "day" | "night";
+  index: number;
+}
+
+/** One-line meaning per classical Choghadiya name, for the redesigned grid. */
+export const CHOG_MEANING: Record<string, { en: string; hi: string }> = {
+  "अमृत": { en: "The best period — ideal for any auspicious activity.", hi: "सर्वश्रेष्ठ — सभी शुभ कार्यों हेतु उत्तम।" },
+  "शुभ": { en: "Good for auspicious and pious activities.", hi: "शुभ व मंगलकारी कार्यों के लिए अच्छा।" },
+  "लाभ": { en: "Excellent for profit, business & new ventures.", hi: "लाभ व व्यापार हेतु उत्तम।" },
+  "चल": { en: "Fine for travel and ongoing activities.", hi: "यात्रा व गतिमान कार्यों हेतु ठीक।" },
+  "उद्वेग": { en: "Anxious energy — avoid starting anything new.", hi: "तनाव व चिंता — नए कार्य टालें।" },
+  "काल": { en: "Inauspicious — postpone important tasks.", hi: "अशुभ — महत्वपूर्ण कार्य टालें।" },
+  "रोग": { en: "Illness-linked — be cautious with health matters.", hi: "रोग-कारक — स्वास्थ्य संबंधी कार्यों में सावधानी।" },
+};
+
+/** Minutes elapsed since `sunriseMin`, treating `hhmm` as belonging to the
+ *  same sunrise→next-sunrise cycle (night slots wrap past midnight, so a
+ *  raw clock time earlier than sunrise means "the next calendar day"). */
+function slotElapsed(hhmm: string, sunriseMin: number): number {
+  const raw = toMin(hhmm);
+  return raw < sunriseMin ? raw + 1440 - sunriseMin : raw - sunriseMin;
+}
+
+function allSlots(day: TimeSlot[], night: TimeSlot[]): ActiveChogSlot[] {
+  return [
+    ...day.map((slot, index) => ({ slot, period: "day" as const, index })),
+    ...night.map((slot, index) => ({ slot, period: "night" as const, index })),
+  ];
+}
+
+/** Which of the 16 choghadiya slots (8 day + 8 night) contains `nowMinInPlace`
+ *  (minutes-since-midnight IN THE PLACE'S LOCAL TIME, from `nowMinutesInZone`
+ *  — never the browser's own zone). Returns null when `nowMinInPlace` is
+ *  before today's sunrise: those hours belong to LAST night's choghadiya
+ *  (yesterday's weekday sequence), which isn't loaded — showing today's
+ *  night[] there would silently use the wrong weekday's sequence. */
+export function getActiveChoghadiyaSlot(
+  day: TimeSlot[], night: TimeSlot[], sunrise: string, nowMinInPlace: number
+): ActiveChogSlot | null {
+  const sunriseMin = toMin(sunrise);
+  if (nowMinInPlace < sunriseMin) return null;
+  const nowElapsed = nowMinInPlace - sunriseMin;
+  for (const entry of allSlots(day, night)) {
+    const startE = slotElapsed(entry.slot.start, sunriseMin);
+    const endE = slotElapsed(entry.slot.end, sunriseMin) || 1440; // last night slot's end wraps exactly to sunrise (raw=sunriseMin → 0) — that IS the 1440 mark
+    if (nowElapsed >= startE && nowElapsed < endE) return entry;
+  }
+  return null;
+}
+
+/** Time remaining until the next choghadiya slot boundary. Before today's
+ *  sunrise, the honest answer is simply "today's day sequence starts at
+ *  sunrise" — no missing data required. Returns null only in the brief tail
+ *  of the very last night slot, where "next" would be tomorrow's day[0]
+ *  (a different date's fetch, not available here). */
+export function minutesUntilNextChogSlot(
+  day: TimeSlot[], night: TimeSlot[], sunrise: string, nowMinInPlace: number
+): { next: ActiveChogSlot; minutes: number } | null {
+  const sunriseMin = toMin(sunrise);
+  if (nowMinInPlace < sunriseMin) {
+    return { next: { slot: day[0], period: "day", index: 0 }, minutes: sunriseMin - nowMinInPlace };
+  }
+  const nowElapsed = nowMinInPlace - sunriseMin;
+  let best: { entry: ActiveChogSlot; startE: number } | null = null;
+  for (const entry of allSlots(day, night)) {
+    const startE = slotElapsed(entry.slot.start, sunriseMin);
+    if (startE > nowElapsed && (!best || startE < best.startE)) best = { entry, startE };
+  }
+  if (!best) return null;
+  return { next: best.entry, minutes: Math.round(best.startE - nowElapsed) };
 }
 
 /* ── Panchak & Bhadra ────────────────────────────────────────────────────── */

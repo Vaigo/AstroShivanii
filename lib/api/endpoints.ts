@@ -18,6 +18,18 @@ import type {
   AscendantOptionsRequest,
   AscendantOptionsResult,
   KpRulingResult,
+  LalKitabFullResult,
+  LuckyColorsResult,
+  SpecialYogasResult,
+  DobRequest,
+  NumerologyRequest,
+  FirstLetterResult,
+  PersonalYearResult,
+  KarmicDebtResult,
+  MissingNumbersResult,
+  WeeklyRashifalResult,
+  VarshphalYearLordResult,
+  VarshphalMunthaResult,
 } from "./types";
 
 export function fetchKundli(birth: BirthRequest): Promise<KundliFullResult> {
@@ -102,3 +114,48 @@ export function fetchFestivals(
 
 // fetchTurantUttarAI moved to lib/api/site.ts — it's AstroShivanii-only and
 // must never travel through the GrahaAPI-keyed client.
+
+export function fetchLalKitab(birth: BirthRequest): Promise<LalKitabFullResult> {
+  return post("/v1/lalkitab/full", birth);
+}
+
+export function fetchLuckyColors(birth: BirthRequest): Promise<LuckyColorsResult> {
+  return post("/v1/remedies/colors", birth);
+}
+
+export function fetchSpecialYogas(birth: BirthRequest): Promise<SpecialYogasResult> {
+  return post("/v1/rajyog/special-yogas", birth);
+}
+
+export function fetchFirstLetter(req: DobRequest): Promise<FirstLetterResult> {
+  return post("/v1/numerology/first-letter", req);
+}
+
+export function fetchPersonalYear(req: NumerologyRequest): Promise<PersonalYearResult> {
+  return post("/v1/numerology/personal-year", req);
+}
+
+export function fetchKarmicDebt(req: DobRequest): Promise<KarmicDebtResult> {
+  return post("/v1/numerology/karmic-debt", req);
+}
+
+export function fetchMissingNumbers(req: DobRequest): Promise<MissingNumbersResult> {
+  return post("/v1/numerology/missing-numbers", req);
+}
+
+/** BySignRequest.rashi is the English name (e.g. "Scorpio") — the exact
+ *  string RashifalTool already keeps in its selectedRashi state. */
+export function fetchWeeklyRashifal(rashi: string, date?: string, tz = 5.5): Promise<WeeklyRashifalResult> {
+  return post("/v1/rashifal/weekly", { rashi, date, tz });
+}
+
+/** Free, real (non-fabricated) teasers for the paid Yearly Horoscope —
+ *  cheap single-fact lookups, safe to expose pre-payment like every other
+ *  free tool on the site. */
+export function fetchVarshphalYearLord(birth: BirthRequest, year?: number): Promise<VarshphalYearLordResult> {
+  return post(`/v1/varshphal/year-lord${year ? `?year=${year}` : ""}`, birth);
+}
+
+export function fetchVarshphalMuntha(birth: BirthRequest, year?: number): Promise<VarshphalMunthaResult> {
+  return post(`/v1/varshphal/muntha${year ? `?year=${year}` : ""}`, birth);
+}

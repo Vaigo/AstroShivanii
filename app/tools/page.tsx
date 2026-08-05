@@ -22,6 +22,12 @@ const TOOLS: Array<{ slug: string; icon: IconName; name: string; nameHi: string;
   { slug: "numerology", icon: "hash",   name: "Numerology",            nameHi: "अंक ज्योतिष",           desc: "Mulank, Bhagyank, Name Number, Lo Shu Grid, Karmic Numbers" },
   { slug: "sade-sati",  icon: "planet", name: "Sade Sati Check",       nameHi: "साढ़े साती जांच",         desc: "Is Saturn's 7.5-year period currently active for you?" },
   { slug: "tarot",      icon: "cards",  name: "Tarot Reading",         nameHi: "टैरो पाठन",             desc: "3-card Vedic tarot spread for your question" },
+  { slug: "lal-kitab",          icon: "book",     name: "Lal Kitab Calculator",         nameHi: "लाल किताब गणना",             desc: "Planetary houses, debts (karz), pakka ghar & remedies" },
+  { slug: "lucky-colors",       icon: "droplet",  name: "Lucky Color Calculator",       nameHi: "शुभ रंग गणना",               desc: "Auspicious colors from your Lagna and Nakshatra lord" },
+  { slug: "kaal-sarp-dosha",    icon: "shield",   name: "Kaal Sarp Dosha Checker",      nameHi: "काल सर्प दोष जांच",           desc: "Is Kaal Sarp Dosha present in your birth chart?" },
+  { slug: "favorable-alphabet", icon: "type",     name: "Favorable Alphabet",           nameHi: "शुभ अक्षर गणना",             desc: "Cornerstone & Capstone letter numerology from your name" },
+  { slug: "personal-year",      icon: "calendar", name: "Personal Year Number",         nameHi: "व्यक्तिगत वर्षांक",           desc: "This year's dominant theme, ruling planet & gemstone" },
+  { slug: "karmic-debt",        icon: "eye",      name: "Karmic Debt & Missing Numbers", nameHi: "कार्मिक ऋण व अनुपस्थित अंक", desc: "Karmic debt numbers plus missing & repeated number lessons" },
 ];
 
 export default function ToolsPage() {
@@ -118,6 +124,42 @@ export default function ToolsPage() {
               </Link>
             </div>
           </PatrikaFrame>
+        </Reveal>
+
+        {/* ── Numerology Suite + Yearly Horoscope — featured, paid tools ── */}
+        <Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
+            <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                <div className="service-card-icon"><Icon name="hash" size={24} /></div>
+                <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                  ₹299 · अंक ज्योतिष सूट
+                </span>
+                <h2 style={{ fontSize: "1.15rem", margin: 0 }}>प्रेम, करियर, व्यापार, विवाह</h2>
+                <p style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                  आपके मूलांक व भाग्यांक से चार-आयामी अंक ज्योतिष रिपोर्ट, एक साथ
+                </p>
+                <Link href="/tools/numerology-suite" className="btn btn-primary" style={{ width: "100%" }}>
+                  शुरू करें →
+                </Link>
+              </div>
+            </PatrikaFrame>
+            <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                <div className="service-card-icon"><Icon name="calendar" size={24} /></div>
+                <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                  ₹1,499 · वार्षिक भविष्यफल
+                </span>
+                <h2 style={{ fontSize: "1.15rem", margin: 0 }}>आपका आने वाला वर्ष कैसा रहेगा?</h2>
+                <p style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                  वर्षफल (सौर वापसी कुंडली) से करियर, धन, स्वास्थ्य व रिश्तों का पूर्ण विश्लेषण
+                </p>
+                <Link href="/tools/varshphal-yearly" className="btn btn-primary" style={{ width: "100%" }}>
+                  शुरू करें →
+                </Link>
+              </div>
+            </PatrikaFrame>
+          </div>
         </Reveal>
 
         <div className="grid-3">

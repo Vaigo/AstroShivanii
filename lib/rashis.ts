@@ -174,3 +174,8 @@ export const RASHIS: RashiInfo[] = [
 export function getRashi(slug: string): RashiInfo | undefined {
   return RASHIS.find((r) => r.slug === slug);
 }
+
+/** ︎ forces TEXT presentation of the zodiac glyphs (same reasoning as
+ *  RashifalTool.tsx's own copy) — without it, some platforms render them as
+ *  colored emoji, clashing with the parchment theme. Index-ordered 0=Aries…11=Pisces. */
+export const RASHI_GLYPH = ["♈︎", "♉︎", "♊︎", "♋︎", "♌︎", "♍︎", "♎︎", "♏︎", "♐︎", "♑︎", "♒︎", "♓︎"];
