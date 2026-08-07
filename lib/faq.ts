@@ -120,8 +120,8 @@ export const FAQS: FaqItem[] = [
       hi: "क्या रिफंड मिलता है?",
     },
     a: {
-      en: "If Shivanii hasn't started your reading yet, you get a full refund — just message on WhatsApp. Once a personal reading has been prepared, refunds aren't possible, since the work is done by hand for you alone.",
-      hi: "यदि शिवानी ने आपका पाठन शुरू नहीं किया है, तो पूर्ण रिफंड मिलता है — बस WhatsApp पर संदेश करें। पाठन तैयार हो जाने के बाद रिफंड संभव नहीं है।",
+      en: "No — all payments are final and non-refundable, regardless of whether your reading has started. If a reading is delayed past its stated timeframe, message us on WhatsApp and we'll get it completed for you.",
+      hi: "नहीं — सभी भुगतान अंतिम हैं और रिफंड नहीं होता, चाहे पाठन शुरू हुआ हो या नहीं। यदि पाठन तय समय से देर हो जाए, तो WhatsApp पर संदेश करें, हम इसे पूरा करेंगे।",
     },
   },
 ];

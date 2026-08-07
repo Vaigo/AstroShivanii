@@ -66,17 +66,24 @@ const COMPARE_ROWS = [
   },
 ];
 
-/* Every number here must be VERIFIABLE on the site itself — a visitor burned
-   by fake "10,000+ happy clients" claims elsewhere will check. */
-const STATS = [
-  { end: 7, en: "Free Tools — try before you pay", hi: "निःशुल्क टूल्स — पहले परखें" },
-  { end: 100, suffix: "%", en: "Personal — by Shivanii", hi: "व्यक्तिगत — शिवानी द्वारा" },
-  { end: 499, prefix: "₹", en: "Readings Start At", hi: "पाठन की शुरुआत" },
-];
+interface WhyShivaniiProps {
+  /** Actual count of free tools shown on the homepage grid (FREE_TOOLS.length
+   *  in HomePage.tsx) — passed in rather than hardcoded so this stat can
+   *  never drift out of sync with the real tool count again. */
+  freeToolsCount: number;
+}
 
-export default function WhyShivanii() {
+export default function WhyShivanii({ freeToolsCount }: WhyShivaniiProps) {
   const { lang } = useI18n();
   const isHi = lang === "hi";
+
+  /* Every number here must be VERIFIABLE on the site itself — a visitor
+     burned by fake "10,000+ happy clients" claims elsewhere will check. */
+  const STATS = [
+    { end: freeToolsCount, en: "Free Tools — try before you pay", hi: "निःशुल्क टूल्स — पहले परखें" },
+    { end: 100, suffix: "%", en: "Personal — by Shivanii", hi: "व्यक्तिगत — शिवानी द्वारा" },
+    { end: 499, prefix: "₹", en: "Readings Start At", hi: "पाठन की शुरुआत" },
+  ];
 
   return (
     <section className="section">

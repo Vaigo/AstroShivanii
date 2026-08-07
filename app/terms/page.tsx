@@ -26,8 +26,9 @@ export default function TermsPage() {
           </p>
           <h2 style={{ marginBottom: "0.75rem", fontSize: "1.2rem" }}>Refund policy</h2>
           <p style={{ marginBottom: "1rem" }}>
-            Once a reading has been delivered, refunds are not available. If your reading has not been
-            delivered within the stated timeframe, please contact us on WhatsApp.
+            All payments are final. Refunds are not provided under any circumstances, including before a
+            reading has started. If your reading has not been delivered within the stated timeframe, contact
+            us on WhatsApp and we will complete it for you — but the payment itself is non-refundable.
           </p>
           <h2 style={{ marginBottom: "0.75rem", fontSize: "1.2rem" }}>Contact</h2>
           <p>For any questions, reach us via the Contact page.</p>

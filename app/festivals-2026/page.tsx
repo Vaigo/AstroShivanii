@@ -91,6 +91,7 @@ export default async function FestivalsPage() {
 
         <h1 className="section-heading">व्रत एवं त्यौहार 2026</h1>
         <p className="section-heading-hi devanagari">एकादशी · प्रदोष · पूर्णिमा · अमावस्या — पूरे वर्ष की तिथियाँ</p>
+        <div className="temple-skyline-band" aria-hidden="true" style={{ margin: "0.5rem 0 1.5rem" }} />
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1rem" }}>
           <p>
             2026 की हर तिथि-आधारित व्रत-तिथि, वास्तविक खगोलीय गणना से (लाहिरी अयनांश) —

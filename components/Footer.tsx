@@ -10,6 +10,7 @@ export default function Footer() {
 
   return (
     <footer className="footer" role="contentinfo">
+      <div className="temple-skyline-band" aria-hidden="true" style={{ marginBottom: "1.25rem" }} />
       <div className="footer-om" aria-hidden="true">॥ ॐ ॥</div>
 
       <div className="footer-grid">

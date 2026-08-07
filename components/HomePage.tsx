@@ -174,6 +174,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <div className="temple-skyline-band" aria-hidden="true" />
+
       {/* ── Google Reviews (renders only once real reviews are in lib/reviews.ts) ── */}
       <GoogleReviews />
 
@@ -430,7 +432,7 @@ export default function HomePage() {
       <Divider symbol="✦" />
 
       {/* ── Why Shivanii vs Others (comparison) ──────────────────────────────── */}
-      <WhyShivanii />
+      <WhyShivanii freeToolsCount={FREE_TOOLS.length} />
 
       <Divider symbol="❈" />
 
