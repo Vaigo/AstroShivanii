@@ -7,6 +7,11 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import LifeEventRows, { emptyEventRow, isValidRow, type EventRow } from "@/components/LifeEventRows";
+import PredispositionQuestions from "@/components/PredispositionQuestions";
+import {
+  EVENT_TYPES, PREDISPOSITIONS, PREDISPOSITION_ANSWERS,
+  type PredispositionTypeKey, type PredispositionAnswerKey,
+} from "@/lib/rectification-data";
 import { waLink } from "@/lib/config";
 import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints";
 import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError } from "@/lib/api/site";
@@ -21,7 +26,7 @@ declare global {
 
 const PRICE = 1100;
 
-type Step = "birth" | "teaser" | "events" | "paywall" | "computing" | "result";
+type Step = "birth" | "teaser" | "events" | "predispositions" | "confirm" | "paywall" | "computing" | "result";
 
 export default function TimeRectificationTool() {
   const { lang } = useI18n();
@@ -40,6 +45,7 @@ export default function TimeRectificationTool() {
   const [selectedStart, setSelectedStart] = useState<string | null>(null);
 
   const [rows, setRows] = useState<EventRow[]>(() => [emptyEventRow(), emptyEventRow(), emptyEventRow()]);
+  const [predispositions, setPredispositions] = useState<Partial<Record<PredispositionTypeKey, PredispositionAnswerKey>>>({});
 
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
@@ -71,6 +77,7 @@ export default function TimeRectificationTool() {
         setAscOptions(s.ascOptions ?? null);
         setSelectedStart(s.selectedStart ?? null);
         if (Array.isArray(s.rows) && s.rows.length) setRows(s.rows);
+        setPredispositions(s.predispositions ?? {});
         setResult(s.result ?? null);
         if (s.refCode) setRefCode(s.refCode);
         setStep(s.step === "computing" ? "events" : (s.step ?? "birth"));
@@ -83,10 +90,10 @@ export default function TimeRectificationTool() {
     try {
       window.sessionStorage.setItem("rect-state", JSON.stringify({
         step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName,
-        ascOptions, selectedStart, rows, result, refCode,
+        ascOptions, selectedStart, rows, predispositions, result, refCode,
       }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, rows, result, refCode]);
+  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, rows, predispositions, result, refCode]);
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -105,7 +112,7 @@ export default function TimeRectificationTool() {
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
       const s = e.state?.rectStep;
-      if (s === "birth" || s === "teaser" || s === "events" || s === "paywall" || s === "result") {
+      if (s === "birth" || s === "teaser" || s === "events" || s === "predispositions" || s === "confirm" || s === "paywall" || s === "result") {
         setStep(s);
       } else if (s === undefined && window.location.pathname.includes("time-rectification")) {
         setStep("birth");
@@ -208,11 +215,18 @@ export default function TimeRectificationTool() {
     setStep("computing");
     try {
       const validRows = rows.filter(isValidRow);
+      // "unsure" carries no signal on the backend (skipped, not scored as
+      // 0.5) — dropping it here too keeps the payload honest about what was
+      // actually answered.
+      const answeredPredispositions = Object.fromEntries(
+        Object.entries(predispositions).filter(([, v]) => v && v !== "unsure")
+      );
       const res = await fetchRectificationResult({
         dob: birthDraft.dob, day_unknown: dayUnknown, approx_tob: approxTob,
         time_range_minutes: timeRangeMinutes, step_minutes: 6,
         lat: birthDraft.lat, lon: birthDraft.lon, tz: birthDraft.tz,
         events: validRows.map((r) => ({ date: r.date, type: r.type, note: r.note })),
+        predispositions: answeredPredispositions,
         name: userName.trim() || undefined, ref_code: refCode, razorpay_order_id: razorpayOrderId,
       });
       setResult(res);
@@ -241,11 +255,30 @@ export default function TimeRectificationTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, result, birthDraft]);
 
+  // A fresh attempt is a NEW paid computation, not a free re-edit of the
+  // already-paid result — the "Start a new rectification" button on the
+  // result screen is this, not an "undo".
+  function startNewRectification() {
+    setDayUnknown(false);
+    setBirthDraft(null);
+    setApproxTob("");
+    setTimeRangeMinutes(60);
+    setUserName("");
+    setAscOptions(null);
+    setSelectedStart(null);
+    setRows([emptyEventRow(), emptyEventRow(), emptyEventRow()]);
+    setPredispositions({});
+    setResult(null);
+    setKpResult(null);
+    setRefCode(`REC-${Date.now().toString(36).toUpperCase()}`);
+    setStep("birth");
+  }
+
   const waMessage =
     `Namaste Shivanii ji! 🙏 मैंने आपकी वेबसाइट पर "जन्म समय शुद्धिकरण" के लिए भुगतान करना है — ₹${PRICE}.\n` +
     `Reference: ${refCode}`;
 
-  const phase = step === "birth" ? 1 : step === "teaser" || step === "events" ? 2 : 3;
+  const phase = step === "birth" ? 1 : step === "teaser" || step === "events" || step === "predispositions" ? 2 : 3;
   const phases = [
     { n: 1, hi: "जन्म विवरण", en: "Birth details" },
     { n: 2, hi: "जीवन-घटनाएं", en: "Life events" },
@@ -409,6 +442,17 @@ export default function TimeRectificationTool() {
                 </>
               )}
             </PatrikaFrame>
+            {!teaserLoading && (
+              <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setStep("birth")}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
+                >
+                  ← {isHi ? "जन्म विवरण बदलें" : "Edit birth details"}
+                </button>
+              </p>
+            )}
           </div>
         )}
 
@@ -422,15 +466,146 @@ export default function TimeRectificationTool() {
                 className="btn btn-primary"
                 style={{ width: "100%", marginTop: "1.25rem" }}
                 disabled={validEventCount < minEvents}
-                onClick={() => setStep("paywall")}
+                onClick={() => setStep("predispositions")}
               >
-                {isHi ? `आगे बढ़ें — ₹${PRICE} पर परिणाम पाएं` : `Continue — get the result for ₹${PRICE}`}
+                {isHi ? "आगे बढ़ें" : "Continue"}
               </button>
             </PatrikaFrame>
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
               <button
                 type="button"
                 onClick={() => setStep("teaser")}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
+              >
+                ← {isHi ? "पीछे जाएं" : "Go back"}
+              </button>
+            </p>
+          </div>
+        )}
+
+        {/* ── Step: predispositions (optional bonus signal) ───────────────── */}
+        {step === "predispositions" && (
+          <div ref={stepRef}>
+            <PatrikaFrame>
+              <p className={isHi ? "devanagari" : undefined} style={{ marginBottom: "1rem" }}>
+                {isHi
+                  ? "वैकल्पिक: कुछ सामान्य जीवन-प्रवृत्तियों के बारे में प्रश्न (किसी तारीख से जुड़े नहीं) — यह परिणाम को और स्पष्ट कर सकता है, पर हर मामले में मदद नहीं करता। अनिश्चित हों तो \"पता नहीं\" ही रहने दें या यह चरण छोड़ दें।"
+                  : "Optional: a few questions about general life patterns (not tied to any date) — this can sometimes sharpen the result further, though it doesn't help in every case. Leave on \"Not sure\" or skip this step if you're unsure."}
+              </p>
+              <PredispositionQuestions answers={predispositions} onChange={setPredispositions} />
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: "1.1rem" }}
+                onClick={() => setStep("confirm")}
+              >
+                {isHi ? "आगे बढ़ें" : "Continue"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                style={{ width: "100%", marginTop: "0.6rem" }}
+                onClick={() => { setPredispositions({}); setStep("confirm"); }}
+              >
+                {isHi ? "यह चरण छोड़ें" : "Skip this step"}
+              </button>
+            </PatrikaFrame>
+            <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
+              <button
+                type="button"
+                onClick={() => setStep("events")}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
+              >
+                ← {isHi ? "पीछे जाएं" : "Go back"}
+              </button>
+            </p>
+          </div>
+        )}
+
+        {/* ── Step: confirm — final review of everything before payment ──── */}
+        {step === "confirm" && (
+          <div ref={stepRef}>
+            <PatrikaFrame>
+              <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", marginBottom: "1rem", fontWeight: 600 }}>
+                {isHi ? "भुगतान से पहले अपनी सभी जानकारी जांच लें" : "Review everything before you pay"}
+              </p>
+
+              <div className="result-box">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div className="result-label">{isHi ? "जन्म विवरण" : "Birth details"}</div>
+                  <button type="button" onClick={() => setStep("birth")} className="btn btn-ghost btn-sm" style={{ padding: "0.2rem 0.6rem", fontSize: "0.75rem" }}>
+                    {isHi ? "बदलें" : "Edit"}
+                  </button>
+                </div>
+                <div style={{ fontSize: "0.9rem", marginTop: "0.4rem", lineHeight: 1.6 }}>
+                  {userName.trim() && <div>{isHi ? "नाम" : "Name"}: {userName.trim()}</div>}
+                  <div>{isHi ? "जन्म तारीख" : "DOB"}: {birthDraft?.dob}{dayUnknown && (isHi ? " (केवल वर्ष-महीना, दिन अज्ञात)" : " (year-month only, day unknown)")}</div>
+                  <div>{isHi ? "अनुमानित समय" : "Approx. time"}: {approxTob || "—"} (± {timeRangeMinutes} {isHi ? "मिनट" : "min"})</div>
+                  <div>{isHi ? "स्थान (अक्षांश, देशांतर)" : "Location (lat, lon)"}: {birthDraft ? `${birthDraft.lat.toFixed(3)}, ${birthDraft.lon.toFixed(3)}` : "—"}</div>
+                </div>
+              </div>
+
+              <div className="result-box">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div className="result-label">{isHi ? "जीवन-घटनाएं" : "Life events"} ({validEventCount})</div>
+                  <button type="button" onClick={() => setStep("events")} className="btn btn-ghost btn-sm" style={{ padding: "0.2rem 0.6rem", fontSize: "0.75rem" }}>
+                    {isHi ? "बदलें" : "Edit"}
+                  </button>
+                </div>
+                <div style={{ marginTop: "0.4rem" }}>
+                  {rows.filter(isValidRow).map((r) => {
+                    const label = EVENT_TYPES.find((et) => et.key === r.type)?.label;
+                    return (
+                      <div key={r.id} style={{ fontSize: "0.9rem", padding: "0.3rem 0", borderBottom: "1px dashed rgba(201,154,58,0.3)" }}>
+                        <span className={isHi ? "devanagari" : undefined}>{label ? (isHi ? label.hi : label.en) : r.type}</span>
+                        {" — "}{r.date}
+                        {r.note && <span style={{ color: "var(--muted)" }}> ({r.note})</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="result-box">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div className="result-label">{isHi ? "जीवन-प्रवृत्तियां (वैकल्पिक)" : "Life patterns (optional)"}</div>
+                  <button type="button" onClick={() => setStep("predispositions")} className="btn btn-ghost btn-sm" style={{ padding: "0.2rem 0.6rem", fontSize: "0.75rem" }}>
+                    {isHi ? "बदलें" : "Edit"}
+                  </button>
+                </div>
+                <div style={{ marginTop: "0.4rem" }}>
+                  {Object.entries(predispositions).filter(([, v]) => v && v !== "unsure").length === 0 ? (
+                    <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
+                      {isHi ? "छोड़ दिया गया" : "Skipped"}
+                    </p>
+                  ) : (
+                    Object.entries(predispositions).filter(([, v]) => v && v !== "unsure").map(([key, ans]) => {
+                      const q = PREDISPOSITIONS.find((p) => p.key === key)?.question;
+                      const a = PREDISPOSITION_ANSWERS.find((pa) => pa.key === ans)?.label;
+                      return (
+                        <div key={key} style={{ fontSize: "0.85rem", padding: "0.25rem 0" }}>
+                          <span className={isHi ? "devanagari" : undefined}>{q ? (isHi ? q.hi : q.en) : key}</span>
+                          {": "}<strong>{a ? (isHi ? a.hi : a.en) : ans}</strong>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: "1rem" }}
+                onClick={() => setStep("paywall")}
+              >
+                {isHi ? `सही है — आगे बढ़ें` : "Looks right — continue"}
+              </button>
+            </PatrikaFrame>
+            <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
+              <button
+                type="button"
+                onClick={() => setStep("predispositions")}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
               >
                 ← {isHi ? "पीछे जाएं" : "Go back"}
@@ -493,10 +668,10 @@ export default function TimeRectificationTool() {
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
               <button
                 type="button"
-                onClick={() => setStep("events")}
+                onClick={() => setStep("confirm")}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
               >
-                ← {isHi ? "घटनाएं बदलें" : "Change events"}
+                ← {isHi ? "पीछे जाएं" : "Go back"}
               </button>
             </p>
           </div>
@@ -573,6 +748,16 @@ export default function TimeRectificationTool() {
                 {isHi
                   ? `यह परिणाम इस ब्राउज़र में सुरक्षित है — पेज रीफ़्रेश करने पर भी। कोई समस्या हो तो Ref कोड (${refCode}) के साथ WhatsApp पर संदेश करें।`
                   : `This result stays saved in this browser, even after refresh. Any issue? Message on WhatsApp with your ref code (${refCode}).`}
+              </p>
+
+              <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
+                <button
+                  type="button"
+                  onClick={startNewRectification}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
+                >
+                  {isHi ? "नई जांच शुरू करें (नया भुगतान आवश्यक)" : "Start a new rectification (new payment required)"}
+                </button>
               </p>
 
               <Divider />

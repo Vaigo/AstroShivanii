@@ -135,6 +135,9 @@ export function fetchRectificationResult(body: {
   dob: string; day_unknown: boolean; approx_tob: string;
   time_range_minutes?: number; step_minutes?: number;
   lat: number; lon: number; tz: number; events: RectEvent[];
+  /** Optional bonus signal — static, date-independent self-report answers.
+   *  Omit or send empty to leave scoring exactly as if this didn't exist. */
+  predispositions?: Record<string, string>;
   name?: string; ref_code?: string; razorpay_order_id: string;
 }): Promise<EventScoreResult> {
   return siteFetch<EventScoreResult>("/v1/site/rectification", {
