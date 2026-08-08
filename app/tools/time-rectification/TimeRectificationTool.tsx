@@ -7,11 +7,7 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import LifeEventRows, { emptyEventRow, isValidRow, type EventRow } from "@/components/LifeEventRows";
-import PredispositionQuestions from "@/components/PredispositionQuestions";
-import {
-  EVENT_TYPES, PREDISPOSITIONS, PREDISPOSITION_ANSWERS,
-  type PredispositionTypeKey, type PredispositionAnswerKey,
-} from "@/lib/rectification-data";
+import { EVENT_TYPES } from "@/lib/rectification-data";
 import { waLink } from "@/lib/config";
 import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints";
 import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError } from "@/lib/api/site";
@@ -38,7 +34,7 @@ declare global {
 
 const PRICE = 1100;
 
-type Step = "birth" | "teaser" | "events" | "predispositions" | "confirm" | "paywall" | "computing" | "result";
+type Step = "birth" | "teaser" | "events" | "confirm" | "paywall" | "computing" | "result";
 
 export default function TimeRectificationTool() {
   const { lang } = useI18n();
@@ -63,7 +59,6 @@ export default function TimeRectificationTool() {
   const [hasOwnTobGuess, setHasOwnTobGuess] = useState(false);
 
   const [rows, setRows] = useState<EventRow[]>(() => Array.from({ length: 5 }, emptyEventRow));
-  const [predispositions, setPredispositions] = useState<Partial<Record<PredispositionTypeKey, PredispositionAnswerKey>>>({});
 
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
@@ -96,7 +91,6 @@ export default function TimeRectificationTool() {
         setSelectedStart(s.selectedStart ?? null);
         setHasOwnTobGuess(!!s.hasOwnTobGuess);
         if (Array.isArray(s.rows) && s.rows.length) setRows(s.rows);
-        setPredispositions(s.predispositions ?? {});
         setResult(s.result ?? null);
         if (s.refCode) setRefCode(s.refCode);
         setStep(s.step === "computing" ? "events" : (s.step ?? "birth"));
@@ -109,10 +103,10 @@ export default function TimeRectificationTool() {
     try {
       window.sessionStorage.setItem("rect-state", JSON.stringify({
         step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName,
-        ascOptions, selectedStart, hasOwnTobGuess, rows, predispositions, result, refCode,
+        ascOptions, selectedStart, hasOwnTobGuess, rows, result, refCode,
       }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, hasOwnTobGuess, rows, predispositions, result, refCode]);
+  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, hasOwnTobGuess, rows, result, refCode]);
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -131,7 +125,7 @@ export default function TimeRectificationTool() {
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
       const s = e.state?.rectStep;
-      if (s === "birth" || s === "teaser" || s === "events" || s === "predispositions" || s === "confirm" || s === "paywall" || s === "result") {
+      if (s === "birth" || s === "teaser" || s === "events" || s === "confirm" || s === "paywall" || s === "result") {
         setStep(s);
       } else if (s === undefined && window.location.pathname.includes("time-rectification")) {
         setStep("birth");
@@ -239,18 +233,11 @@ export default function TimeRectificationTool() {
     setStep("computing");
     try {
       const validRows = rows.filter(isValidRow);
-      // "unsure" carries no signal on the backend (skipped, not scored as
-      // 0.5) — dropping it here too keeps the payload honest about what was
-      // actually answered.
-      const answeredPredispositions = Object.fromEntries(
-        Object.entries(predispositions).filter(([, v]) => v && v !== "unsure")
-      );
       const res = await fetchRectificationResult({
         dob: birthDraft.dob, day_unknown: dayUnknown, approx_tob: approxTob,
         time_range_minutes: timeRangeMinutes, step_minutes: 6,
         lat: birthDraft.lat, lon: birthDraft.lon, tz: birthDraft.tz,
         events: validRows.map((r) => ({ date: r.date, type: r.type, note: r.note })),
-        predispositions: answeredPredispositions,
         name: userName.trim() || undefined, ref_code: refCode, razorpay_order_id: razorpayOrderId,
       });
       setResult(res);
@@ -292,7 +279,6 @@ export default function TimeRectificationTool() {
     setSelectedStart(null);
     setHasOwnTobGuess(false);
     setRows(Array.from({ length: 5 }, emptyEventRow));
-    setPredispositions({});
     setResult(null);
     setKpResult(null);
     setRefCode(`REC-${Date.now().toString(36).toUpperCase()}`);
@@ -303,7 +289,7 @@ export default function TimeRectificationTool() {
     `Namaste Shivanii ji! 🙏 मैंने आपकी वेबसाइट पर "जन्म समय शुद्धिकरण" के लिए भुगतान करना है — ₹${PRICE}.\n` +
     `Reference: ${refCode}`;
 
-  const phase = step === "birth" ? 1 : step === "teaser" || step === "events" || step === "predispositions" ? 2 : 3;
+  const phase = step === "birth" ? 1 : step === "teaser" || step === "events" ? 2 : 3;
   const phases = [
     { n: 1, hi: "जन्म विवरण", en: "Birth details" },
     { n: 2, hi: "जीवन-घटनाएं", en: "Life events" },
@@ -353,8 +339,8 @@ export default function TimeRectificationTool() {
                         ? "दिन अज्ञात होने पर हम पूरे महीने के हर दिन की जांच करेंगे — पर विश्वसनीय परिणाम हेतु कम से कम 7 जीवन-घटनाएं देनी होंगी (सामान्यतः 5)।"
                         : "Since the day isn't known, we'll search every day of that month — but we'll need at least 7 life events (instead of the usual 5) for a confident result.")
                     : (isHi
-                        ? "अधिक सटीक परिणाम के लिए आगे कम से कम 5 ऐसी घटनाएं जोड़ें जिनकी तारीख आपको निश्चित रूप से याद है — विवाह, नौकरी परिवर्तन, दुर्घटना/बीमारी जैसी घटनाएं सबसे बेहतर परिणाम देती हैं।"
-                        : "For the most accurate result, you'll add at least 5 events with dates you're certain of — marriage, job change, or an accident/illness work especially well.")}
+                        ? "अधिक सटीक परिणाम के लिए आगे कम से कम 5 ऐसी घटनाएं जोड़ें जिनकी तारीख आपको निश्चित रूप से याद है। यदि आपको कोई दुर्घटना, गंभीर बीमारी या सर्जरी याद है — उसे अवश्य शामिल करें: ये घटनाएं सीधे आपके लग्न (जन्म के समय उदय होने वाली राशि) से जुड़ी होती हैं, इसलिए विवाह या नौकरी-परिवर्तन जैसी घटनाओं से कहीं अधिक सटीकता से समय बताती हैं।"
+                        : "For the most accurate result, you'll add at least 5 events with dates you're certain of. If you've had an accident, a serious illness, or a surgery, include it — these are tied directly to your Ascendant (the sign rising at the exact moment of birth), so they pin down your birth time far more sharply than events like marriage or a job change.")}
                 </p>
               </div>
 
@@ -498,6 +484,11 @@ export default function TimeRectificationTool() {
                     ? "परिणाम की सटीकता पूरी तरह आपके द्वारा दी गई जानकारी पर निर्भर करती है — जितनी अधिक और जितनी सटीक घटनाएं आप जोड़ेंगे, परिणाम उतना ही विश्वसनीय होगा। कृपया केवल वे घटनाएं चुनें जिनकी तारीख आपको पूरी तरह निश्चित याद है, और न्यूनतम से अधिक घटनाएं जोड़ने की कोशिश करें।"
                     : "The accuracy of your result depends entirely on the information you provide — the more events you add, and the more certain their dates, the more reliable the result. Please add only events whose dates you're fully certain of, and try to add more than the minimum."}
                 </p>
+                <p className={isHi ? "devanagari" : undefined} style={{ margin: "0.5rem 0 0", fontWeight: 600 }}>
+                  {isHi
+                    ? "विशेष रूप से: यदि आपको कोई दुर्घटना, गंभीर बीमारी या सर्जरी की तारीख निश्चित याद है, तो उसे ज़रूर जोड़ें — भले ही आपके पास पहले से पर्याप्त घटनाएं हों। ये आपके सटीक जन्म-समय की पहचान की सबसे सशक्त कुंजी हैं।"
+                    : "Specifically: if you're certain of the date of an accident, a serious illness, or a surgery, add it — even if you already have enough events. These are the single strongest markers we have for pinning down your exact birth time."}
+                </p>
               </div>
               <LifeEventRows rows={rows} onChange={setRows} min={minEvents} max={10} />
               <button
@@ -505,7 +496,7 @@ export default function TimeRectificationTool() {
                 className="btn btn-primary"
                 style={{ width: "100%", marginTop: "1.25rem" }}
                 disabled={validEventCount < minEvents}
-                onClick={() => setStep("predispositions")}
+                onClick={() => setStep("confirm")}
               >
                 {isHi ? "आगे बढ़ें" : "Continue"}
               </button>
@@ -514,45 +505,6 @@ export default function TimeRectificationTool() {
               <button
                 type="button"
                 onClick={() => setStep("teaser")}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
-              >
-                ← {isHi ? "पीछे जाएं" : "Go back"}
-              </button>
-            </p>
-          </div>
-        )}
-
-        {/* ── Step: predispositions (optional bonus signal) ───────────────── */}
-        {step === "predispositions" && (
-          <div ref={stepRef}>
-            <PatrikaFrame>
-              <p className={isHi ? "devanagari" : undefined} style={{ marginBottom: "1rem" }}>
-                {isHi
-                  ? "वैकल्पिक: कुछ सामान्य जीवन-प्रवृत्तियों के बारे में प्रश्न (किसी तारीख से जुड़े नहीं) — यह परिणाम को और स्पष्ट कर सकता है, पर हर मामले में मदद नहीं करता। अनिश्चित हों तो \"पता नहीं\" ही रहने दें या यह चरण छोड़ दें।"
-                  : "Optional: a few questions about general life patterns (not tied to any date) — this can sometimes sharpen the result further, though it doesn't help in every case. Leave on \"Not sure\" or skip this step if you're unsure."}
-              </p>
-              <PredispositionQuestions answers={predispositions} onChange={setPredispositions} />
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={{ width: "100%", marginTop: "1.1rem" }}
-                onClick={() => setStep("confirm")}
-              >
-                {isHi ? "आगे बढ़ें" : "Continue"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                style={{ width: "100%", marginTop: "0.6rem" }}
-                onClick={() => { setPredispositions({}); setStep("confirm"); }}
-              >
-                {isHi ? "यह चरण छोड़ें" : "Skip this step"}
-              </button>
-            </PatrikaFrame>
-            <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
-              <button
-                type="button"
-                onClick={() => setStep("events")}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
               >
                 ← {isHi ? "पीछे जाएं" : "Go back"}
@@ -610,33 +562,6 @@ export default function TimeRectificationTool() {
                 </p>
               </div>
 
-              <div className="result-box">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <div className="result-label">{isHi ? "जीवन-प्रवृत्तियां (वैकल्पिक)" : "Life patterns (optional)"}</div>
-                  <button type="button" onClick={() => setStep("predispositions")} className="btn btn-ghost btn-sm" style={{ padding: "0.2rem 0.6rem", fontSize: "0.75rem" }}>
-                    {isHi ? "बदलें" : "Edit"}
-                  </button>
-                </div>
-                <div style={{ marginTop: "0.4rem" }}>
-                  {Object.entries(predispositions).filter(([, v]) => v && v !== "unsure").length === 0 ? (
-                    <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
-                      {isHi ? "छोड़ दिया गया" : "Skipped"}
-                    </p>
-                  ) : (
-                    Object.entries(predispositions).filter(([, v]) => v && v !== "unsure").map(([key, ans]) => {
-                      const q = PREDISPOSITIONS.find((p) => p.key === key)?.question;
-                      const a = PREDISPOSITION_ANSWERS.find((pa) => pa.key === ans)?.label;
-                      return (
-                        <div key={key} style={{ fontSize: "0.85rem", padding: "0.25rem 0" }}>
-                          <span className={isHi ? "devanagari" : undefined}>{q ? (isHi ? q.hi : q.en) : key}</span>
-                          {": "}<strong>{a ? (isHi ? a.hi : a.en) : ans}</strong>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
               <button
                 type="button"
                 className="btn btn-primary"
@@ -649,7 +574,7 @@ export default function TimeRectificationTool() {
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
               <button
                 type="button"
-                onClick={() => setStep("predispositions")}
+                onClick={() => setStep("events")}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
               >
                 ← {isHi ? "पीछे जाएं" : "Go back"}
