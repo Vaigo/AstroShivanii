@@ -11,6 +11,7 @@ import { fetchLuckyColors } from "@/lib/api/endpoints";
 import type { BirthRequest, LuckyColorsResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { SIGN_HI, PLANET_HI, colorHi } from "@/lib/hindi-labels";
 
 /** Best-effort CSS color for a name returned by the API — most (Red, Gold,
  *  Blue, White, Black…) are valid CSS keywords already; a small fallback
@@ -114,25 +115,46 @@ export default function LuckyColorsTool() {
 
               <div className="result-box">
                 <div className="result-label">{isHi ? "लग्न" : "Ascendant (Lagna)"}</div>
-                <div className="result-value">{result.lagna}</div>
+                <div className="result-value">{isHi ? SIGN_HI[result.lagna] ?? result.lagna : result.lagna}</div>
               </div>
               <div className="result-box">
                 <div className="result-label">{isHi ? "लग्न स्वामी" : "Lagna Lord"}</div>
-                <div className="result-value">{result.lagna_lord}</div>
+                <div className="result-value">{isHi ? PLANET_HI[result.lagna_lord] ?? result.lagna_lord : result.lagna_lord}</div>
               </div>
               <div className="result-box">
                 <div className="result-label">{isHi ? "नक्षत्र स्वामी" : "Nakshatra Lord"}</div>
-                <div className="result-value">{result.nakshatra_lord}</div>
+                <div className="result-value">{isHi ? PLANET_HI[result.nakshatra_lord] ?? result.nakshatra_lord : result.nakshatra_lord}</div>
               </div>
 
+              {/* Shown grouped by WHICH lord each color belongs to — these
+                  colors genuinely come from two different planets (Lagna
+                  lord and Nakshatra lord), and showing them as one
+                  undifferentiated list looked like a data error when
+                  checked against either planet's classical colors alone. */}
               <div className="result-box">
                 <div className="result-label" style={{ marginBottom: "0.5rem" }}>
-                  {isHi ? "शुभ रंग" : "Auspicious Colors"}
+                  {isHi
+                    ? `शुभ रंग — लग्न स्वामी (${PLANET_HI[result.auspicious_colors_by_source.lagna_lord.planet] ?? result.auspicious_colors_by_source.lagna_lord.planet})`
+                    : `Auspicious Colors — Lagna Lord (${result.auspicious_colors_by_source.lagna_lord.planet})`}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                  {result.auspicious_colors.map((c) => (
+                  {result.auspicious_colors_by_source.lagna_lord.colors.map((c) => (
                     <span key={c} className="trait-chip" style={{ background: "rgba(26,122,58,0.08)", borderColor: "rgba(26,122,58,0.3)" }}>
-                      <ColorDot name={c} />{c}
+                      <ColorDot name={c} />{isHi ? colorHi(c) : c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="result-box">
+                <div className="result-label" style={{ marginBottom: "0.5rem" }}>
+                  {isHi
+                    ? `शुभ रंग — नक्षत्र स्वामी (${PLANET_HI[result.auspicious_colors_by_source.nakshatra_lord.planet] ?? result.auspicious_colors_by_source.nakshatra_lord.planet})`
+                    : `Auspicious Colors — Nakshatra Lord (${result.auspicious_colors_by_source.nakshatra_lord.planet})`}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                  {result.auspicious_colors_by_source.nakshatra_lord.colors.map((c) => (
+                    <span key={c} className="trait-chip" style={{ background: "rgba(26,122,58,0.08)", borderColor: "rgba(26,122,58,0.3)" }}>
+                      <ColorDot name={c} />{isHi ? colorHi(c) : c}
                     </span>
                   ))}
                 </div>
@@ -146,7 +168,7 @@ export default function LuckyColorsTool() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
                     {result.inauspicious_colors.map((c) => (
                       <span key={c} className="trait-chip" style={{ background: "rgba(192,57,43,0.06)", borderColor: "rgba(192,57,43,0.25)", opacity: 0.85 }}>
-                        <ColorDot name={c} />{c}
+                        <ColorDot name={c} />{isHi ? colorHi(c) : c}
                       </span>
                     ))}
                   </div>
@@ -155,7 +177,9 @@ export default function LuckyColorsTool() {
 
               <div className="result-box">
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                  {result.note}
+                  {isHi
+                    ? "अपने ग्रह के दिन इन शुभ रंगों को पहनने से उसका शुभ प्रभाव और बढ़ता है।"
+                    : result.note}
                 </p>
               </div>
 

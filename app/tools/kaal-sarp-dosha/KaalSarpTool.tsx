@@ -11,6 +11,7 @@ import { fetchSpecialYogas } from "@/lib/api/endpoints";
 import type { BirthRequest, SpecialYogasResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { PLANET_HI } from "@/lib/hindi-labels";
 
 const DIRECTION_LABEL: Record<string, { en: string; hi: string }> = {
   "Udit Golardha (Rahu→Ketu)": { en: "Udit Golardha (Rahu → Ketu)", hi: "उदित गोलार्ध (राहु → केतु)" },
@@ -122,13 +123,40 @@ export default function KaalSarpTool() {
                     <div className="result-label">{isHi ? "शामिल ग्रह" : "Planets Involved"}</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.4rem" }}>
                       {kaalSarp.planets.map((p) => (
-                        <span key={p} className="trait-chip">{p}</span>
+                        <span key={p} className="trait-chip">{isHi ? PLANET_HI[p] ?? p : p}</span>
                       ))}
                     </div>
                   </div>
                   <div className="result-box">
                     <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
                       {isHi ? kaalSarp.effect_hi : kaalSarp.effect_en}
+                    </p>
+                  </div>
+                  <div className="result-box">
+                    <div className="result-label" style={{ marginBottom: "0.4rem" }}>
+                      {isHi ? "सामान्य शास्त्रीय उपाय" : "General Classical Remedies"}
+                    </div>
+                    <ul className={isHi ? "devanagari" : undefined} style={{ paddingLeft: "1.1rem", fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: 0 }}>
+                      {isHi ? (
+                        <>
+                          <li>महाशिवरात्रि या श्रावण में राहु-केतु शांति पूजा</li>
+                          <li>नाग पंचमी पर नाग देवता की पूजा और दूध अर्पण</li>
+                          <li>महामृत्युंजय मंत्र का नियमित जाप</li>
+                          <li>त्र्यंबकेश्वर या कालहस्ती में विशेष पूजा (जहां यह परंपरा प्रचलित है)</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>Rahu-Ketu shanti puja, ideally during Mahashivratri or Shravan month</li>
+                          <li>Naag Panchami worship — offering milk to a Naag Devta idol/temple</li>
+                          <li>Regular japa of the Maha Mrityunjaya mantra</li>
+                          <li>A dedicated puja at Trimbakeshwar or Kalahasti (where this tradition is followed)</li>
+                        </>
+                      )}
+                    </ul>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "0.5rem" }}>
+                      {isHi
+                        ? "ये सामान्य, गैर-कुंडली-विशेष उपाय हैं। दोष की वास्तविक तीव्रता और सही उपाय आपकी पूर्ण कुंडली देखकर ही तय किए जा सकते हैं।"
+                        : "These are general, not chart-specific. This dosha's real intensity and the right remedy for you can only be judged from your full chart."}
                     </p>
                   </div>
                 </>

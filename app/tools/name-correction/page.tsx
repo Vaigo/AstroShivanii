@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import RashifalTool from "./RashifalTool";
+import NameCorrectionTool from "./NameCorrectionTool";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Daily Rashifal — Vedic Horoscope",
+  title: "Name Correction Checker ₹501 — All Name Types",
   description:
-    "Free daily Vedic horoscope (Rashifal) for all 12 rashis. Transit-based predictions for career, love, health, and finance. No sign-up needed.",
+    "Check whether a personal, business, or other name's numerology (Destiny number) harmonises with its owner's Life Path, with natural, pronounceable spelling correction suggestions. ₹501, instant result.",
 };
 
 const appJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Daily Rashifal — Vedic Horoscope",
+  name: "Name Correction Checker",
   description:
-    "Daily Vedic horoscope (Rashifal) for all 12 rashis. Transit-based predictions for career, love, health, and finance.",
-  url: `${SITE_URL}/tools/rashifal/`,
+    "Check whether a personal, business, or other name's numerology harmonises with its owner's Life Path, with natural, pronounceable spelling correction suggestions.",
+  url: `${SITE_URL}/tools/name-correction/`,
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Any",
-  offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
+  offers: { "@type": "Offer", price: "501", priceCurrency: "INR" },
   provider: { "@type": "Person", name: "Shivanii", url: `${SITE_URL}/about/` },
 };
 
@@ -27,11 +27,11 @@ export default function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
-      <RashifalTool />
+      <NameCorrectionTool />
       <div className="container" style={{ maxWidth: "760px", margin: "-2rem auto 0", padding: "0 1rem 2.5rem", textAlign: "center" }}>
         <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-          Related: <Link href="/tools/panchang">Today's Panchang</Link> ·{" "}
-          <Link href="/tools/sade-sati">Sade Sati Checker</Link>
+          Related: <Link href="/guides/mulank-bhagyank-numerology">Mulank & Bhagyank Explained</Link> ·{" "}
+          <Link href="/tools/numerology">Numerology Calculator</Link>
         </p>
       </div>
     </>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Divider from "@/components/Divider";
 import { RASHIS, getRashi } from "@/lib/rashis";
+import { truncateDescription } from "@/lib/seo";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
@@ -20,8 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const r = getRashi(slug);
   if (!r) return {};
   return {
-    title: `${r.name_hi} राशि (${r.name} Moon Sign) — स्वभाव, करियर, प्रेम, स्वास्थ्य`,
-    description: `${r.name_hi} (${r.name}) rashi explained: lord ${r.lord}, ${r.element} element, nakshatras, honest personality, career fields, love style and health tendencies.`,
+    title: `${r.name_hi} राशि (${r.name} Moon Sign) — स्वभाव व करियर`,
+    description: truncateDescription(
+      `${r.name_hi} (${r.name}) rashi explained: lord ${r.lord}, ${r.element} element, honest personality, career fields and love style.`
+    ),
     alternates: { canonical: `/rashi/${r.slug}/` },
   };
 }

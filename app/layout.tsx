@@ -37,7 +37,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "Astrologer Shivanii — Personal Vedic Astrology Readings",
-    template: "%s | Astrologer Shivanii",
+    // Was " | Astrologer Shivanii" (22 chars) — ate nearly half of Google's
+    // ~60-char SERP title budget before a page's own title even started,
+    // confirmed via built output that most page titles were being
+    // truncated in search results as a result. Shortened site-wide in one
+    // place rather than re-padding every individual page title.
+    template: "%s | Shivanii",
   },
   description:
     "Personal Vedic astrology readings by Astrologer Shivanii. Birth chart, marriage matching, Prashna, annual forecast and more. Hindi & English. Flat pricing, no per-minute meters.",
@@ -57,8 +62,9 @@ export const metadata: Metadata = {
     locale: "en_IN",
     alternateLocale: "hi_IN",
     siteName: "Astrologer Shivanii",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Astrologer Shivanii — Personal Vedic Astrology Readings" }],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", images: ["/og-image.png"] },
   robots: { index: true, follow: true },
   alternates: { canonical: "./" },
   category: "Astrology",

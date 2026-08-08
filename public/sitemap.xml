@@ -19,6 +19,7 @@
   <url><loc>https://astroshivanii.com/tools/favorable-alphabet/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/tools/personal-year/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/tools/karmic-debt/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroshivanii.com/tools/name-correction/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/tools/numerology-suite/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/tools/varshphal-yearly/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/faq/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -29,6 +30,7 @@
   <url><loc>https://astroshivanii.com/guides/mangal-dosha-truth/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://astroshivanii.com/guides/mulank-bhagyank-numerology/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://astroshivanii.com/guides/birth-time-missing-astrology/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://astroshivanii.com/guides/what-is-baal-kundli/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://astroshivanii.com/readings/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/readings/ask-one-question/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/readings/birth-chart/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
@@ -42,6 +44,8 @@
   <url><loc>https://astroshivanii.com/about/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://astroshivanii.com/contact/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://astroshivanii.com/book/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://astroshivanii.com/privacy/</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://astroshivanii.com/terms/</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://astroshivanii.com/nakshatra/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://astroshivanii.com/nakshatra/ashwini/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://astroshivanii.com/nakshatra/bharani/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

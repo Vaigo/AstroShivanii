@@ -16,6 +16,7 @@ import { fetchPanchang, fetchRahuKaal, fetchMuhurta, fetchFestivals } from "@/li
 import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo, PanchangDayInfo } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { PLANET_HI, weekdayHi, yogaNameHi, karanaNameHi, moonPhaseHi } from "@/lib/hindi-labels";
 
 /** Today's date AS OBSERVED in `tzName` — never `toISOString()`'s UTC date,
  *  which silently returns YESTERDAY for any IST-side viewer for the ~5.5
@@ -441,11 +442,11 @@ export default function PanchangTool() {
             ? (panchang.tithi.paksha_num === 15 ? panchang.tithi.name_hi : `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name_hi}`)
             : `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name}`,
           sub: `${Math.round(panchang.tithi.completion * 100)}% बीती · समाप्ति ${panchang.tithi.end_time}`, meaning: "चंद्र-सूर्य की दूरी से तय व्रत-त्योहार की तिथि" },
-        { label: "वार / Day", value: panchang.vara.name, sub: `स्वामी: ${panchang.vara.lord}`, meaning: "दिन का स्वामी ग्रह — उसी ग्रह से जुड़े कार्य आज शुभ" },
-        { label: "नक्षत्र / Nakshatra", value: `${panchang.nakshatra.name}`, sub: `${panchang.nakshatra.name_hi} · पाद ${panchang.nakshatra.pada} · स्वामी ${panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`, meaning: "आज चंद्रमा जिस नक्षत्र में है — मुहूर्त चुनने का मुख्य आधार" },
-        { label: "योग / Yoga", value: panchang.yoga.name, sub: `समाप्ति ${panchang.yoga.end_time}`, meaning: "सूर्य-चंद्र के संयोग से बना योग — दिन की समग्र प्रकृति दर्शाता है" },
-        { label: "करण / Karana", value: panchang.karana.name, sub: `समाप्ति ${panchang.karana.end_time}`, meaning: "तिथि का आधा भाग — दैनिक कार्यों की बारीक शुभता तय करता है" },
-        { label: "चंद्र कला / Moon Phase", value: panchang.moon_phase, sub: "", meaning: "" },
+        { label: "वार / Day", value: isHi ? weekdayHi(panchang.vara.name) : panchang.vara.name, sub: `स्वामी: ${isHi ? PLANET_HI[panchang.vara.lord] ?? panchang.vara.lord : panchang.vara.lord}`, meaning: "दिन का स्वामी ग्रह — उसी ग्रह से जुड़े कार्य आज शुभ" },
+        { label: "नक्षत्र / Nakshatra", value: `${panchang.nakshatra.name}`, sub: `${panchang.nakshatra.name_hi} · पाद ${panchang.nakshatra.pada} · स्वामी ${isHi ? PLANET_HI[panchang.nakshatra.lord] ?? panchang.nakshatra.lord : panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`, meaning: "आज चंद्रमा जिस नक्षत्र में है — मुहूर्त चुनने का मुख्य आधार" },
+        { label: "योग / Yoga", value: isHi ? yogaNameHi(panchang.yoga.name) : panchang.yoga.name, sub: `समाप्ति ${panchang.yoga.end_time}`, meaning: "सूर्य-चंद्र के संयोग से बना योग — दिन की समग्र प्रकृति दर्शाता है" },
+        { label: "करण / Karana", value: isHi ? karanaNameHi(panchang.karana.name) : panchang.karana.name, sub: `समाप्ति ${panchang.karana.end_time}`, meaning: "तिथि का आधा भाग — दैनिक कार्यों की बारीक शुभता तय करता है" },
+        { label: "चंद्र कला / Moon Phase", value: isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase, sub: "", meaning: "" },
         { label: "सूर्योदय / Sunrise", value: panchang.sun_rise, sub: "", meaning: "" },
         { label: "सूर्यास्त / Sunset", value: panchang.sun_set, sub: "", meaning: "" },
       ]

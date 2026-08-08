@@ -559,20 +559,27 @@ function TurantUttarInner() {
                     {payError}
                   </p>
                 )}
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                {/* flexWrap + minWidth:0 are both required here, not just
+                    one — flex items default to min-width:auto (refuse to
+                    shrink below their unwrapped text width), which was
+                    forcing this row wider than the screen on mobile and
+                    clipping both buttons' text at the edges. flexWrap lets
+                    them stack to full width on very narrow screens instead
+                    of being squeezed. */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                   <a
                     href={waLink(waMessage)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-ghost btn-sm"
-                    style={{ flex: 1, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
+                    style={{ flex: "1 1 140px", minWidth: 0, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
                   >
                     {isHi ? "WhatsApp से भुगतान" : "Pay via WhatsApp"}
                   </a>
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
-                    style={{ flex: 1, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
+                    style={{ flex: "1 1 140px", minWidth: 0, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
                     onClick={() => handleUnlock()}
                   >
                     {isHi ? "भुगतान हो गया — उत्तर देखें" : "Paid — Show Answer"}
@@ -583,8 +590,8 @@ function TurantUttarInner() {
                 </p>
                 <p className={`cta-note${isHi ? " devanagari" : ""}`} style={{ fontSize: "0.75rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>
                   {isHi
-                    ? "उत्तर न मिले तो पूर्ण रिफंड — बस Ref कोड के साथ WhatsApp पर संदेश करें"
-                    : "No answer = full refund — just message on WhatsApp with your ref code"}
+                    ? "उत्तर न मिले तो Ref कोड के साथ WhatsApp पर संदेश करें — हम इसे पूरा करेंगे (भुगतान रिफंड नहीं होता)"
+                    : "No answer yet? Message us on WhatsApp with your ref code and we'll get it completed (payment itself is non-refundable)"}
                 </p>
               </div>
             </PatrikaFrame>

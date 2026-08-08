@@ -12,6 +12,7 @@ import type { BirthRequest, AshtakootResult, MangalDoshaResult } from "@/lib/api
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 import { NAKSHATRAS } from "@/lib/nakshatras";
+import { pickLang } from "@/lib/hindi-labels";
 
 const nakHi = (name?: string) => (name ? NAKSHATRAS.find((n) => n.name === name)?.name_hi ?? name : "—");
 
@@ -347,7 +348,7 @@ export default function MatchingTool() {
             <PatrikaFrame>
               {/* Score header */}
               <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                <ScoreDonut total={result.total} max={36} color={totalColor} verdict={result.verdict} isHi={isHi} />
+                <ScoreDonut total={result.total} max={36} color={totalColor} verdict={pickLang(result.verdict, isHi)} isHi={isHi} />
                 <div style={{ fontSize: "0.85rem", color: "var(--muted)", marginTop: "0.35rem" }}>
                   {result.percentage}% {isHi ? "संगति" : "compatibility"}
                 </div>
@@ -474,7 +475,7 @@ export default function MatchingTool() {
                   en: `${result.total}/36 — but scores don't marry, people do. Which points matter for you two, and what cancels out — that's the full matching.`,
                   hi: `${result.total}/36 — पर अंक विवाह नहीं करते, लोग करते हैं। कौन-से अंक आपके लिए मायने रखते हैं और क्या कटता है — यही पूर्ण मिलान है।`,
                 }}
-                waText={`Namaste Shivanii ji! We checked our kundli match on your website — score ${result.total}/36 (${result.verdict}). We would like the full matching analysis before deciding.`}
+                waText={`Namaste Shivanii ji! We checked our kundli match on your website — score ${result.total}/36 (${pickLang(result.verdict, false)}). We would like the full matching analysis before deciding.`}
                 reading={{ href: "/readings/marriage-matching", labelEn: "Book Full Matching ₹1,299", labelHi: "पूर्ण मिलान बुक करें ₹1,299" }}
               />
             </PatrikaFrame>

@@ -151,9 +151,9 @@ export default function LalKitabTool() {
                       <span className="karmic-debt-num">⚠</span>
                       <span className="karmic-debt-theme">{isHi ? d.name_hi : d.name}</span>
                     </div>
-                    <p className="karmic-debt-meaning">{d.indicator}</p>
+                    <p className="karmic-debt-meaning">{isHi ? d.indicator_hi : d.indicator}</p>
                     <div className="karmic-debt-remedy">
-                      <strong>{isHi ? "उपाय:" : "Remedy:"}</strong> {d.remedy}
+                      <strong>{isHi ? "उपाय:" : "Remedy:"}</strong> {isHi ? d.remedy_hi : d.remedy}
                     </div>
                   </div>
                 ))
@@ -166,7 +166,7 @@ export default function LalKitabTool() {
                   {inactiveDebts.map((d, i) => (
                     <div key={i} className="result-box" style={{ marginTop: "0.5rem", opacity: 0.7 }}>
                       <div className="result-label">{isHi ? d.name_hi : d.name}</div>
-                      <p style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{d.indicator}</p>
+                      <p style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{isHi ? d.indicator_hi : d.indicator}</p>
                     </div>
                   ))}
                 </details>
@@ -182,7 +182,7 @@ export default function LalKitabTool() {
                         {isHi ? `भाव ${p.house} — ${PLANET_HI[p.planet] ?? p.planet}` : `House ${p.house} — ${p.planet}`}
                       </div>
                       <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                        {p.prediction}
+                        {isHi ? p.prediction_hi : p.prediction}
                       </p>
                     </div>
                   ))}
@@ -232,9 +232,9 @@ export default function LalKitabTool() {
                       <div className="result-label">
                         {isHi ? `${PLANET_HI[u.planet] ?? u.planet}${u.house ? ` — भाव ${u.house}` : ""}` : `${u.planet}${u.house ? ` — House ${u.house}` : ""}`}
                       </div>
-                      <p style={{ fontSize: "0.82rem", color: "var(--muted)", marginBottom: "0.4rem" }}>{u.reason}</p>
-                      <ul style={{ paddingLeft: "1.2rem" }}>
-                        {u.upayas.map((up, j) => (
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--muted)", marginBottom: "0.4rem" }}>{isHi ? u.reason_hi : u.reason}</p>
+                      <ul className={isHi ? "devanagari" : undefined} style={{ paddingLeft: "1.2rem" }}>
+                        {(isHi ? u.upayas_hi : u.upayas).map((up, j) => (
                           <li key={j} style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginBottom: "0.2rem" }}>{up}</li>
                         ))}
                       </ul>

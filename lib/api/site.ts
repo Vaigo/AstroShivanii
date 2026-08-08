@@ -6,7 +6,7 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "as-site-token";
 const USER_KEY = "as-site-user";
 
-import type { BirthRequest, TurantUttarAIResult, EventScoreResult, RectEvent, NumerologySuiteResult, VarshphalYearlyResult } from "./types";
+import type { BirthRequest, TurantUttarAIResult, EventScoreResult, RectEvent, NumerologySuiteResult, VarshphalYearlyResult, NameCorrectionResult } from "./types";
 
 export interface SiteUser { id: number; email: string; name: string; created_at?: number; }
 
@@ -112,7 +112,7 @@ export function fetchTurantUttarAI(
 export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
 
 export function createPaymentOrder(body: {
-  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly"; slug: string;
+  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction"; slug: string;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
   // birth place — required for the birth-chart/kundli-report product so the
   // auto-generated PDF uses an accurate chart; harmless to omit elsewhere.
@@ -164,6 +164,19 @@ export function fetchVarshphalYearlyResult(body: {
   year?: number; ref_code?: string; razorpay_order_id: string;
 }): Promise<VarshphalYearlyResult> {
   return siteFetch<VarshphalYearlyResult>("/v1/site/varshphal-yearly", {
+    body, headers: { "X-Site-Token": getSiteToken() ?? "" },
+  });
+}
+
+/** Name Correction's compute step — hard-gated server-side on a verified
+ *  razorpay_order_id, same pattern as Numerology Suite. `dob` is the
+ *  personal/business-owner's/reference birth date depending on category —
+ *  the category itself is a frontend-only label, not sent to the backend. */
+export function fetchNameCorrectionResult(body: {
+  dob: string; name: string; system?: "chaldean" | "pythagorean";
+  ref_code?: string; razorpay_order_id: string;
+}): Promise<NameCorrectionResult> {
+  return siteFetch<NameCorrectionResult>("/v1/site/name-correction", {
     body, headers: { "X-Site-Token": getSiteToken() ?? "" },
   });
 }

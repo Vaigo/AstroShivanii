@@ -27,6 +27,7 @@ import type {
   PersonalYearResult,
   KarmicDebtResult,
   MissingNumbersResult,
+  NameCorrectionResult,
   WeeklyRashifalResult,
   VarshphalYearLordResult,
   VarshphalMunthaResult,
@@ -141,6 +142,10 @@ export function fetchKarmicDebt(req: DobRequest): Promise<KarmicDebtResult> {
 
 export function fetchMissingNumbers(req: DobRequest): Promise<MissingNumbersResult> {
   return post("/v1/numerology/missing-numbers", req);
+}
+
+export function fetchNameCorrection(req: NumerologyRequest): Promise<NameCorrectionResult> {
+  return post("/v1/numerology/name-correction", req);
 }
 
 /** BySignRequest.rashi is the English name (e.g. "Scorpio") — the exact

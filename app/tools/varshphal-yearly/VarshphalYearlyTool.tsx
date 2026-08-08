@@ -11,6 +11,19 @@ import { fetchVarshphalYearLord } from "@/lib/api/endpoints";
 import { createPaymentOrder, verifyPayment, fetchVarshphalYearlyResult, SiteApiError } from "@/lib/api/site";
 import type { BirthRequest, VarshphalYearLordResult, VarshphalYearlyResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { pickLang, PLANET_HI } from "@/lib/hindi-labels";
+
+/** Classical Tajika office-bearer roles — a fixed 5-value enum from the
+ *  backend (varshphal.py::_compute_varshesha), Sanskrit terms with no
+ *  Hindi field of their own; transliterated to Devanagari here. */
+const VARSHESHA_ROLE_HI: Record<string, string> = {
+  "Muntha Pati": "मुंथा पति",
+  "Varsha Lagna Pati": "वर्ष लग्न पति",
+  "Janma Lagna Pati": "जन्म लग्न पति",
+  "Dina-Ratri Pati": "दिन-रात्रि पति",
+  "Tri-Rashi Pati": "त्रिराशि पति",
+};
+const varsheshaRole = (role: string, isHi: boolean) => (isHi ? VARSHESHA_ROLE_HI[role] ?? role : role);
 
 declare global {
   interface Window {
@@ -29,6 +42,7 @@ const PREDICTION_LABELS: Array<{ key: keyof VarshphalYearlyResult["predictions"]
   { key: "health", en: "Health", hi: "स्वास्थ्य" },
   { key: "relationships", en: "Relationships", hi: "रिश्ते" },
   { key: "spiritual", en: "Spiritual", hi: "आध्यात्म" },
+  { key: "year_lord_influence", en: "Year Lord's Influence", hi: "वर्षपति का प्रभाव" },
 ];
 
 export default function VarshphalYearlyTool() {
@@ -271,10 +285,13 @@ export default function VarshphalYearlyTool() {
                   <div className="result-box" style={{ marginTop: 0, textAlign: "center" }}>
                     <div className="result-label">{isHi ? "आपका वर्षेश (वर्ष स्वामी)" : "Your Varshesha (Year Lord)"}</div>
                     <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.5rem", color: "var(--maroon-deep)", marginTop: "0.4rem" }}>
-                      {teaser.varshesha}
+                      {isHi ? PLANET_HI[teaser.varshesha] ?? teaser.varshesha : teaser.varshesha}
                     </div>
                     <p className="devanagari" style={{ marginTop: "0.3rem", color: "var(--muted)" }}>
                       {teaser.varshesha_sign_hi} ({teaser.varshesha_sign}) · {isHi ? "भाव" : "House"} {teaser.varshesha_house}
+                    </p>
+                    <p className={isHi ? "devanagari" : undefined} style={{ marginTop: "0.2rem", color: "var(--muted)", fontSize: "0.85rem" }}>
+                      {varsheshaRole(teaser.varshesha_role, isHi)} · {pickLang(teaser.varshesha_quality, isHi)}
                     </p>
                   </div>
                   <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", color: "var(--ink-light)" }}>
@@ -358,7 +375,7 @@ export default function VarshphalYearlyTool() {
                   {result.overall_year_score}<span style={{ fontSize: "1rem", color: "var(--muted)" }}>/100</span>
                 </div>
                 <p className="devanagari" style={{ marginTop: "0.3rem", color: "var(--muted)" }}>
-                  {isHi ? "वर्षेश" : "Varshesha"}: {result.varshesha} ({result.varshesha_role}) · {isHi ? "मुंथा भाव" : "Muntha House"} {result.muntha_house}
+                  {isHi ? "वर्षेश" : "Varshesha"}: {isHi ? PLANET_HI[result.varshesha] ?? result.varshesha : result.varshesha} ({varsheshaRole(result.varshesha_role, isHi)}) · {isHi ? "मुंथा भाव" : "Muntha House"} {result.muntha_house}
                 </p>
               </div>
 
@@ -366,14 +383,14 @@ export default function VarshphalYearlyTool() {
                 <div key={key} className="result-box">
                   <div className="result-label">{isHi ? hi : en}</div>
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                    {result.predictions[key]}
+                    {pickLang(result.predictions[key], isHi)}
                   </p>
                 </div>
               ))}
 
               <div className="result-box">
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)" }}>
-                  {result.note}
+                  {pickLang(result.note, isHi)}
                 </p>
               </div>
 

@@ -150,7 +150,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
         </>
       ) : (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "0.75rem" }}>
             <div className="form-group">
               <label className="form-label">{t("form.lat")}</label>
               <input className="form-input" type="number" step="0.0001" value={mLat} onChange={(e) => setMLat(e.target.value)} required />

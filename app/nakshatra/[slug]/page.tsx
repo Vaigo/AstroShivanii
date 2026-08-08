@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Divider from "@/components/Divider";
 import { NAKSHATRAS, GANA_HI, getNakshatra, padaNavamsa } from "@/lib/nakshatras";
+import { truncateDescription } from "@/lib/seo";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
@@ -20,8 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const n = getNakshatra(slug);
   if (!n) return {};
   return {
-    title: `${n.name} Nakshatra (${n.name_hi}) — स्वामी ${n.lord_hi}, गुण, करियर, नामाक्षर`,
-    description: `${n.name} nakshatra explained: ruling planet ${n.lord}, deity ${n.deity}, ${n.gana} gana, name syllables ${n.syllables.join(", ")} — honest personality, career and remedy guidance.`,
+    title: `${n.name} Nakshatra (${n.name_hi}) — स्वामी ${n.lord_hi}`,
+    description: truncateDescription(
+      `${n.name} nakshatra explained: ruling planet ${n.lord}, deity ${n.deity}, ${n.gana} gana — honest personality, career and remedy guidance.`
+    ),
     alternates: { canonical: `/nakshatra/${n.slug}/` },
   };
 }

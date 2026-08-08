@@ -174,7 +174,7 @@ export default function KarmicDebtTool() {
                             {isHi ? s.hi : s.en}
                           </p>
                           <div style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "0.3rem" }}>
-                            {s.ruling_planet} · {s.gemstone}
+                            {isHi ? s.ruling_planet_hi : s.ruling_planet} · {isHi ? s.gemstone_hi : s.gemstone}
                           </div>
                         </div>
                       );

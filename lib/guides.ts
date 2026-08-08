@@ -27,7 +27,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "what-is-kundli",
     icon: "scroll",
-    title: "What is a Kundli? Your Vedic Birth Chart Explained Simply",
+    title: "What is a Kundli? Vedic Birth Chart Explained",
     titleHi: "कुंडली क्या है?",
     description:
       "What a Kundli (Vedic birth chart) actually shows — Lagna, houses, planets, and dashas — explained in plain language, without jargon or fear.",
@@ -97,7 +97,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "kundli-matching-guna-milan",
     icon: "rings",
-    title: "Kundli Matching Explained: What the 36 Gunas Really Measure",
+    title: "Kundli Matching: What the 36 Gunas Measure",
     titleHi: "गुण मिलान की सच्चाई",
     description:
       "How Ashtakoot Guna Milan works, what each of the 8 kootas measures, what a good score is, and why 18/36 is not an automatic rejection.",
@@ -160,7 +160,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "sade-sati-meaning",
     icon: "planet",
-    title: "Sade Sati: What Saturn's 7.5 Years Actually Bring (Not What You Fear)",
+    title: "Sade Sati: What Saturn's 7.5 Years Really Bring",
     titleHi: "साढ़े साती का सच",
     description:
       "Sade Sati explained without fear: the three phases, why effects differ by Moon sign, what Saturn actually teaches, and simple honest remedies.",
@@ -220,7 +220,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "mangal-dosha-truth",
     icon: "flame",
-    title: "Mangal Dosha: Facts vs Fear — Do You Really Have It?",
+    title: "Mangal Dosha: Facts vs Fear — Do You Have It?",
     titleHi: "मंगल दोष — तथ्य बनाम डर",
     description:
       "What Mangal (Manglik) dosha actually is, the many cancellation rules astrologers check, and why most 'Manglik' verdicts from apps are incomplete.",
@@ -273,7 +273,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "mulank-bhagyank-numerology",
     icon: "hash",
-    title: "Mulank & Bhagyank: Your Two Core Numbers in Vedic Numerology",
+    title: "Mulank & Bhagyank: Your Two Core Life Numbers",
     titleHi: "मूलांक और भाग्यांक",
     description:
       "The difference between Mulank (psychic number) and Bhagyank (destiny number), how each is calculated, and how the two interact in your life.",
@@ -321,7 +321,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "birth-time-missing-astrology",
     icon: "clock",
-    title: "Don't Know Your Birth Time? What Astrology Can Still Tell You",
+    title: "No Birth Time? What Astrology Still Reveals",
     titleHi: "जन्म समय नहीं पता?",
     description:
       "No birth time? Learn exactly what remains reliable (Moon sign, nakshatra, dasha), what becomes approximate, and which techniques work without any time at all.",
@@ -382,7 +382,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "what-is-baal-kundli",
     icon: "leaf",
-    title: "What is a Baal Kundli? Naming Syllable & Baby Chart Explained",
+    title: "What is a Baal Kundli? Naming Syllable Guide",
     titleHi: "बाल कुंडली क्या है?",
     description:
       "A Baal Kundli is your baby's birth chart read for a parent — the auspicious naming syllable, temperament, health tendencies, and why remedies for an infant differ from an adult's.",

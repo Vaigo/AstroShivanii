@@ -128,7 +128,7 @@ export default function TarotTool() {
               </p>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "1rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
               {result.cards.map((card, i) => (
                 <div key={i} style={{ textAlign: "center" }}>
                   <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", fontWeight: 800, letterSpacing: "0.06em", color: "var(--maroon-deep)", marginBottom: "0.1rem" }}>

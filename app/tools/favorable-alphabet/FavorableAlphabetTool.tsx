@@ -108,9 +108,10 @@ export default function FavorableAlphabetTool() {
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginTop: "0.5rem" }}>
                     {isHi ? result.capstone.meaning_hi : result.capstone.meaning_en}
                   </p>
-                  {/* Capstone has no _hi fields for ruling_planet/gemstone — always English, by API design */}
                   <div style={{ marginTop: "0.6rem", fontSize: "0.8rem", color: "var(--muted)" }}>
-                    {result.capstone.ruling_planet} · {result.capstone.gemstone} · {result.capstone.colour}
+                    {isHi ? result.capstone.ruling_planet_hi : result.capstone.ruling_planet} ·{" "}
+                    {isHi ? result.capstone.gemstone_hi : result.capstone.gemstone} ·{" "}
+                    {result.capstone.colour}
                   </div>
                 </div>
               </div>
@@ -118,11 +119,11 @@ export default function FavorableAlphabetTool() {
               <div className="result-box">
                 <div className="result-label">{isHi ? "करियर तालमेल" : "Career Resonance"}</div>
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                  {result.career_resonance}
+                  {isHi ? result.career_resonance_hi : result.career_resonance}
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.6rem" }}>
-                  {result.recommended_careers.map((c) => (
-                    <span key={c} className="trait-chip">{c}</span>
+                  {(isHi ? result.recommended_careers_hi : result.recommended_careers).map((c) => (
+                    <span key={c} className={isHi ? "trait-chip devanagari" : "trait-chip"}>{c}</span>
                   ))}
                 </div>
               </div>

@@ -44,8 +44,12 @@ export default function Navbar() {
       >
         <div className="nav-inner">
           <Link href="/" className="nav-logo" aria-label="Astrologer Shivanii home">
-            Astrologer Shivanii
-            <span className="nav-logo-hi">ज्योतिषाचार्य शिवानी</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="" width={34} height={34} className="nav-logo-mark" />
+            <span>
+              Astrologer Shivanii
+              <span className="nav-logo-hi">ज्योतिषाचार्य शिवानी</span>
+            </span>
           </Link>
 
           <ul className="nav-links" role="list">

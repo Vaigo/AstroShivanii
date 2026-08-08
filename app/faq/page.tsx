@@ -6,7 +6,7 @@ import FaqList from "./FaqList";
 export const metadata: Metadata = {
   title: "FAQ — Bookings, Accuracy, Pricing & Privacy",
   description:
-    "Answers to common questions about Astrologer Shivanii's readings: how bookings work, what happens without a birth time, refund policy, privacy, and why there's no fear-selling.",
+    "Common questions about Shivanii's readings: bookings, accuracy without a birth time, refund policy, privacy, and why there's no fear-selling.",
   alternates: { canonical: "/faq/" },
 };
 

@@ -9,6 +9,7 @@ import { fetchRashifal, fetchWeeklyRashifal } from "@/lib/api/endpoints";
 import type { RashiPrediction, WeeklyRashifalResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { PLANET_HI, colorHi, weekdayHi } from "@/lib/hindi-labels";
 
 /* ︎ forces TEXT presentation — without it Windows/Android render zodiac
    glyphs as colored emoji, which clashes with the parchment theme. */
@@ -180,7 +181,7 @@ export default function RashifalTool() {
                   </span>
                 </h2>
                 <span style={{ color: "var(--muted)", fontSize: "0.82rem" }}>
-                  {forDate} · {isHi ? "स्वामी" : "Lord"}: {result.rashi_lord} · {result.symbol}
+                  {forDate} · {isHi ? "स्वामी" : "Lord"}: {isHi ? PLANET_HI[result.rashi_lord] ?? result.rashi_lord : result.rashi_lord} · {result.symbol}
                 </span>
               </div>
               <div style={{ textAlign: "right" }}>
@@ -214,7 +215,7 @@ export default function RashifalTool() {
               <div className="result-box" style={{ margin: 0, textAlign: "center" }}>
                 <div className="result-label">{isHi ? "शुभ रंग" : "Lucky Colors"}</div>
                 <div className="result-value" style={{ fontSize: "0.9rem" }}>
-                  {result.lucky.colors.join(", ")}
+                  {(isHi ? result.lucky.colors.map(colorHi) : result.lucky.colors).join(", ")}
                 </div>
               </div>
               <div className="result-box" style={{ margin: 0, textAlign: "center" }}>
@@ -223,7 +224,7 @@ export default function RashifalTool() {
               </div>
               <div className="result-box" style={{ margin: 0, textAlign: "center" }}>
                 <div className="result-label">{isHi ? "शुभ दिन" : "Lucky Day"}</div>
-                <div className="result-value" style={{ fontSize: "0.9rem" }}>{result.lucky.day}</div>
+                <div className="result-value" style={{ fontSize: "0.9rem" }}>{isHi ? weekdayHi(result.lucky.day) : result.lucky.day}</div>
               </div>
               <div className="result-box" style={{ margin: 0, textAlign: "center" }}>
                 <div className="result-label">{isHi ? "मंत्र" : "Mantra"}</div>
@@ -282,7 +283,7 @@ export default function RashifalTool() {
                 <StarRating rating={weeklyResult.week_average_stars} />
                 {weeklyResult.best_day && (
                   <span style={{ fontSize: "0.78rem", color: "var(--saffron)", fontWeight: 700, display: "block" }}>
-                    {isHi ? "सर्वोत्तम दिन" : "Best Day"}: {weeklyResult.best_day}
+                    {isHi ? "सर्वोत्तम दिन" : "Best Day"}: {isHi ? weekdayHi(weeklyResult.best_day) : weeklyResult.best_day}
                   </span>
                 )}
               </div>
@@ -310,7 +311,7 @@ export default function RashifalTool() {
                 <tbody>
                   {weeklyResult.days.map((d) => (
                     <tr key={d.date} style={{ borderBottom: "1px solid rgba(201,154,58,0.12)" }}>
-                      <td style={{ padding: "0.4rem 0.5rem", fontWeight: 600 }}>{d.weekday}<br /><span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{d.date}</span></td>
+                      <td style={{ padding: "0.4rem 0.5rem", fontWeight: 600 }}>{isHi ? weekdayHi(d.weekday) : d.weekday}<br /><span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{d.date}</span></td>
                       <td style={{ padding: "0.4rem 0.5rem" }}><StarRating rating={d.overall_stars} /></td>
                       <td style={{ padding: "0.4rem 0.5rem", color: "var(--ink-light)" }} className={isHi ? "devanagari" : undefined}>{isHi ? d.overall_hi : d.overall_en}</td>
                       <td style={{ padding: "0.4rem 0.5rem" }}>{d.lucky_number}</td>

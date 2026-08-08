@@ -287,7 +287,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── अंक ज्योतिष सूट + वार्षिक भविष्यफल — instant-compute paid tools ── */}
+      {/* ── अंक ज्योतिष सूट + वार्षिक भविष्यफल + नाम सुधार — instant-compute paid tools ── */}
       <section className="section" style={{ paddingTop: "0", paddingBottom: "3rem" }}>
         <div className="container" style={{ maxWidth: "900px" }}>
           <Reveal>
@@ -326,6 +326,25 @@ export default function HomePage() {
                       : "A full Varshphal (solar-return) forecast — career, finance, health & relationships"}
                   </p>
                   <Link href="/tools/varshphal-yearly" className="btn btn-primary" style={{ width: "100%" }}>
+                    {isHi ? "शुरू करें →" : "Get Started →"}
+                  </Link>
+                </div>
+              </PatrikaFrame>
+              <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                  <div className="service-card-icon"><Icon name="sparkle" size={24} /></div>
+                  <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                    ₹501 · नाम सुधार
+                  </span>
+                  <h2 style={{ fontSize: "1.15rem", margin: 0 }}>
+                    {isHi ? "आपका नाम भाग्य के अनुकूल है?" : "Does your name match your fortune?"}
+                  </h2>
+                  <p className={isHi ? "devanagari" : undefined} style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                    {isHi
+                      ? "व्यक्तिगत, व्यापार या अन्य नाम — भाग्यांक-जीवन पथ मेल जांच व स्वाभाविक सुधार सुझाव"
+                      : "Personal, business, or other name — Destiny-Life Path match check with natural correction suggestions"}
+                  </p>
+                  <Link href="/tools/name-correction" className="btn btn-primary" style={{ width: "100%" }}>
                     {isHi ? "शुरू करें →" : "Get Started →"}
                   </Link>
                 </div>

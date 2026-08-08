@@ -17,6 +17,18 @@ import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints
 import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError } from "@/lib/api/site";
 import type { BirthRequest, AscendantOptionsResult, AscendantWindow, EventScoreResult, KpRulingResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
+import { PLANET_HI } from "@/lib/hindi-labels";
+import { NAKSHATRAS } from "@/lib/nakshatras";
+
+const nakHi = (name: string) => NAKSHATRAS.find((n) => n.name === name)?.name_hi ?? name;
+
+/** event_breakdown scores are 0-1 (dasha gated by transit) — too technical
+ *  to show raw to a paying customer, so bucket into a plain-language label. */
+function matchStrength(score: number, isHi: boolean): { label: string; color: string } {
+  if (score >= 0.7) return { label: isHi ? "प्रबल मेल" : "Strong match", color: "#1a7a3a" };
+  if (score >= 0.4) return { label: isHi ? "मध्यम मेल" : "Moderate match", color: "#a67c1e" };
+  return { label: isHi ? "अल्प मेल" : "Weak match", color: "#8a2f24" };
+}
 
 declare global {
   interface Window {
@@ -425,8 +437,8 @@ export default function TimeRectificationTool() {
                           </strong>
                           <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{w.start_local}–{w.end_local}</span>
                         </div>
-                        <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--ink-light)", margin: "0.35rem 0 0" }}>
-                          {w.personality.slice(0, 3).join(" · ")}
+                        <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", margin: "0.35rem 0 0" }}>
+                          {isHi ? w.hi : w.personality.slice(0, 3).join(" · ")}
                         </p>
                       </button>
                     ))}
@@ -460,6 +472,16 @@ export default function TimeRectificationTool() {
         {step === "events" && (
           <div ref={stepRef}>
             <PatrikaFrame>
+              <div className="kaal-box" style={{ marginBottom: "1.1rem" }}>
+                <strong className={isHi ? "devanagari" : undefined}>
+                  {isHi ? "⚠ महत्वपूर्ण — कृपया ध्यान दें" : "⚠ Important — please read"}
+                </strong>
+                <p className={isHi ? "devanagari" : undefined} style={{ margin: "0.3rem 0 0" }}>
+                  {isHi
+                    ? "परिणाम की सटीकता पूरी तरह आपके द्वारा दी गई जानकारी पर निर्भर करती है — जितनी अधिक और जितनी सटीक घटनाएं आप जोड़ेंगे, परिणाम उतना ही विश्वसनीय होगा। कृपया केवल वे घटनाएं चुनें जिनकी तारीख आपको पूरी तरह निश्चित याद है, और न्यूनतम से अधिक घटनाएं जोड़ने की कोशिश करें।"
+                    : "The accuracy of your result depends entirely on the information you provide — the more events you add, and the more certain their dates, the more reliable the result. Please add only events whose dates you're fully certain of, and try to add more than the minimum."}
+                </p>
+              </div>
               <LifeEventRows rows={rows} onChange={setRows} min={minEvents} max={10} />
               <button
                 type="button"
@@ -564,6 +586,11 @@ export default function TimeRectificationTool() {
                     );
                   })}
                 </div>
+                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "0.5rem" }}>
+                  {isHi
+                    ? "याद रखें: परिणाम इन्हीं घटनाओं पर आधारित है — अभी भी \"बदलें\" दबाकर और निश्चित घटनाएं जोड़ सकते हैं, इससे सटीकता बढ़ती है।"
+                    : "Remember: the result is built entirely from these events — you can still hit \"Edit\" to add more certain ones, which improves accuracy."}
+                </p>
               </div>
 
               <div className="result-box">
@@ -703,6 +730,36 @@ export default function TimeRectificationTool() {
                 <p className={`devanagari`} style={{ marginTop: "0.3rem", color: "var(--muted)" }}>
                   {result.best_match.ascendant_hi} लग्न ({result.best_match.ascendant}) · {isHi ? "विश्वास स्तर" : "Confidence"}: {result.best_match.confidence_pct}%
                 </p>
+                <p className={isHi ? "devanagari" : undefined} style={{ marginTop: "0.2rem", color: "var(--muted)", fontSize: "0.85rem" }}>
+                  {isHi ? "लग्नेश" : "Ascendant Lord"}: {isHi ? PLANET_HI[result.best_match.ascendant_lord] ?? result.best_match.ascendant_lord : result.best_match.ascendant_lord}
+                  {" · "}
+                  {isHi ? "चंद्र नक्षत्र" : "Moon Nakshatra"}: {isHi ? nakHi(result.best_match.moon_nakshatra) : result.best_match.moon_nakshatra}
+                </p>
+              </div>
+
+              <div className="result-box">
+                <div className="result-label">{isHi ? "घटना-अनुसार मेल" : "Event-by-Event Match"}</div>
+                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", margin: "0.2rem 0 0.6rem" }}>
+                  {isHi
+                    ? "यह समय आपकी हर घटना से कितना मेल खाता है — दशा और गोचर दोनों के आधार पर"
+                    : "How well this time matches each of your events — based on both dasha and transit"}
+                </p>
+                <div style={{ display: "grid", gap: "0.4rem" }}>
+                  {result.best_match.event_breakdown.map((eb, i) => {
+                    const label = EVENT_TYPES.find((et) => et.key === eb.type)?.label;
+                    const m = matchStrength(eb.score, isHi);
+                    return (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", padding: "0.3rem 0", borderBottom: "1px dashed rgba(201,154,58,0.3)" }}>
+                        <span className={isHi ? "devanagari" : undefined}>
+                          {label ? (isHi ? label.hi : label.en) : eb.type} — {eb.date}
+                        </span>
+                        <span style={{ fontWeight: 700, color: m.color, whiteSpace: "nowrap", marginLeft: "0.5rem" }} className={isHi ? "devanagari" : undefined}>
+                          {m.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="result-box">

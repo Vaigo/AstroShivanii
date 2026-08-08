@@ -125,8 +125,8 @@ export default function ReadingDetail({ reading }: Props) {
 
           <p style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--muted)", marginTop: "1rem" }}>
             {isHi
-              ? "Razorpay से सुरक्षित भुगतान। भारतीय निवासियों के लिए GST लागू।"
-              : "Secure payment via Razorpay. GST applicable for Indian residents."}
+              ? "Razorpay से सुरक्षित भुगतान।"
+              : "Secure payment via Razorpay."}
           </p>
         </PatrikaFrame>
 

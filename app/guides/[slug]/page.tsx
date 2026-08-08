@@ -29,6 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: guide.title,
       description: guide.description,
       url: `/guides/${guide.slug}/`,
+      // Page-level openGraph replaces the layout's wholesale in Next.js (no
+      // deep merge), so images must be repeated here — see app/page.tsx.
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Astrologer Shivanii — Personal Vedic Astrology Readings" }],
     },
   };
 }

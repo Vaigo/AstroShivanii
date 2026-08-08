@@ -11,6 +11,7 @@ import { fetchPersonalYear } from "@/lib/api/endpoints";
 import type { PersonalYearResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { pickLang } from "@/lib/hindi-labels";
 
 export default function PersonalYearTool() {
   const { t, lang } = useI18n();
@@ -84,7 +85,7 @@ export default function PersonalYearTool() {
                 <div className="num-core-card">
                   <div className="num-core-num">{result.personal_year}</div>
                   <div className="num-core-label">{isHi ? `वर्ष ${result.current_year}` : `Year ${result.current_year}`}</div>
-                  <div className="num-core-planet">{result.theme}</div>
+                  <div className="num-core-planet">{pickLang(result.theme, isHi)}</div>
                   <div className="num-core-sub">{isHi ? result.ruling_planet_hi : result.ruling_planet}</div>
                 </div>
               </div>
@@ -94,12 +95,14 @@ export default function PersonalYearTool() {
                   {isHi ? result.meaning.hi : result.meaning.en}
                 </p>
                 {(result.meaning.strengths?.length > 0 || result.meaning.challenges?.length > 0) && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginTop: "0.75rem" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "0.75rem", marginTop: "0.75rem" }}>
                     {result.meaning.strengths?.length > 0 && (
                       <div>
                         <div className="result-label" style={{ marginBottom: "0.3rem" }}>{isHi ? "शक्तियां" : "Strengths"}</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-                          {result.meaning.strengths.map((s) => <span key={s} className="trait-chip">{s}</span>)}
+                          {(isHi ? result.meaning.strengths_hi : result.meaning.strengths).map((s) => (
+                            <span key={s} className={isHi ? "trait-chip devanagari" : "trait-chip"}>{s}</span>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -107,7 +110,9 @@ export default function PersonalYearTool() {
                       <div>
                         <div className="result-label" style={{ marginBottom: "0.3rem" }}>{isHi ? "चुनौतियां" : "Challenges"}</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-                          {result.meaning.challenges.map((c) => <span key={c} className="trait-chip">{c}</span>)}
+                          {(isHi ? result.meaning.challenges_hi : result.meaning.challenges).map((c) => (
+                            <span key={c} className={isHi ? "trait-chip devanagari" : "trait-chip"}>{c}</span>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -120,7 +125,7 @@ export default function PersonalYearTool() {
                   { icon: "planet" as const, label: isHi ? "शासक ग्रह" : "Ruling Planet", val: isHi ? result.ruling_planet_hi : result.ruling_planet },
                   { icon: "gem" as const, label: isHi ? "रत्न" : "Gemstone", val: isHi ? result.gemstone_hi : result.gemstone },
                   { icon: "droplet" as const, label: isHi ? "शुभ रंग" : "Favorable Color", val: isHi ? result.colour_hi : result.colour },
-                  { icon: "calendar" as const, label: isHi ? "शुभ दिन" : "Favourable Days", val: result.favourable_days.join(", ") },
+                  { icon: "calendar" as const, label: isHi ? "शुभ दिन" : "Favourable Days", val: (isHi ? result.favourable_days_hi : result.favourable_days).join(", ") },
                 ].map(({ icon, label, val }) => (
                   <div key={label} className="fav-item">
                     <span className="fav-icon"><Icon name={icon} size={20} /></span>
@@ -137,21 +142,27 @@ export default function PersonalYearTool() {
                 <div className="result-value devanagari">{result.mantra_devanagari}</div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.6rem", margin: "1rem 0" }}>
+              {/* minmax(0, 1fr), not bare 1fr — a grid track's implicit
+                  minimum is its content's width, so the 3rd column (often
+                  the longest theme text) was being pushed outside the card
+                  on narrow phones instead of wrapping. minmax(0, ...)
+                  removes that implicit floor so all 3 columns actually
+                  share the available width evenly. */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "0.6rem", margin: "1rem 0" }}>
                 <div className="result-box" style={{ textAlign: "center" }}>
                   <div className="result-label">{result.previous_year.year}</div>
                   <div className="result-value" style={{ fontSize: "1.1rem" }}>{result.previous_year.number}</div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{result.previous_year.theme}</div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{pickLang(result.previous_year.theme, isHi)}</div>
                 </div>
                 <div className="result-box" style={{ textAlign: "center", border: "1.5px solid var(--gold)" }}>
                   <div className="result-label">{result.current_year}</div>
                   <div className="result-value" style={{ fontSize: "1.1rem" }}>{result.personal_year}</div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{result.theme}</div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{pickLang(result.theme, isHi)}</div>
                 </div>
                 <div className="result-box" style={{ textAlign: "center" }}>
                   <div className="result-label">{result.next_year.year}</div>
                   <div className="result-value" style={{ fontSize: "1.1rem" }}>{result.next_year.number}</div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{result.next_year.theme}</div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{pickLang(result.next_year.theme, isHi)}</div>
                 </div>
               </div>
 
@@ -179,7 +190,7 @@ export default function PersonalYearTool() {
                   en: `Your Personal Year ${result.personal_year} sets the theme — a full reading maps it onto your actual planetary periods (dasha).`,
                   hi: `आपका वर्षांक ${result.personal_year} विषय तय करता है — पूर्ण पाठन इसे आपकी वास्तविक दशा से जोड़ता है।`,
                 }}
-                waText={`Namaste Shivanii ji! My Personal Year Number for ${result.current_year} is ${result.personal_year} (${result.theme}). I'd like to know how this year looks for me in detail.`}
+                waText={`Namaste Shivanii ji! My Personal Year Number for ${result.current_year} is ${result.personal_year} (${pickLang(result.theme, false)}). I'd like to know how this year looks for me in detail.`}
                 reading={{ href: "/readings/annual-forecast", labelEn: "Book Annual Forecast ₹1,499", labelHi: "वार्षिक भविष्यफल बुक करें ₹1,499" }}
               />
             </PatrikaFrame>

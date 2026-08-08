@@ -7,7 +7,7 @@ import Icon, { IconName } from "@/components/Icon";
 import { CATEGORIES } from "@/lib/turant-uttar-data";
 
 export const metadata: Metadata = {
-  title: "Free Vedic Astrology Tools — Kundli, Matching, Numerology & More",
+  title: "Free Vedic Astrology & Numerology Tools",
   description:
     "Free Vedic astrology calculators — Kundli, Marriage Matching, Rashifal, Tarot, Sade Sati, Numerology with Lo Shu Grid. No sign-up needed, free forever.",
   alternates: { canonical: "/tools/" },
@@ -155,6 +155,21 @@ export default function ToolsPage() {
                   वर्षफल (सौर वापसी कुंडली) से करियर, धन, स्वास्थ्य व रिश्तों का पूर्ण विश्लेषण
                 </p>
                 <Link href="/tools/varshphal-yearly" className="btn btn-primary" style={{ width: "100%" }}>
+                  शुरू करें →
+                </Link>
+              </div>
+            </PatrikaFrame>
+            <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                <div className="service-card-icon"><Icon name="sparkle" size={24} /></div>
+                <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                  ₹501 · नाम सुधार
+                </span>
+                <h2 style={{ fontSize: "1.15rem", margin: 0 }}>आपका नाम भाग्य के अनुकूल है?</h2>
+                <p style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                  व्यक्तिगत, व्यापार या अन्य नाम — भाग्यांक-जीवन पथ मेल जांच व स्वाभाविक सुधार सुझाव
+                </p>
+                <Link href="/tools/name-correction" className="btn btn-primary" style={{ width: "100%" }}>
                   शुरू करें →
                 </Link>
               </div>

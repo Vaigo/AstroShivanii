@@ -4,7 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import PanchangTool from "./PanchangTool";
 
 export const metadata: Metadata = {
-  title: "आज का पंचांग (Aaj Ka Panchang) — Tithi, Nakshatra, Rahu Kaal, Muhurta",
+  title: "आज का पंचांग (Aaj Ka Panchang) — Tithi & Rahu Kaal",
   description:
     "Today's panchang with real astronomical calculations: tithi, vara, nakshatra, yoga, karana, sunrise-sunset, Rahu Kaal, Gulika Kaal, Yamaganda and Abhijit Muhurta — for any date and city. Free, no sign-up.",
   alternates: { canonical: "/tools/panchang/" },

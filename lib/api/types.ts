@@ -521,7 +521,9 @@ export interface LalKitabDebt {
   name: string;
   name_hi: string;
   indicator: string;
+  indicator_hi: string;
   remedy: string;
+  remedy_hi: string;
   active: boolean;
 }
 
@@ -531,13 +533,16 @@ export interface LalKitabPrediction {
   sign: string;
   in_pakka_ghar: boolean;
   prediction: string;
+  prediction_hi: string;
 }
 
 export interface LalKitabUpaya {
   planet: string;
   house: number | null;
   reason: string;
+  reason_hi: string;
   upayas: string[];
+  upayas_hi: string[];
 }
 
 export interface LalKitabPakkaGharEntry {
@@ -562,7 +567,14 @@ export interface LuckyColorsResult {
   lagna: string;
   lagna_lord: string;
   nakshatra_lord: string;
+  /** A merge of the Lagna lord's AND Nakshatra lord's classical colors —
+   *  use auspicious_colors_by_source to show which color came from which,
+   *  rather than implying they're all one planet's colors. */
   auspicious_colors: string[];
+  auspicious_colors_by_source: {
+    lagna_lord: { planet: string; colors: string[] };
+    nakshatra_lord: { planet: string; colors: string[] };
+  };
   inauspicious_colors: string[];
   note: string;
 }
@@ -615,14 +627,15 @@ export interface CornerstoneLetter {
   colour: string;
 }
 
-/** No _hi fields on ruling_planet/gemstone — asymmetric with CornerstoneLetter by API design. */
 export interface CapstoneLetter {
   letter: string;
   value: number;
   meaning_en: string;
   meaning_hi: string;
   ruling_planet: string;
+  ruling_planet_hi: string;
   gemstone: string;
+  gemstone_hi: string;
   colour: string;
 }
 
@@ -633,7 +646,9 @@ export interface FirstLetterResult {
   cornerstone: CornerstoneLetter;
   capstone: CapstoneLetter;
   career_resonance: string;
+  career_resonance_hi: string;
   recommended_careers: string[];
+  recommended_careers_hi: string[];
   interpretation_en: string;
   interpretation_hi: string;
 }
@@ -651,7 +666,9 @@ export interface PersonalYearMeaning {
   hi: string;
   en: string;
   strengths: string[];
+  strengths_hi: string[];
   challenges: string[];
+  challenges_hi: string[];
   lucky_color: string;
   ruling_planet: string;
 }
@@ -670,6 +687,7 @@ export interface PersonalYearResult {
   mantra: string;
   mantra_devanagari: string;
   favourable_days: string[];
+  favourable_days_hi: string[];
   previous_year: PersonalYearAdjacent;
   next_year: PersonalYearAdjacent;
   advice_en: string;
@@ -697,6 +715,48 @@ export interface KarmicDebtResult {
   interpretation_hi: string;
 }
 
+/* ── Name Correction (/v1/numerology/name-correction) ────────────────────
+   Sourced directly from backend/app/routers/numerology.py's
+   _name_correction_core — dob drives Mulank/Bhagyank regardless of
+   category (personal birth date / business owner's birth date / other
+   reference date); the category only changes the frontend's field labels,
+   not the API call. Rewritten 2026-08-08 to a 5-rule, exhaustively-
+   searched system (Mulank/Bhagyank harmony, avoid 4/8, added-letter
+   compatibility, preserved pronunciation) — every returned variant has
+   already passed all 5 rules; `rating` differentiates HOW WELL among
+   passing options, it never appears on a rule-violating one. */
+
+export type NameCorrectionRating = "best" | "good" | "moderate";
+
+export interface NameCorrectionVariant {
+  name: string;
+  destiny: number;
+  ideal: boolean;
+  rating: NameCorrectionRating;
+  /** How the variant was reached — "spelling" (softened an existing word,
+   *  no new token) is the least intrusive; "*initial"/"*2initials" add one
+   *  or two extra letters between first and last name. */
+  mechanism: string;
+  added_letters: string[];
+}
+
+export interface NameCorrectionResult {
+  original_name: string;
+  current_destiny_number: number;
+  mulank: number;
+  bhagyank: number;
+  /** @deprecated kept for API back-compat — equals bhagyank */
+  life_path: number;
+  ideal_destiny_numbers: number[];
+  current_is_ideal: boolean;
+  /** Always empty in the current backend — superseded by spelling_variants,
+   *  which are exact, rule-checked names rather than abstract letter hints. */
+  correction_suggestions: unknown[];
+  spelling_variants: NameCorrectionVariant[];
+  disclaimer_en: string;
+  disclaimer_hi: string;
+}
+
 /* ── Missing/Repeated Numbers (/v1/numerology/missing-numbers) ──────────── */
 
 export interface MissingLesson {
@@ -711,12 +771,13 @@ export interface MissingLesson {
   remedy_hi: string;
 }
 
-/** NOT the same shape as MissingLesson — fewer fields, no _hi/colour/remedy. */
 export interface RepeatedStrength {
   en: string;
   hi: string;
   ruling_planet: string;
+  ruling_planet_hi: string;
   gemstone: string;
+  gemstone_hi: string;
 }
 
 export interface MissingNumbersResult {
