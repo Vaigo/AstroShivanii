@@ -55,8 +55,14 @@ export default function TimeRectificationTool() {
   const [ascOptions, setAscOptions] = useState<AscendantOptionsResult | null>(null);
   const [teaserLoading, setTeaserLoading] = useState(false);
   const [selectedStart, setSelectedStart] = useState<string | null>(null);
+  // True when the user typed their own approx time on the birth step — in
+  // that case an ascendant-window click in the teaser step must NOT silently
+  // overwrite it (a remembered clock time is a stronger signal than a
+  // personality-vibe guess); it only narrows the search when they gave no
+  // guess at all (approxTob was blank, defaulted to a full-day scan).
+  const [hasOwnTobGuess, setHasOwnTobGuess] = useState(false);
 
-  const [rows, setRows] = useState<EventRow[]>(() => [emptyEventRow(), emptyEventRow(), emptyEventRow()]);
+  const [rows, setRows] = useState<EventRow[]>(() => Array.from({ length: 5 }, emptyEventRow));
   const [predispositions, setPredispositions] = useState<Partial<Record<PredispositionTypeKey, PredispositionAnswerKey>>>({});
 
   const [paying, setPaying] = useState(false);
@@ -71,7 +77,7 @@ export default function TimeRectificationTool() {
   const [refCode, setRefCode] = useState(() => `REC-${Date.now().toString(36).toUpperCase()}`);
   const stepRef = useRef<HTMLDivElement>(null);
 
-  const minEvents = dayUnknown ? 5 : 3;
+  const minEvents = dayUnknown ? 7 : 5;
   const validEventCount = rows.filter(isValidRow).length;
 
   // Restore a saved session first — a refresh must never lose a paid result
@@ -88,6 +94,7 @@ export default function TimeRectificationTool() {
         setUserName(s.userName ?? "");
         setAscOptions(s.ascOptions ?? null);
         setSelectedStart(s.selectedStart ?? null);
+        setHasOwnTobGuess(!!s.hasOwnTobGuess);
         if (Array.isArray(s.rows) && s.rows.length) setRows(s.rows);
         setPredispositions(s.predispositions ?? {});
         setResult(s.result ?? null);
@@ -102,10 +109,10 @@ export default function TimeRectificationTool() {
     try {
       window.sessionStorage.setItem("rect-state", JSON.stringify({
         step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName,
-        ascOptions, selectedStart, rows, predispositions, result, refCode,
+        ascOptions, selectedStart, hasOwnTobGuess, rows, predispositions, result, refCode,
       }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, rows, predispositions, result, refCode]);
+  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, hasOwnTobGuess, rows, predispositions, result, refCode]);
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -136,6 +143,7 @@ export default function TimeRectificationTool() {
 
   async function handleContinueFromBirth() {
     if (!birthDraft) return;
+    setHasOwnTobGuess(!!approxTob);
     const guess = approxTob || "12:00";
     const range = approxTob ? 60 : 720; // no guess at all -> scan the whole day
     setApproxTob(guess);
@@ -156,6 +164,11 @@ export default function TimeRectificationTool() {
   }
 
   function pickAscendantWindow(w: AscendantWindow) {
+    setSelectedStart(w.start_local);
+    // A user-remembered clock time outranks a "which ascendant sounds like
+    // me" guess — never overwrite it. Only narrow the actual search window
+    // when the user gave no time at all (this is then the only signal we have).
+    if (hasOwnTobGuess) return;
     const [sh, sm] = w.start_local.split(":").map(Number);
     const [eh, em] = w.end_local === "24:00" ? [24, 0] : w.end_local.split(":").map(Number);
     const startMin = sh * 60 + sm, endMin = eh * 60 + em;
@@ -163,7 +176,6 @@ export default function TimeRectificationTool() {
     const midH = Math.floor(midMin / 60) % 24, midM = Math.round(midMin % 60);
     setApproxTob(`${String(midH).padStart(2, "0")}:${String(midM).padStart(2, "0")}`);
     setTimeRangeMinutes(Math.max(45, Math.round((endMin - startMin) / 2) + 15));
-    setSelectedStart(w.start_local);
   }
 
   // Razorpay checkout.js — loaded once, used by the hard-gated payment step.
@@ -278,7 +290,8 @@ export default function TimeRectificationTool() {
     setUserName("");
     setAscOptions(null);
     setSelectedStart(null);
-    setRows([emptyEventRow(), emptyEventRow(), emptyEventRow()]);
+    setHasOwnTobGuess(false);
+    setRows(Array.from({ length: 5 }, emptyEventRow));
     setPredispositions({});
     setResult(null);
     setKpResult(null);
@@ -337,11 +350,11 @@ export default function TimeRectificationTool() {
                 <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.4rem" }}>
                   {dayUnknown
                     ? (isHi
-                        ? "दिन अज्ञात होने पर हम पूरे महीने के हर दिन की जांच करेंगे — पर विश्वसनीय परिणाम हेतु कम से कम 5 जीवन-घटनाएं देनी होंगी (सामान्यतः 3)।"
-                        : "Since the day isn't known, we'll search every day of that month — but we'll need at least 5 life events (instead of the usual 3) for a confident result.")
+                        ? "दिन अज्ञात होने पर हम पूरे महीने के हर दिन की जांच करेंगे — पर विश्वसनीय परिणाम हेतु कम से कम 7 जीवन-घटनाएं देनी होंगी (सामान्यतः 5)।"
+                        : "Since the day isn't known, we'll search every day of that month — but we'll need at least 7 life events (instead of the usual 5) for a confident result.")
                     : (isHi
-                        ? "अधिक सटीक परिणाम के लिए आगे कम से कम 3 ऐसी घटनाएं जोड़ें जिनकी तारीख आपको निश्चित रूप से याद है — विवाह, नौकरी परिवर्तन, दुर्घटना/बीमारी जैसी घटनाएं सबसे बेहतर परिणाम देती हैं।"
-                        : "For the most accurate result, you'll add at least 3 events with dates you're certain of — marriage, job change, or an accident/illness work especially well.")}
+                        ? "अधिक सटीक परिणाम के लिए आगे कम से कम 5 ऐसी घटनाएं जोड़ें जिनकी तारीख आपको निश्चित रूप से याद है — विवाह, नौकरी परिवर्तन, दुर्घटना/बीमारी जैसी घटनाएं सबसे बेहतर परिणाम देती हैं।"
+                        : "For the most accurate result, you'll add at least 5 events with dates you're certain of — marriage, job change, or an accident/illness work especially well.")}
                 </p>
               </div>
 
@@ -403,9 +416,13 @@ export default function TimeRectificationTool() {
               ) : (
                 <>
                   <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", marginBottom: "1rem" }}>
-                    {isHi
-                      ? "जो लग्न आपसे सबसे मेल खाता लगे, उस पर क्लिक करें — इससे हमें आपके समय का बेहतर अनुमान मिलेगा (वैकल्पिक, छोड़ भी सकते हैं)"
-                      : "Click the ascendant that sounds most like you — this helps narrow the guess (optional, you can skip)"}
+                    {hasOwnTobGuess
+                      ? (isHi
+                          ? `आपने पहले ही एक अनुमानित समय (${approxTob}) दिया है, इसलिए खोज उसी के आसपास रहेगी — नीचे किसी लग्न पर क्लिक करना सिर्फ़ रुचि के लिए है, इससे आपका दिया समय नहीं बदलेगा।`
+                          : `You've already given an approximate time (${approxTob}), so the search stays anchored to that — clicking an ascendant below is just for interest and won't change your search window.`)
+                      : (isHi
+                          ? "जो लग्न आपसे सबसे मेल खाता लगे, उस पर क्लिक करें — चूंकि आपने कोई समय नहीं बताया, यही हमारा एकमात्र अनुमान होगा (वैकल्पिक, छोड़ भी सकते हैं)"
+                          : "Click the ascendant that sounds most like you — since you gave no time at all, this becomes our only guess to narrow the search (optional, you can skip)")}
                   </p>
                   {dayUnknown && (
                     <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ textAlign: "center", marginBottom: "1rem" }}>
