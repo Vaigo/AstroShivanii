@@ -57,6 +57,13 @@ export default function TimeRectificationTool() {
   // personality-vibe guess); it only narrows the search when they gave no
   // guess at all (approxTob was blank, defaulted to a full-day scan).
   const [hasOwnTobGuess, setHasOwnTobGuess] = useState(false);
+  // Shown when the customer has given NO time signal at all — neither a
+  // guessed clock time nor a picked ascendant window — right before letting
+  // them proceed anyway. Tested directly against a real known-birth-time
+  // case: that specific combination (full-day blind scan) put the WRONG
+  // time on top even with 8 life events, while a rough guess (even wrong by
+  // 25 min) got the right time to rank #1. Worth one honest speed bump.
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
 
   const [rows, setRows] = useState<EventRow[]>(() => Array.from({ length: 5 }, emptyEventRow));
 
@@ -278,6 +285,7 @@ export default function TimeRectificationTool() {
     setAscOptions(null);
     setSelectedStart(null);
     setHasOwnTobGuess(false);
+    setShowSkipWarning(false);
     setRows(Array.from({ length: 5 }, emptyEventRow));
     setResult(null);
     setKpResult(null);
@@ -359,8 +367,8 @@ export default function TimeRectificationTool() {
                 />
                 <span className="form-hint">
                   {isHi
-                    ? "जैसे \"रात करीब 10 बजे\" — बिल्कुल सही न भी पता हो तो चलेगा; कोई अनुमान न हो तो खाली छोड़ें, हम पूरे दिन की जांच करेंगे"
-                    : "e.g. \"around 10pm\" — an approximate guess is fine; leave blank to scan the whole day if you have no guess at all"}
+                    ? "जैसे \"रात करीब 10 बजे\" — बिल्कुल सही न भी पता हो तो चलेगा, और इससे सटीकता काफी बढ़ जाती है; कोई अनुमान न हो तो खाली छोड़ें (अगले चरण में एक और तरीका मिलेगा)"
+                    : "e.g. \"around 10pm\" — even a rough guess meaningfully improves accuracy; leave blank if you truly have no idea (you'll get one more way to narrow it down on the next step)"}
                 </span>
               </div>
 
@@ -450,10 +458,44 @@ export default function TimeRectificationTool() {
                     type="button"
                     className="btn btn-primary"
                     style={{ width: "100%", marginTop: "1.1rem" }}
-                    onClick={() => setStep("events")}
+                    onClick={() => {
+                      if (!hasOwnTobGuess && !selectedStart) {
+                        setShowSkipWarning(true);
+                      } else {
+                        setStep("events");
+                      }
+                    }}
                   >
                     {isHi ? "आगे बढ़ें" : "Continue"}
                   </button>
+                  {showSkipWarning && (
+                    <div className="kaal-box" style={{ marginTop: "0.9rem" }}>
+                      <strong className={isHi ? "devanagari" : undefined}>
+                        {isHi ? "⚠ बिना किसी समय-संकेत के आगे बढ़ रहे हैं" : "⚠ Proceeding with no time signal at all"}
+                      </strong>
+                      <p className={isHi ? "devanagari" : undefined} style={{ margin: "0.4rem 0 0" }}>
+                        {isHi
+                          ? "आपने न कोई अनुमानित समय दिया है, न ऊपर कोई लग्न चुना — इस स्थिति में खोज पूरे दिन में होगी। हमारी अपनी वास्तविक जांच में, ठीक इसी स्थिति में एल्गोरिथ्म ने गलत समय को शीर्ष परिणाम बताया — भले ही कई जीवन-घटनाएं दी गई हों। ऊपर सिर्फ एक लग्न चुनने मात्र से सटीकता में बड़ा सुधार होता है।"
+                          : "You haven't given an approximate time, and you haven't picked an ascendant above either — in that exact situation, the search scans the entire day. In our own real testing, that specific combination led the algorithm to the WRONG top result, even with several life events. Picking just one ascendant above meaningfully improves your odds."}
+                      </p>
+                      <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.7rem", flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => setShowSkipWarning(false)}
+                        >
+                          {isHi ? "ठीक है, एक लग्न चुनता/चुनती हूं" : "Okay, let me pick one"}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => setStep("events")}
+                        >
+                          {isHi ? "फिर भी आगे बढ़ें" : "Continue anyway"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </PatrikaFrame>
@@ -461,7 +503,7 @@ export default function TimeRectificationTool() {
               <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
                 <button
                   type="button"
-                  onClick={() => setStep("birth")}
+                  onClick={() => { setShowSkipWarning(false); setStep("birth"); }}
                   style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
                 >
                   ← {isHi ? "जन्म विवरण बदलें" : "Edit birth details"}
