@@ -7,7 +7,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com"
 export const metadata: Metadata = {
   title: "Name Correction Checker ₹501 — All Name Types",
   description:
-    "Check whether a personal, business, or other name's numerology (Destiny number) harmonises with its owner's Life Path, with natural, pronounceable spelling correction suggestions. ₹501, instant result.",
+    "Check whether a personal, business, or other name's numerology (Destiny number) harmonises with its owner's Mulank and Bhagyank — up to 10 natural, pronounceable spelling suggestions, plus an optional family sync analysis using your parents' names. ₹501, instant result.",
 };
 
 const appJsonLd = {
@@ -15,7 +15,7 @@ const appJsonLd = {
   "@type": "WebApplication",
   name: "Name Correction Checker",
   description:
-    "Check whether a personal, business, or other name's numerology harmonises with its owner's Life Path, with natural, pronounceable spelling correction suggestions.",
+    "Check whether a personal, business, or other name's numerology harmonises with its owner's Mulank and Bhagyank — up to 10 natural, pronounceable spelling suggestions, plus an optional family sync analysis using the parents' names.",
   url: `${SITE_URL}/tools/name-correction/`,
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Any",

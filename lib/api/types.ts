@@ -740,6 +740,37 @@ export interface NameCorrectionVariant {
   added_letters: string[];
 }
 
+export type FamilySyncRelation = "same" | "friend" | "neutral" | "enemy";
+export type FamilySyncVerdict = "same_frequency" | "harmonious" | "neutral" | "clashing";
+
+export interface FamilyParentSync {
+  relation: "father" | "mother";
+  name: string;
+  first_letter: string;
+  letter_value: number;
+  vs_child_letter: FamilySyncRelation;
+  vs_mulank: FamilySyncRelation;
+  vs_bhagyank: FamilySyncRelation;
+  verdict: FamilySyncVerdict;
+  description_en: string;
+  description_hi: string;
+}
+
+/** First-letter family-frequency analysis — present only when at least one
+ *  parent name was sent. Corroborative context only: it never changes which
+ *  spellings pass, and no suggestion ever alters the first letter, so it
+ *  applies equally to the original name and every variant. */
+export interface FamilySync {
+  child_first_letter: string;
+  child_letter_value: number;
+  parents: FamilyParentSync[];
+  overall: "in_sync" | "partial" | "clash_present";
+  overall_en: string;
+  overall_hi: string;
+  note_en: string;
+  note_hi: string;
+}
+
 export interface NameCorrectionResult {
   original_name: string;
   current_destiny_number: number;
@@ -753,6 +784,7 @@ export interface NameCorrectionResult {
    *  which are exact, rule-checked names rather than abstract letter hints. */
   correction_suggestions: unknown[];
   spelling_variants: NameCorrectionVariant[];
+  family_sync: FamilySync | null;
   disclaimer_en: string;
   disclaimer_hi: string;
 }

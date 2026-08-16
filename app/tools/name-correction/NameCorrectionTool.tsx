@@ -48,6 +48,81 @@ const NAME_PLACEHOLDER: Record<Category, { en: string; hi: string }> = {
   other: { en: "Brand, product, or any other name", hi: "ब्रांड, उत्पाद या कोई अन्य नाम" },
 };
 
+// Category only relabels the two fields below it — the harmony calculation
+// itself never changes, so the hint says so up front to avoid confusion.
+const CATEGORY_HINT = {
+  en: "This just changes what we ask for below — the calculation always checks a name's numbers against the birth date's Mulank and Bhagyank.",
+  hi: "इससे केवल नीचे मांगी जाने वाली जानकारी बदलती है — गणना हमेशा नाम के अंकों की तुलना जन्मतिथि के मूलांक व भाग्यांक से करती है।",
+};
+
+const DATE_HINT: Record<Category, { en: string; hi: string }> = {
+  personal: {
+    en: "We derive your Mulank (from the day alone) and Bhagyank (from the full date) — the name is checked for harmony against both.",
+    hi: "इससे आपका मूलांक (केवल जन्म-दिन से) और भाग्यांक (पूरी तारीख से) निकाला जाता है — नाम की जांच इन्हीं दोनों से होती है।",
+  },
+  business: {
+    en: "Use the owner's/founder's actual birth date, not the registration or launch date — the business name is checked against the owner's own numbers.",
+    hi: "मालिक/संस्थापक की वास्तविक जन्मतिथि दें, पंजीकरण या लॉन्च तारीख नहीं — व्यापार के नाम की जांच मालिक के अपने अंकों से होती है।",
+  },
+  other: {
+    en: "Enter the birth date of the person this name belongs to — that date's Mulank and Bhagyank are what the name is checked against.",
+    hi: "इस नाम से जुड़े व्यक्ति की जन्मतिथि दर्ज करें — नाम की जांच इसी तारीख के मूलांक व भाग्यांक से की जाती है।",
+  },
+};
+
+const NAME_HINT: Record<Category, { en: string; hi: string }> = {
+  personal: {
+    en: "Type it exactly as spelled today, on your ID — numerology is calculated letter by letter, so even a small spelling change shifts the number.",
+    hi: "आज जैसा नाम पहचान-पत्र पर लिखा है वैसे ही दर्ज करें — अंक ज्योतिष अक्षर-दर-अक्षर गिनता है, इसलिए छोटी सी स्पेलिंग भी अंक बदल देती है।",
+  },
+  business: {
+    en: "Use the exact spelling shown on signage/branding today — that precise spelling is what gets scored.",
+    hi: "आज साइनेज/ब्रांडिंग में जो सटीक स्पेलिंग दिखती है वही दर्ज करें — उसी की गणना होती है।",
+  },
+  other: {
+    en: "Enter the exact current spelling of the name you want checked.",
+    hi: "जिस नाम की जांच करनी है, उसकी मौजूदा सटीक स्पेलिंग दर्ज करें।",
+  },
+};
+
+/** spelling_variants[].mechanism — plain-language description of HOW the
+ *  suggested name differs from the original (added_letters is the raw
+ *  evidence; this is the human-readable summary of it). */
+function mechanismLabel(mechanism: string, isHi: boolean): string {
+  switch (mechanism) {
+    case "spelling":
+      return isHi ? "मौजूदा स्पेलिंग में मामूली बदलाव — कोई नया अक्षर नहीं जोड़ा गया" : "Existing spelling softened slightly — no new letter added";
+    case "middle_initial":
+      return isHi ? "नाम के बीच में एक आद्याक्षर जोड़ा गया" : "One middle initial added between your names";
+    case "spelling_and_initial":
+      return isHi ? "स्पेलिंग में बदलाव + एक आद्याक्षर जोड़ा गया" : "Spelling softened + one middle initial added";
+    case "2initials":
+      return isHi ? "नाम के बीच में दो आद्याक्षर जोड़े गए" : "Two middle initials added between your names";
+    case "spelling_and_2initials":
+      return isHi ? "स्पेलिंग में बदलाव + दो आद्याक्षर जोड़े गए" : "Spelling softened + two middle initials added";
+    default:
+      return mechanism;
+  }
+}
+
+/** family_sync[].verdict — chip label + colors, matching the rating-chip
+ *  conventions used for spelling variants. "clashing" deliberately renders
+ *  as a calm "Opposed", not an alarm — the description text already explains
+ *  it's a common generational pattern, not a defect (honesty rule: never
+ *  manufacture fear the product can't and needn't fix). */
+function familyVerdictChip(verdict: string, isHi: boolean): { label: string; bg: string; color: string } {
+  switch (verdict) {
+    case "same_frequency":
+      return { label: isHi ? "समान आवृत्ति" : "Same frequency", bg: "var(--gold)", color: "var(--maroon-deep)" };
+    case "harmonious":
+      return { label: isHi ? "मैत्रीपूर्ण" : "Harmonious", bg: "rgba(26,122,58,0.12)", color: "#1a7a3a" };
+    case "clashing":
+      return { label: isHi ? "विपरीत" : "Opposed", bg: "rgba(138,47,36,0.12)", color: "#8a2f24" };
+    default:
+      return { label: isHi ? "तटस्थ" : "Neutral", bg: "rgba(150,150,150,0.15)", color: "var(--muted)" };
+  }
+}
+
 export default function NameCorrectionTool() {
   const { lang } = useI18n();
   const isHi = lang === "hi";
@@ -56,6 +131,11 @@ export default function NameCorrectionTool() {
   const [category, setCategory] = useState<Category>("personal");
   const [dob, setDob] = useState("");
   const [name, setName] = useState("");
+  // Optional, personal category only — unlock the family-frequency analysis
+  // (first letters of the parents' names checked against the person's own
+  // first letter, Mulank, and Bhagyank).
+  const [fatherName, setFatherName] = useState("");
+  const [motherName, setMotherName] = useState("");
   const [error, setError] = useState("");
 
   const [paying, setPaying] = useState(false);
@@ -75,6 +155,8 @@ export default function NameCorrectionTool() {
         setCategory(s.category ?? "personal");
         setDob(s.dob ?? "");
         setName(s.name ?? "");
+        setFatherName(s.fatherName ?? "");
+        setMotherName(s.motherName ?? "");
         setResult(s.result ?? null);
         if (s.refCode) setRefCode(s.refCode);
         setStep(s.step === "computing" ? "intake" : (s.step ?? "intake"));
@@ -85,9 +167,9 @@ export default function NameCorrectionTool() {
 
   useEffect(() => {
     try {
-      window.sessionStorage.setItem("name-correction-state", JSON.stringify({ step, category, dob, name, result, refCode }));
+      window.sessionStorage.setItem("name-correction-state", JSON.stringify({ step, category, dob, name, fatherName, motherName, result, refCode }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [step, category, dob, name, result, refCode]);
+  }, [step, category, dob, name, fatherName, motherName, result, refCode]);
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -179,7 +261,13 @@ export default function NameCorrectionTool() {
     setStep("computing");
     try {
       const res = await fetchNameCorrectionResult({
-        dob, name: name.trim(), system: "chaldean", ref_code: refCode, razorpay_order_id: razorpayOrderId,
+        dob, name: name.trim(), system: "chaldean",
+        // Family sync only makes sense for a person's own name — never sent
+        // for business/other even if the fields held text from an earlier
+        // category choice.
+        father_name: category === "personal" ? fatherName.trim() : "",
+        mother_name: category === "personal" ? motherName.trim() : "",
+        ref_code: refCode, razorpay_order_id: razorpayOrderId,
       });
       setResult(res);
       setStep("result");
@@ -253,6 +341,9 @@ export default function NameCorrectionTool() {
                       </button>
                     ))}
                   </div>
+                  <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.4rem" }}>
+                    {isHi ? CATEGORY_HINT.hi : CATEGORY_HINT.en}
+                  </p>
                 </div>
 
                 <div className="form-group">
@@ -265,6 +356,9 @@ export default function NameCorrectionTool() {
                     required
                     max={new Date().toISOString().split("T")[0]}
                   />
+                  <span className={`form-hint${isHi ? " devanagari" : ""}`}>
+                    {isHi ? DATE_HINT[category].hi : DATE_HINT[category].en}
+                  </span>
                 </div>
 
                 <div className="form-group">
@@ -277,7 +371,42 @@ export default function NameCorrectionTool() {
                     required
                     placeholder={isHi ? NAME_PLACEHOLDER[category].hi : NAME_PLACEHOLDER[category].en}
                   />
+                  <span className={`form-hint${isHi ? " devanagari" : ""}`}>
+                    {isHi ? NAME_HINT[category].hi : NAME_HINT[category].en}
+                  </span>
                 </div>
+
+                {category === "personal" && (
+                  <>
+                    <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginBottom: "0.6rem" }}>
+                      {isHi
+                        ? "वैकल्पिक: माता-पिता का नाम देने पर परिणाम में \"पारिवारिक तालमेल\" विश्लेषण भी जुड़ता है — उनके नाम के पहले अक्षर की आवृत्ति आपके नाम, मूलांक व भाग्यांक से कितनी मेल खाती है। न देना चाहें तो खाली छोड़ें, बाकी परिणाम पूरा ही मिलेगा।"
+                        : "Optional: adding a parent's name unlocks a \"family sync\" analysis in your result — how the first-letter frequency of their name sits with your own name, Mulank, and Bhagyank. Leave blank to skip; the rest of the result is complete either way."}
+                    </p>
+                    <div className="form-group">
+                      <label className="form-label">{isHi ? "पिता का नाम (वैकल्पिक)" : "Father's name (optional)"}</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={fatherName}
+                        onChange={(e) => setFatherName(e.target.value)}
+                        maxLength={120}
+                        placeholder={isHi ? "जैसे, सुरेश शर्मा" : "e.g., Suresh Sharma"}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">{isHi ? "माता का नाम (वैकल्पिक)" : "Mother's name (optional)"}</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={motherName}
+                        onChange={(e) => setMotherName(e.target.value)}
+                        maxLength={120}
+                        placeholder={isHi ? "जैसे, मीना शर्मा" : "e.g., Meena Sharma"}
+                      />
+                    </div>
+                  </>
+                )}
 
                 <button
                   type="submit"
@@ -301,8 +430,8 @@ export default function NameCorrectionTool() {
                 <div className="tu-paywall-price">₹{PRICE}</div>
                 <div className="tu-paywall-sub devanagari">
                   {isHi
-                    ? `"${name}" के लिए मूलांक-भाग्यांक मेल जांच + सुधारित नाम सुझाव`
-                    : `Mulank-Bhagyank match check + corrected name suggestions for "${name}"`}
+                    ? `"${name}" के लिए मूलांक-भाग्यांक मेल जांच + 10 तक सुधारित नाम सुझाव${category === "personal" && (fatherName.trim() || motherName.trim()) ? " + पारिवारिक तालमेल विश्लेषण" : ""}`
+                    : `Mulank-Bhagyank match check + up to 10 corrected name suggestions for "${name}"${category === "personal" && (fatherName.trim() || motherName.trim()) ? " + family sync analysis" : ""}`}
                 </div>
                 <button
                   type="button"
@@ -383,6 +512,21 @@ export default function NameCorrectionTool() {
                 </p>
               </div>
 
+              <div className="result-box">
+                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6, margin: 0 }}>
+                  {isHi
+                    ? "हर नाम के अक्षरों का जोड़ एक भाग्यांक (Destiny Number) बनाता है। यह नाम तभी सहायक माना जाता है जब यह भाग्यांक आपके मूलांक (जन्म-दिन से) और भाग्यांक (पूरी जन्मतिथि से) — दोनों के समान हो या उनका शास्त्रीय \"मित्र\" अंक हो, बिना किसी \"शत्रु\" अंक के टकराव के। नीचे यही तालमेल जांचा गया है।"
+                    : "Every name's letters add up to one Destiny Number. A name is considered supportive when that number matches — or is a classical \"friend\" of — both your Mulank (from your birth day) and Bhagyank (from your full birth date), with no clash from an \"enemy\" number. That's the harmony check below."}
+                </p>
+                {result.ideal_destiny_numbers.length > 0 && (
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>
+                    {isHi
+                      ? `आपके लिए सबसे अनुकूल भाग्यांक: ${result.ideal_destiny_numbers.join(", ")}`
+                      : `Destiny numbers that work best for you: ${result.ideal_destiny_numbers.join(", ")}`}
+                  </p>
+                )}
+              </div>
+
               {result.current_is_ideal ? (
                 <div className="result-box" style={{ background: "rgba(26,122,58,0.05)", borderColor: "rgba(26,122,58,0.3)" }}>
                   <span style={{ color: "#1a7a3a", fontWeight: 700 }}>
@@ -395,6 +539,11 @@ export default function NameCorrectionTool() {
                     <span style={{ color: "var(--maroon)", fontWeight: 700 }}>
                       {isHi ? "सुधार सुझाव" : "Correction suggested"}
                     </span>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", margin: "0.4rem 0 0" }}>
+                      {isHi
+                        ? `"${result.original_name}" का भाग्यांक (${result.current_destiny_number}) आपके मूलांक व भाग्यांक से पूरी तरह मेल नहीं खाता — नीचे ऐसी वैकल्पिक स्पेलिंग दी गई हैं जो उच्चारण में लगभग वैसी ही रहें, पर नियमों को पूरा करें।`
+                        : `"${result.original_name}"'s Destiny number (${result.current_destiny_number}) doesn't fully harmonise with your Mulank and Bhagyank — below are alternate spellings that sound nearly the same but satisfy the rules.`}
+                    </p>
                   </div>
 
                   {result.spelling_variants.length > 0 ? (
@@ -402,6 +551,11 @@ export default function NameCorrectionTool() {
                       <div className="result-label" style={{ marginBottom: "0.4rem" }}>
                         {isHi ? `${result.spelling_variants.length} सुधारित नाम — उच्चारण में स्वाभाविक` : `${result.spelling_variants.length} Corrected Names — Natural to Pronounce`}
                       </div>
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", margin: "0 0 0.6rem" }}>
+                        {isHi
+                          ? "श्रेष्ठ = आपके मूलांक/भाग्यांक से पूर्ण मेल · अच्छा = शास्त्रीय \"मित्र\" अंक · सामान्य = नियम पूरे करता है पर मेल हल्का है"
+                          : "BEST = matches your numbers exactly · GOOD = a classical \"friend\" number · MODERATE = passes every rule, just a milder match"}
+                      </p>
                       <div style={{ display: "grid", gap: "0.6rem" }}>
                         {result.spelling_variants.map((v, i) => (
                           <div key={i} className="result-box" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
@@ -409,6 +563,10 @@ export default function NameCorrectionTool() {
                               <span style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--maroon-deep)" }}>{v.name}</span>
                               <div style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "0.15rem" }}>
                                 {isHi ? "भाग्यांक" : "Destiny"}: {v.destiny}
+                              </div>
+                              <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.76rem", color: "var(--ink-light)", marginTop: "0.2rem" }}>
+                                {mechanismLabel(v.mechanism, isHi)}
+                                {v.added_letters.length > 0 && ` (${v.added_letters.join(", ")})`}
                               </div>
                             </div>
                             <span
@@ -435,6 +593,51 @@ export default function NameCorrectionTool() {
                     </p>
                   )}
                 </>
+              )}
+
+              {result.family_sync && (
+                <div style={{ marginTop: "1.25rem" }}>
+                  <div className="result-label" style={{ marginBottom: "0.4rem" }}>
+                    {isHi ? "पारिवारिक तालमेल — नाम के पहले अक्षर की आवृत्ति" : "Family Sync — First-Letter Frequency"}
+                  </div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", margin: "0 0 0.6rem" }}>
+                    {isHi
+                      ? `आपका नाम ${result.family_sync.child_first_letter} से शुरू होता है (अंक ${result.family_sync.child_letter_value}) — नीचे देखें कि माता-पिता के नामों की आरंभिक आवृत्ति इससे कैसे जुड़ती है।`
+                      : `Your name opens with ${result.family_sync.child_first_letter} (vibration ${result.family_sync.child_letter_value}) — here's how your parents' opening letters relate to it.`}
+                  </p>
+                  <div style={{ display: "grid", gap: "0.6rem" }}>
+                    {result.family_sync.parents.map((p) => {
+                      const chip = familyVerdictChip(p.verdict, isHi);
+                      return (
+                        <div key={p.relation} className="result-box" style={{ margin: 0 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.75rem", flexWrap: "wrap" }}>
+                            <span style={{ fontWeight: 700, color: "var(--maroon-deep)" }}>
+                              {p.relation === "father" ? (isHi ? "पिता" : "Father") : (isHi ? "माता" : "Mother")}: {p.name}
+                              <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "var(--muted)" }}>
+                                {" "}· {p.first_letter} ({isHi ? "अंक" : "vibration"} {p.letter_value})
+                              </span>
+                            </span>
+                            <span
+                              className={isHi ? "devanagari" : undefined}
+                              style={{ fontSize: "0.72rem", fontWeight: 700, padding: "0.25rem 0.65rem", borderRadius: "2px", background: chip.bg, color: chip.color }}
+                            >
+                              {chip.label}
+                            </span>
+                          </div>
+                          <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.84rem", color: "var(--ink-light)", lineHeight: 1.6, margin: "0.45rem 0 0" }}>
+                            {isHi ? p.description_hi : p.description_en}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.84rem", color: "var(--ink-light)", lineHeight: 1.6, margin: "0.6rem 0 0", fontWeight: 600 }}>
+                    {isHi ? result.family_sync.overall_hi : result.family_sync.overall_en}
+                  </p>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.76rem", color: "var(--muted)", margin: "0.4rem 0 0" }}>
+                    {isHi ? result.family_sync.note_hi : result.family_sync.note_en}
+                  </p>
+                </div>
               )}
 
               <div className="result-box" style={{ marginTop: "1rem" }}>

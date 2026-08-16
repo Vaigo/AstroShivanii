@@ -171,6 +171,9 @@ export function fetchVarshphalYearlyResult(body: {
  *  the category itself is a frontend-only label, not sent to the backend. */
 export function fetchNameCorrectionResult(body: {
   dob: string; name: string; system?: "chaldean" | "pythagorean";
+  /** Optional — either parent's name adds a family_sync first-letter
+   *  frequency analysis to the result (personal category only in the UI). */
+  father_name?: string; mother_name?: string;
   ref_code?: string; razorpay_order_id: string;
 }): Promise<NameCorrectionResult> {
   return siteFetch<NameCorrectionResult>("/v1/site/name-correction", {
