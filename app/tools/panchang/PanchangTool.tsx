@@ -446,7 +446,7 @@ export default function PanchangTool() {
         { label: "नक्षत्र / Nakshatra", value: `${panchang.nakshatra.name}`, sub: `${panchang.nakshatra.name_hi} · पाद ${panchang.nakshatra.pada} · स्वामी ${isHi ? PLANET_HI[panchang.nakshatra.lord] ?? panchang.nakshatra.lord : panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`, meaning: "आज चंद्रमा जिस नक्षत्र में है — मुहूर्त चुनने का मुख्य आधार" },
         { label: "योग / Yoga", value: isHi ? yogaNameHi(panchang.yoga.name) : panchang.yoga.name, sub: `समाप्ति ${panchang.yoga.end_time}`, meaning: "सूर्य-चंद्र के संयोग से बना योग — दिन की समग्र प्रकृति दर्शाता है" },
         { label: "करण / Karana", value: isHi ? karanaNameHi(panchang.karana.name) : panchang.karana.name, sub: `समाप्ति ${panchang.karana.end_time}`, meaning: "तिथि का आधा भाग — दैनिक कार्यों की बारीक शुभता तय करता है" },
-        { label: "चंद्र कला / Moon Phase", value: isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase, sub: "", meaning: "" },
+        { label: "चंद्र कला / Moon Phase", value: isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase, sub: "", meaning: "चंद्रमा सूर्य से कितना आगे है, उससे तय होने वाली उसकी आकृति — यही तय करता है कि आज शुक्ल पक्ष है या कृष्ण" },
         { label: "सूर्योदय / Sunrise", value: panchang.sun_rise, sub: "", meaning: "" },
         { label: "सूर्यास्त / Sunset", value: panchang.sun_set, sub: "", meaning: "" },
       ]
@@ -474,6 +474,11 @@ export default function PanchangTool() {
             </button>
           )}
         </form>
+        <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ textAlign: "center", marginTop: "0.6rem" }}>
+          {isHi
+            ? "सूर्योदय-सूर्यास्त, राहु काल, चोघड़िया और मुहूर्त — सब आपके शहर के अनुसार बदलते हैं, इसलिए सही शहर चुनना ज़रूरी है।"
+            : "Sunrise-sunset, Rahu Kaal, Choghadiya and Muhurta all shift with your city — pick the right one for an accurate panchang."}
+        </p>
 
         <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1rem" }}>
           <button type="button" className={`btn btn-sm ${view === "day" ? "btn-secondary" : "btn-ghost"}`} onClick={() => setView("day")}>

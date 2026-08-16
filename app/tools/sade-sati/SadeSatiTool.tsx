@@ -13,6 +13,7 @@ import { fetchSadeSati } from "@/lib/api/endpoints";
 import type { BirthRequest, SadeSatiResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { todayInZone } from "@/lib/timezone";
 
 export default function SadeSatiTool() {
   const { t, lang } = useI18n();
@@ -37,7 +38,10 @@ export default function SadeSatiTool() {
     setError("");
     setResult(null);
     try {
-      const today = new Date().toISOString().split("T")[0];
+      // "Today" must be the calendar date in IST, not the browser's UTC date
+      // (new Date().toISOString() would report YESTERDAY for anyone browsing
+      // India between 00:00–05:30 IST) — same bug class already fixed in Panchang.
+      const today = todayInZone("Asia/Kolkata", new Date());
       const data = await fetchSadeSati({ birth, transit_date: today });
       setResult(data);
     } catch (e) {

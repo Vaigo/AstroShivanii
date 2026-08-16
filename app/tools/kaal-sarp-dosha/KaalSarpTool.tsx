@@ -118,6 +118,11 @@ export default function KaalSarpTool() {
                         ? (isHi ? DIRECTION_LABEL[kaalSarp.direction]?.hi ?? kaalSarp.direction : DIRECTION_LABEL[kaalSarp.direction]?.en ?? kaalSarp.direction)
                         : "—"}
                     </div>
+                    <p className={`result-explain${isHi ? " devanagari" : ""}`}>
+                      {isHi
+                        ? "यह सिर्फ यह बताता है कि आपके सातों ग्रह राहु से केतु की ओर बंधे हैं या केतु से राहु की ओर — दिशा से उपाय नहीं बदलते, यह केवल आपकी कुंडली की बनावट पहचानने के लिए है।"
+                        : "This just tells you which of the two nodes your seven planets are hemmed behind — Rahu leading toward Ketu, or Ketu leading toward Rahu. It doesn't change the remedies; it's simply how this pattern is identified in your chart."}
+                    </p>
                   </div>
                   <div className="result-box">
                     <div className="result-label">{isHi ? "शामिल ग्रह" : "Planets Involved"}</div>

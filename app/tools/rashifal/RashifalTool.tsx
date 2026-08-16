@@ -10,6 +10,7 @@ import type { RashiPrediction, WeeklyRashifalResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 import { PLANET_HI, colorHi, weekdayHi } from "@/lib/hindi-labels";
+import { todayInZone } from "@/lib/timezone";
 
 /* ︎ forces TEXT presentation — without it Windows/Android render zodiac
    glyphs as colored emoji, which clashes with the parchment theme. */
@@ -69,7 +70,11 @@ export default function RashifalTool() {
     setResult(null);
     setWeeklyResult(null);
     try {
-      const today = new Date().toISOString().split("T")[0];
+      // "Today" must be IST's calendar date, not the browser's UTC date —
+      // the API defaults tz to 5.5 (IST) for day boundaries, so an
+      // early-morning IST visitor must not get yesterday's rashifal because
+      // new Date().toISOString() would still be showing UTC's previous day.
+      const today = todayInZone("Asia/Kolkata", new Date());
       if (view === "weekly") {
         const data = await fetchWeeklyRashifal(selectedRashi, today);
         setWeeklyResult(data);

@@ -457,6 +457,11 @@ function TurantUttarInner() {
                     <option value="female">{isHi ? "महिला" : "Female"}</option>
                     <option value="male">{isHi ? "पुरुष" : "Male"}</option>
                   </select>
+                  <span className="form-hint">
+                    {isHi
+                      ? "इससे केवल उत्तर में सही व्याकरण (जैसे \"किया\"/\"किया\") के लिए संबोधन तय होता है — कुंडली की गणना पर कोई असर नहीं, न देना चाहें तो छोड़ सकते हैं"
+                      : "This only sets how we address you grammatically in the answer text — it has no effect on the chart calculation, so feel free to skip it"}
+                  </span>
                 </div>
               </div>
 

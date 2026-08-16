@@ -6,7 +6,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com"
 export const metadata: Metadata = {
   title: "बाल कुंडली — Free Baby Kundli, Naming Syllable",
   description:
-    "Create your child's free birth chart — auspicious naming syllable (नामाक्षर), temperament, health tendencies, and education direction, calculated from real Vedic astrology.",
+    "Create your child's free birth chart — auspicious naming syllable (नामाक्षर), ascendant, planetary positions, and current dasha, calculated from real Vedic astrology. Personal guidance on temperament, health, and education is available separately.",
 };
 
 const appJsonLd = {
@@ -14,7 +14,7 @@ const appJsonLd = {
   "@type": "WebApplication",
   name: "Baal Kundli — Baby Birth Chart Calculator",
   description:
-    "Create your child's free birth chart — auspicious naming syllable, temperament, health tendencies, and education direction.",
+    "Create your child's free birth chart — auspicious naming syllable, ascendant, planetary positions, and current dasha.",
   url: `${SITE_URL}/tools/baal-kundli/`,
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Any",

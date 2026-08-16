@@ -207,6 +207,11 @@ export default function NumerologySuiteTool() {
                   value={dob} onChange={(e) => setDob(e.target.value)}
                   max={new Date().toISOString().split("T")[0]} required
                 />
+                <span className="form-hint">
+                  {isHi
+                    ? "इससे आपका मूलांक (जन्म-दिन से, व्यक्तित्व का अंक) और भाग्यांक (पूरी तारीख से, जीवन-पथ का अंक) निकाला जाता है — पूरी रिपोर्ट इन्हीं दो अंकों पर आधारित है (चाल्डियन पद्धति)"
+                    : "We derive your Mulank (from the day alone — your core personality) and Bhagyank (from the full date — your life path) — the whole report is built from these two numbers (Chaldean system)"}
+                </span>
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="ns-name">{isHi ? "आपका नाम (वैकल्पिक)" : "Your name (optional)"}</label>
@@ -215,7 +220,9 @@ export default function NumerologySuiteTool() {
                   value={userName} onChange={(e) => setUserName(e.target.value)} maxLength={60}
                 />
                 <span className="form-hint">
-                  {isHi ? "नाम देने पर विवाह खंड में सोल-अर्ज विश्लेषण भी जुड़ता है" : "Adding your name enables the Soul Urge analysis in the marriage section"}
+                  {isHi
+                    ? "नाम देने पर विवाह खंड में सोल-अर्ज (नाम के स्वरों से निकला अंक) विश्लेषण भी जुड़ता है — न दें तो बाकी तीनों खंड पूरे ही मिलेंगे"
+                    : "Adding your name enables the Soul Urge analysis (a number from the vowels in your name) in the marriage section — the other three sections are complete either way"}
                 </span>
               </div>
               <button
@@ -317,6 +324,11 @@ export default function NumerologySuiteTool() {
           <div ref={stepRef}>
             <PatrikaFrame>
               <div className="result-box" style={{ marginTop: 0 }}>
+                <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "var(--muted)" }}>
+                  {isHi ? "मूलांक" : "Mulank"} <strong style={{ color: "var(--maroon-deep)" }}>{result.mulank}</strong>
+                  {" · "}
+                  {isHi ? "भाग्यांक" : "Bhagyank"} <strong style={{ color: "var(--maroon-deep)" }}>{result.bhagyank}</strong>
+                </p>
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.92rem", color: "var(--ink-light)", lineHeight: 1.6, margin: 0 }}>
                   {isHi ? result.narrative_hi : result.narrative_en}
                 </p>
@@ -327,9 +339,16 @@ export default function NumerologySuiteTool() {
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
                   {isHi ? result.love.interpretation_hi : result.love.interpretation_en}
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.5rem" }}>
-                  {result.love.compatible_numbers.map((n) => <span key={n} className="trait-chip">{n}</span>)}
-                </div>
+                {result.love.compatible_numbers.length > 0 && (
+                  <>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", margin: "0.6rem 0 0.3rem" }}>
+                      {isHi ? "प्रेम में सबसे अनुकूल साथी अंक — मूलांक/भाग्यांक इन अंकों वाले लोगों के साथ स्वाभाविक तालमेल बैठता है" : "Most compatible partner numbers in love — people whose own Mulank/Bhagyank is one of these tend to click naturally with you"}
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                      {result.love.compatible_numbers.map((n) => <span key={n} className="trait-chip">{n}</span>)}
+                    </div>
+                  </>
+                )}
               </div>
 
               <h3 className="num-sub-heading" style={{ marginTop: "1.5rem" }}>{isHi ? "करियर" : "Career"}</h3>
@@ -338,9 +357,14 @@ export default function NumerologySuiteTool() {
                   {isHi ? result.career.interpretation_hi : result.career.interpretation_en}
                 </p>
                 {result.career.strongest_careers && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.5rem" }}>
-                    {result.career.strongest_careers.map((c) => <span key={c} className="trait-chip">{c}</span>)}
-                  </div>
+                  <>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", margin: "0.6rem 0 0.3rem" }}>
+                      {isHi ? "आपके मूलांक व भाग्यांक — दोनों में सशक्त करियर, इसलिए ये सबसे प्रबल विकल्प हैं" : "Careers favoured by both your Mulank and Bhagyank — that overlap makes these your strongest bets"}
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                      {result.career.strongest_careers.map((c) => <span key={c} className="trait-chip">{c}</span>)}
+                    </div>
+                  </>
                 )}
               </div>
 

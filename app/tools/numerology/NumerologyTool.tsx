@@ -153,12 +153,16 @@ export default function NumerologyTool() {
               <input
                 className="form-input"
                 type="text"
-                placeholder={isHi ? "नाम दर्ज करें" : "Enter your name"}
+                placeholder={isHi ? "जैसा जन्म प्रमाणपत्र पर हो" : "As on birth certificate"}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required
               />
-              <span className="form-hint">{isHi ? "नाम अंक = चाल्डियन पद्धति" : "Name Number uses Chaldean system"}</span>
+              <span className={`form-hint${isHi ? " devanagari" : ""}`}>
+                {isHi
+                  ? "नाम अंक चाल्डियन पद्धति से निकलता है — वर्तनी मायने रखती है, एक भी अक्षर बदलने से अंक बदल जाता है, इसलिए उपनाम नहीं, पूरा नाम ठीक उसी वर्तनी में लिखें जो जांचनी है"
+                  : "Name Number uses the Chaldean system — spelling matters, since changing even one letter changes the number. Use your full name in the exact spelling you want checked, not a nickname."}
+              </span>
             </div>
             <div className="form-group">
               <label className="form-label">{isHi ? "जन्म तिथि *" : "Date of Birth *"}</label>
@@ -169,6 +173,11 @@ export default function NumerologyTool() {
                 onChange={e => setDob(e.target.value)}
                 max={new Date().toISOString().split("T")[0]}
               />
+              <span className={`form-hint${isHi ? " devanagari" : ""}`}>
+                {isHi
+                  ? "मूलांक जन्म-दिन से और भाग्यांक पूरी तारीख से निकलता है — दोनों नीचे अलग-अलग दिखेंगे"
+                  : "Mulank comes from your birth day, Bhagyank from the full date — both are shown separately below"}
+              </span>
             </div>
             <div className="form-group">
               <label className="form-label">{isHi ? "लिंग *" : "Gender *"}</label>

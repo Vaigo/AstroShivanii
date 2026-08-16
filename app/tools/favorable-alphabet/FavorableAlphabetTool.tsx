@@ -29,6 +29,11 @@ export default function FavorableAlphabetTool() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
+  // This calculation only ever looks at the first and last letters of the
+  // name (verified against backend/app/routers/numerology.py's first-letter
+  // handler) — a date of birth plays no role, so we don't ask for one here;
+  // DobNameForm's hideDob sends the API's required-but-unread dob field
+  // silently under the hood.
   async function handleSubmit(data: { dob: string; name: string; system: "chaldean" | "pythagorean" }) {
     setLoading(true);
     setError("");
@@ -54,20 +59,32 @@ export default function FavorableAlphabetTool() {
             <p className="devanagari">
               आपके नाम का <span className="hl">पहला अक्षर (Cornerstone)</span> और{" "}
               <span className="hl">अंतिम अक्षर (Capstone)</span> बताते हैं कि आप जीवन को कैसे शुरू करते हैं और कैसे
-              पूरा करते हैं — करियर की दिशा सहित।
+              पूरा करते हैं — करियर की दिशा सहित। केवल आपका नाम चाहिए, जन्म तिथि की ज़रूरत नहीं — गणना{" "}
+              <span className="hl">चाल्डियन पद्धति</span> (परंपरागत व सर्वाधिक अनुशंसित) से होती है।
             </p>
           ) : (
             <p>
               The <span className="hl">first letter (Cornerstone)</span> and{" "}
               <span className="hl">last letter (Capstone)</span> of your name reveal how you start things and how
-              you finish them — including career direction.
+              you finish them — including career direction. Only your name is needed, no date of birth — the
+              calculation uses the <span className="hl">Chaldean system</span> (the traditional, most-recommended
+              method).
             </p>
           )}
         </div>
 
         <div style={{ maxWidth: "420px", margin: "0 auto" }}>
           <PatrikaFrame>
-            <DobNameForm onSubmit={handleSubmit} loading={loading} nameRequired />
+            <DobNameForm
+              onSubmit={handleSubmit}
+              loading={loading}
+              nameRequired
+              hideDob
+              nameHint={{
+                en: "This tool reads only the first and last letters (Cornerstone and Capstone) — enter your name exactly as you want it read. A nickname or short form will give a different Cornerstone/Capstone than your full legal name.",
+                hi: "यह उपकरण केवल पहले और अंतिम अक्षर (Cornerstone और Capstone) को पढ़ता है — नाम ठीक वैसे ही लिखें जैसा जांचना है। उपनाम या छोटा नाम आपके पूरे कानूनी नाम से अलग Cornerstone/Capstone देगा।",
+              }}
+            />
             {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
           </PatrikaFrame>
         </div>
@@ -88,7 +105,7 @@ export default function FavorableAlphabetTool() {
                   <div style={{ fontSize: "2.4rem", fontFamily: "var(--font-display)", color: "var(--maroon-deep)", margin: "0.3rem 0" }}>
                     {result.cornerstone.letter}
                   </div>
-                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{isHi ? `मान: ${result.cornerstone.value}` : `Value: ${result.cornerstone.value}`}</div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{isHi ? `चाल्डियन मान: ${result.cornerstone.value}` : `Chaldean value: ${result.cornerstone.value}`}</div>
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginTop: "0.5rem" }}>
                     {isHi ? result.cornerstone.meaning_hi : result.cornerstone.meaning_en}
                   </p>
@@ -104,7 +121,7 @@ export default function FavorableAlphabetTool() {
                   <div style={{ fontSize: "2.4rem", fontFamily: "var(--font-display)", color: "var(--maroon-deep)", margin: "0.3rem 0" }}>
                     {result.capstone.letter}
                   </div>
-                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{isHi ? `मान: ${result.capstone.value}` : `Value: ${result.capstone.value}`}</div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{isHi ? `चाल्डियन मान: ${result.capstone.value}` : `Chaldean value: ${result.capstone.value}`}</div>
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginTop: "0.5rem" }}>
                     {isHi ? result.capstone.meaning_hi : result.capstone.meaning_en}
                   </p>
@@ -156,7 +173,7 @@ export default function FavorableAlphabetTool() {
             <div style={{ color: "var(--gold)", marginBottom: "0.75rem", display: "flex", justifyContent: "center" }}>
               <Icon name="type" size={40} strokeWidth={1.3} />
             </div>
-            <p>{isHi ? "नाम व जन्म तिथि डालें — परिणाम नीचे दिखेगा" : "Enter your name and date of birth — the result will appear below"}</p>
+            <p>{isHi ? "अपना नाम डालें — परिणाम नीचे दिखेगा" : "Enter your name — the result will appear below"}</p>
           </div>
         )}
       </div>

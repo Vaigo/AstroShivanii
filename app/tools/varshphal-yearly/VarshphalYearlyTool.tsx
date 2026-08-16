@@ -25,6 +25,25 @@ const VARSHESHA_ROLE_HI: Record<string, string> = {
 };
 const varsheshaRole = (role: string, isHi: boolean) => (isHi ? VARSHESHA_ROLE_HI[role] ?? role : role);
 
+// General classical house significations (Vedic astrology) — used to turn a
+// bare house number (Muntha, etc.) into a one-word life area a non-astrologer
+// can place instantly.
+const HOUSE_MEANING: Record<number, { en: string; hi: string }> = {
+  1: { en: "self & health", hi: "स्वयं व स्वास्थ्य" },
+  2: { en: "money & family", hi: "धन व परिवार" },
+  3: { en: "effort & siblings", hi: "पुरुषार्थ व भाई-बहन" },
+  4: { en: "home & mother", hi: "घर व माता" },
+  5: { en: "children & creativity", hi: "संतान व रचनात्मकता" },
+  6: { en: "health issues & rivals", hi: "स्वास्थ्य बाधा व शत्रु" },
+  7: { en: "marriage & partnerships", hi: "विवाह व साझेदारी" },
+  8: { en: "sudden change & obstacles", hi: "अचानक परिवर्तन व बाधाएं" },
+  9: { en: "fortune & higher learning", hi: "भाग्य व उच्च शिक्षा" },
+  10: { en: "career & status", hi: "करियर व प्रतिष्ठा" },
+  11: { en: "income & gains", hi: "आय व लाभ" },
+  12: { en: "expenses & spirituality", hi: "व्यय व आध्यात्म" },
+};
+const houseMeaning = (house: number, isHi: boolean) => HOUSE_MEANING[house]?.[isHi ? "hi" : "en"] ?? "";
+
 declare global {
   interface Window {
     Razorpay: new (options: Record<string, unknown>) => { open(): void; on(event: string, handler: (r: unknown) => void): void };
@@ -242,6 +261,11 @@ export default function VarshphalYearlyTool() {
           <div ref={stepRef}>
             <PatrikaFrame>
               <BirthForm embedded onChange={setBirthDraft} />
+              <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "-0.5rem", marginBottom: "1rem" }}>
+                {isHi
+                  ? "वर्षफल में वर्षेश (वर्ष स्वामी) और मुंथा भाव — दोनों आपके जन्म-लग्न पर निर्भर करते हैं, और लग्न सटीक जन्म-समय से ही सही बनता है। समय न देने पर हम सूर्योदय के अनुमान से गणना करते हैं, जो कम सटीक हो सकता है।"
+                  : "The Varshesha (year lord) and Muntha house both depend on your Ascendant, which needs an accurate birth time to place correctly. Without it, we fall back to a sunrise-based estimate, which can be less precise."}
+              </p>
               <div className="form-group">
                 <label className="form-label" htmlFor="vy-year">{isHi ? "किस वर्ष के लिए?" : "For which year?"}</label>
                 <select
@@ -252,6 +276,11 @@ export default function VarshphalYearlyTool() {
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </select>
+                <span className="form-hint">
+                  {isHi
+                    ? `यह कैलेंडर वर्ष नहीं है — यह आपके ${year} के जन्मदिन से अगले जन्मदिन तक का सौर-वापसी वर्ष है`
+                    : `This isn't the calendar year — it's your solar-return year, running from your ${year} birthday to your next one`}
+                </span>
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="vy-name">{isHi ? "आपका नाम (वैकल्पिक)" : "Your name (optional)"}</label>
@@ -259,6 +288,11 @@ export default function VarshphalYearlyTool() {
                   id="vy-name" className="form-input" type="text"
                   value={userName} onChange={(e) => setUserName(e.target.value)} maxLength={60}
                 />
+                <span className="form-hint">
+                  {isHi
+                    ? "यह केवल भुगतान रसीद पर दिखेगा — भविष्यफल की गणना में इसका कोई उपयोग नहीं होता"
+                    : "This only appears on your payment receipt — it isn't used anywhere in the forecast calculation"}
+                </span>
               </div>
               <button
                 type="button" className="btn btn-primary" style={{ width: "100%" }}
@@ -299,6 +333,26 @@ export default function VarshphalYearlyTool() {
                       ? `${teaser.varshesha} इस वर्ष आपके प्रमुख विषयों पर शासन करता है — पूर्ण भविष्यफल में करियर, धन, स्वास्थ्य, रिश्ते व आध्यात्म पर इसका पूरा असर देखें।`
                       : `${teaser.varshesha} governs your dominant themes this year — see the full forecast for exactly what that means across career, finance, health, relationships and spirituality.`}
                   </p>
+                  {!birthDraft?.tob && (
+                    <div className="kaal-box" style={{ marginTop: "0.9rem" }}>
+                      <strong className={isHi ? "devanagari" : undefined}>
+                        {isHi ? "⚠ जन्म-समय के बिना आगे बढ़ रहे हैं" : "⚠ Proceeding without a birth time"}
+                      </strong>
+                      <p className={isHi ? "devanagari" : undefined} style={{ margin: "0.4rem 0 0" }}>
+                        {isHi
+                          ? "ऊपर दिखाया गया वर्षेश सूर्योदय-अनुमानित लग्न पर आधारित है, आपके वास्तविक जन्म-समय पर नहीं — असली लग्न अलग निकलने पर वर्षेश व मुंथा भाव दोनों बदल सकते हैं। सटीक जन्म-समय जोड़कर सबसे भरोसेमंद परिणाम पाएं।"
+                          : "The Varshesha shown above is based on a sunrise-estimated Ascendant, not your real birth time — if your true Ascendant differs, both the Varshesha and the Muntha house can change. Add your exact birth time for the most reliable result."}
+                      </p>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        style={{ marginTop: "0.6rem" }}
+                        onClick={() => setStep("birth")}
+                      >
+                        {isHi ? "जन्म समय जोड़ें" : "Add my birth time"}
+                      </button>
+                    </div>
+                  )}
                   <button
                     type="button" className="btn btn-primary" style={{ width: "100%", marginTop: "1.1rem" }}
                     onClick={() => setStep("paywall")}
@@ -374,11 +428,24 @@ export default function VarshphalYearlyTool() {
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2rem", color: "var(--maroon-deep)", marginTop: "0.3rem" }}>
                   {result.overall_year_score}<span style={{ fontSize: "1rem", color: "var(--muted)" }}>/100</span>
                 </div>
-                <p className="devanagari" style={{ marginTop: "0.3rem", color: "var(--muted)" }}>
+                <p className={isHi ? "devanagari" : undefined} style={{ marginTop: "0.2rem", color: "var(--muted)", fontSize: "0.82rem" }}>
+                  {isHi
+                    ? "यह गुरु, शनि, मुंथा और वर्षेश की इस वर्ष की स्थिति को मिलाकर बना एक सार-स्कोर है — अधिक अंक यानी ग्रहों का साथ ज़्यादा है, पर कम स्कोर पर भी नीचे व्यावहारिक मार्गदर्शन मौजूद है"
+                    : "A composite of how favourably Jupiter, Saturn, Muntha, and the Varshesha are placed this year — higher means the planets lean more in your favour, but even a lower score comes with real guidance below, not just a verdict"}
+                </p>
+                <p className="devanagari" style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
                   {isHi ? "वर्षेश" : "Varshesha"}: {isHi ? PLANET_HI[result.varshesha] ?? result.varshesha : result.varshesha} ({varsheshaRole(result.varshesha_role, isHi)}) · {isHi ? "मुंथा भाव" : "Muntha House"} {result.muntha_house}
+                </p>
+                <p className={isHi ? "devanagari" : undefined} style={{ marginTop: "0.2rem", color: "var(--muted)", fontSize: "0.82rem" }}>
+                  {isHi
+                    ? `वर्षेश वह ग्रह है जो इस पूरे वर्ष आपकी प्रमुख घटनाओं पर छाप छोड़ता है। मुंथा हर वर्ष एक भाव आगे खिसकती है — इस वर्ष यह ${houseMeaning(result.muntha_house, true)} के भाव में है, यानी ध्यान व ऊर्जा स्वाभाविक रूप से यहीं केंद्रित रहेगी।`
+                    : `The Varshesha is the planet that colours this year's major events. Muntha advances one house every year — this year it sits in the house of ${houseMeaning(result.muntha_house, false)}, meaning your focus and energy naturally gravitate there.`}
                 </p>
               </div>
 
+              <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                {isHi ? "पांच प्रमुख जीवन-क्षेत्रों में इस वर्ष का सार:" : "This year's outlook across five key life areas:"}
+              </p>
               {PREDICTION_LABELS.map(({ key, en, hi }) => (
                 <div key={key} className="result-box">
                   <div className="result-label">{isHi ? hi : en}</div>

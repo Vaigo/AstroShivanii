@@ -71,8 +71,8 @@ export default function BaalKundliTool() {
           {isHi ? (
             <p className="devanagari">
               अपने <span className="hl">बच्चे</span> की जन्म-कुंडली बनाएं — <span className="hl">नामकरण के लिए
-              शुभ अक्षर</span>, स्वभाव, स्वास्थ्य की मूल प्रवृत्तियाँ और शिक्षा की दिशा देखें। जन्म-विवरण डालें,
-              बिल्कुल निःशुल्क।{" "}
+              शुभ अक्षर</span>, लग्न, ग्रह-स्थिति और वर्तमान दशा देखें, बिल्कुल निःशुल्क। स्वभाव, स्वास्थ्य व
+              शिक्षा की गहराई से व्याख्या नीचे व्यक्तिगत पाठन के रूप में उपलब्ध है।{" "}
               <Link href="/guides/what-is-baal-kundli" style={{ color: "var(--maroon)", fontWeight: 600 }}>
                 बाल कुंडली क्या है? →
               </Link>
@@ -80,8 +80,9 @@ export default function BaalKundliTool() {
           ) : (
             <p>
               Create your <span className="hl">child&apos;s</span> birth chart — see the{" "}
-              <span className="hl">auspicious naming syllable</span>, temperament, health tendencies, and
-              education direction. Enter their birth details, completely free.{" "}
+              <span className="hl">auspicious naming syllable</span>, ascendant, planetary positions, and
+              current dasha, completely free. A deeper read on temperament, health tendencies, and
+              education direction is available below as a personal reading.{" "}
               <Link href="/guides/what-is-baal-kundli" style={{ color: "var(--maroon)", fontWeight: 600 }}>
                 What is a Baal Kundli? →
               </Link>

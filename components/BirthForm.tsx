@@ -125,7 +125,13 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
             onChange={(e) => setTob(e.target.value)}
             required={requireTime}
           />
-          {!requireTime && <span className="form-hint">{t("form.noTimeTip")}</span>}
+          <span className={`form-hint${isHi ? " devanagari" : ""}`}>
+            {requireTime
+              ? (isHi
+                  ? "यह ज़रूरी है — यही तय करता है कि आपका लग्न (उदय राशि) व सभी भाव कौन-से हैं। जन्म प्रमाण-पत्र, अस्पताल की पर्ची या माता-पिता से जांचकर सबसे सटीक समय भरें — कुछ मिनट का अंतर भी लग्न बदल सकता है।"
+                  : "This is required — it's what determines your ascendant (rising sign) and all 12 houses. Use the time from a birth certificate, hospital record, or parents' memory for best accuracy — even a few minutes' difference can change the ascendant.")
+              : t("form.noTimeTip")}
+          </span>
         </div>
       )}
 
@@ -142,9 +148,10 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
             <button
               type="button"
               onClick={() => setManual(true)}
+              className={isHi ? "devanagari" : undefined}
               style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline", padding: 0 }}
             >
-              Can&apos;t find your place? Enter coordinates manually
+              {isHi ? "अपना स्थान नहीं मिल रहा? निर्देशांक स्वयं दर्ज करें" : "Can't find your place? Enter coordinates manually"}
             </button>
           </p>
         </>
@@ -168,9 +175,10 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
             <button
               type="button"
               onClick={() => { setManual(false); setPlace(DEFAULT_PLACE); }}
+              className={isHi ? "devanagari" : undefined}
               style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline", padding: 0 }}
             >
-              ← Back to place search
+              ← {isHi ? "स्थान खोज पर वापस जाएं" : "Back to place search"}
             </button>
           </p>
         </>

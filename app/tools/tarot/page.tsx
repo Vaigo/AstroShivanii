@@ -5,17 +5,17 @@ import TarotTool from "./TarotTool";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Vedic Tarot Reading",
+  title: "Free Tarot Card Reading — 3-Card Spread",
   description:
-    "Free tarot card reading with Vedic astrological context. 3-card spread for past, present, and future. No sign-up needed.",
+    "Free 3-card tarot reading — past, present, future — using the classic Rider-Waite-Smith deck. No sign-up needed.",
 };
 
 const appJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Vedic Tarot Reading",
+  name: "Tarot Card Reading",
   description:
-    "Free tarot card reading with Vedic astrological context. 3-card spread for past, present, and future.",
+    "Free 3-card tarot reading — past, present, future — using the classic Rider-Waite-Smith deck.",
   url: `${SITE_URL}/tools/tarot/`,
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Any",

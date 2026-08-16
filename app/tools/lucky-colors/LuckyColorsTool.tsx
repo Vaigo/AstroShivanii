@@ -44,6 +44,14 @@ export default function LuckyColorsTool() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<LuckyColorsResult | null>(null);
+  // The API computes an honest accuracy flag server-side (sunrise-chart
+  // fallback when tob is missing) but returns it in `meta`, which the
+  // shared API client (lib/api/client.ts) discards — only `data` reaches
+  // callers. We already know locally whether the visitor gave a birth time,
+  // which is the exact same fact the server-side flag would report, so we
+  // derive it here instead of silently dropping the promise made by
+  // BirthForm's "results marked as approximate" hint.
+  const [tobGiven, setTobGiven] = useState(true);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,6 +70,7 @@ export default function LuckyColorsTool() {
     try {
       const data = await fetchLuckyColors(birth);
       setResult(data);
+      setTobGiven(!!birth.tob);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("form.error"));
     } finally {
@@ -92,6 +101,11 @@ export default function LuckyColorsTool() {
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
             <BirthForm onSubmit={handleSubmit} loading={loading} />
+            <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "-0.5rem" }}>
+              {isHi
+                ? "यह उपकरण आपकी लग्न (Ascendant) पर आधारित है, जो लगभग हर 2 घंटे में बदलती है — सटीक जन्म समय दिए बिना परिणाम अनुमानित (सूर्योदय-कुंडली) रहता है।"
+                : "This tool is based on your Ascendant, which shifts roughly every 2 hours — without an exact birth time, the result stays an approximation (calculated from a sunrise chart)."}
+            </p>
             {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
           </PatrikaFrame>
         </div>
@@ -110,7 +124,19 @@ export default function LuckyColorsTool() {
                 <div style={{ color: "var(--gold)", marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>
                   <Icon name="droplet" size={36} />
                 </div>
-                <h2 style={{ fontSize: "1.3rem" }}>{isHi ? "आपके शुभ रंग" : "Your Lucky Colors"}</h2>
+                <h2 style={{ fontSize: "1.3rem", marginBottom: "0.6rem" }}>{isHi ? "आपके शुभ रंग" : "Your Lucky Colors"}</h2>
+                <span className={`accuracy-badge ${tobGiven ? "accuracy-reliable" : "accuracy-unreliable"}`}>
+                  {tobGiven
+                    ? (isHi ? "✓ विश्वसनीय — सटीक जन्म समय पर आधारित" : "✓ Reliable — based on your exact birth time")
+                    : (isHi ? "⚠ अनुमानित — जन्म समय नहीं दिया गया" : "⚠ Approximate — no birth time given")}
+                </span>
+                {!tobGiven && (
+                  <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.5rem", maxWidth: "480px", marginLeft: "auto", marginRight: "auto" }}>
+                    {isHi
+                      ? "बिना जन्म समय के हमने सूर्योदय-कुंडली का उपयोग किया — लग्न लगभग हर 2 घंटे में बदलती है, इसलिए आपका सटीक समय देने पर ये रंग बदल भी सकते हैं। अधिक सटीक परिणाम के लिए ऊपर जाकर समय जोड़ें।"
+                      : "Without a birth time, we used a sunrise chart — since the Ascendant shifts roughly every 2 hours, these colors could change once you add your exact time. Scroll up and add it for a more precise result."}
+                  </p>
+                )}
               </div>
 
               <div className="result-box">

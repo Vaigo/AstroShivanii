@@ -79,7 +79,15 @@ export default function KarmicDebtTool() {
 
         <div style={{ maxWidth: "420px", margin: "0 auto" }}>
           <PatrikaFrame>
-            <DobNameForm onSubmit={handleSubmit} loading={loading} nameRequired={false} />
+            <DobNameForm
+              onSubmit={handleSubmit}
+              loading={loading}
+              nameRequired={false}
+              dobHint={{
+                en: "Checked digit by digit — your exact birth day and full date decide which numbers (13, 14, 16, 19) show up as karmic debt, and which 1–9 digits are missing from your Lo Shu grid.",
+                hi: "अंक-दर-अंक जांचा जाता है — आपका जन्म दिन और पूरी जन्म तिथि ही तय करते हैं कि कौन-से अंक (13, 14, 16, 19) कार्मिक ऋण के रूप में मिलते हैं, और लो शु ग्रिड में कौन-से 1–9 अंक अनुपस्थित हैं।",
+              }}
+            />
             {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
           </PatrikaFrame>
         </div>
@@ -125,6 +133,11 @@ export default function KarmicDebtTool() {
             {/* ── Section B: Missing & Repeated Numbers ── */}
             <PatrikaFrame>
               <h2 style={{ fontSize: "1.2rem", marginBottom: "0.75rem" }}>{isHi ? "अनुपस्थित व दोहराए गए अंक" : "Missing & Repeated Numbers"}</h2>
+              <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "-0.4rem", marginBottom: "0.9rem" }}>
+                {isHi
+                  ? "यह केवल आपकी जन्म तिथि के अंकों पर आधारित है (शास्त्रीय पद्धति)। हमारे मुख्य अंक ज्योतिष कैलकुलेटर में दिखने वाला लो शु ग्रिड इसमें मूलांक, भाग्यांक, नामांक और कुआ अंक भी जोड़ता है (सम्पूर्ण-ग्रिड पद्धति) — इसलिए वहां अनुपस्थित अंक यहां से अलग दिख सकते हैं; दोनों ही मान्य पद्धतियां हैं।"
+                  : "This is based purely on the digits of your date of birth (the classical method). The Lo Shu grid in our main Numerology Calculator also folds in your Mulank, Bhagyank, Name Number, and Kua (the complete-grid method) — so the missing numbers can differ between the two. Both are legitimate methods; they simply answer slightly different questions."}
+              </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
                 {/* Missing numbers — full cards with remedy + colour */}

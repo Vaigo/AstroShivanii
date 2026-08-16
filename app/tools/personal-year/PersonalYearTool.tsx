@@ -66,7 +66,15 @@ export default function PersonalYearTool() {
 
         <div style={{ maxWidth: "420px", margin: "0 auto" }}>
           <PatrikaFrame>
-            <DobNameForm onSubmit={handleSubmit} loading={loading} hideName />
+            <DobNameForm
+              onSubmit={handleSubmit}
+              loading={loading}
+              hideName
+              dobHint={{
+                en: "Your Personal Year is calculated purely from this date and today's calendar year — no name needed for this one.",
+                hi: "आपका व्यक्तिगत वर्षांक केवल इस तारीख और चालू कैलेंडर वर्ष से निकाला जाता है — इसके लिए नाम की ज़रूरत नहीं।",
+              }}
+            />
             {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
           </PatrikaFrame>
         </div>

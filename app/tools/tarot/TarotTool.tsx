@@ -83,6 +83,11 @@ export default function TarotTool() {
               the possibilities already forming around this moment.
             </p>
           )}
+          <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.5rem" }}>
+            {isHi
+              ? "यह पाठन क्लासिक राइडर-वेट-स्मिथ डेक (1909) के 78 कार्डों से किया जाता है — यह अभी एकमात्र उपलब्ध डेक है।"
+              : "This reading draws from the classic Rider-Waite-Smith deck (1909), 78 cards — the only deck currently available here."}
+          </p>
         </div>
 
         <PatrikaFrame style={{ marginBottom: "1.5rem" }}>
@@ -101,7 +106,9 @@ export default function TarotTool() {
                 maxLength={200}
               />
               <span className="form-hint">
-                {isHi ? "सामान्य पाठन के लिए खाली छोड़ें" : "Leave blank for a general reading"}
+                {isHi
+                  ? "पारंपरिक तरीके के अनुसार, कार्ड निकालते समय यह प्रश्न मन में रखें — इससे नीचे के अर्थ आपकी स्थिति से जोड़ना आसान होगा। खाली छोड़ने पर सामान्य पाठन मिलेगा।"
+                  : "In classic tarot practice, holding this question in mind while the cards are drawn makes the meanings below easier to relate to your situation. Leave it blank for a general reading."}
               </span>
             </div>
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: "100%" }}>

@@ -309,6 +309,11 @@ export default function MatchingTool() {
         </div>
 
         <form onSubmit={handleCalculate}>
+          <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ textAlign: "center", marginBottom: "0.75rem" }}>
+            {isHi
+              ? "यह मिलान दोनों की चंद्र-राशि व नक्षत्र पर आधारित है — चंद्रमा तेज़ी से चलता है (लगभग 13° प्रतिदिन) और एक ही दिन में राशि या नक्षत्र बदल सकता है, इसलिए जितना सटीक जन्म-समय दोनों का होगा, उतना भरोसेमंद स्कोर मिलेगा।"
+              : "This match is built entirely from each person's Moon sign and nakshatra — and the Moon moves fast enough (about 13° a day) to change sign or nakshatra within a single day, so the more exact each birth time, the more reliable this score."}
+          </p>
           <div className="form-2col-wide" style={{ marginBottom: "1.5rem" }}>
             <PatrikaFrame>
               <BirthForm embedded onChange={setP1} label={t("form.person1")} />
@@ -370,6 +375,19 @@ export default function MatchingTool() {
                             : <>A score <span className="hl">below 18</span> doesn't mean rejection — it means a careful, koota-by-koota review with dosha-cancellation and navamsa checks is essential before deciding.</>)}
                 </p>
               </div>
+
+              {(!p1?.tob || !p2?.tob) && (
+                <div className="kaal-box" style={{ marginBottom: "1.25rem" }}>
+                  <strong className={isHi ? "devanagari" : undefined}>
+                    {isHi ? "⚠ सटीक जन्म-समय अनुपलब्ध" : "⚠ Exact birth time missing"}
+                  </strong>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", marginTop: "0.3rem" }}>
+                    {isHi
+                      ? `${!p1?.tob && !p2?.tob ? "वर और वधू दोनों के जन्म-विवरण" : !p1?.tob ? "वर के जन्म-विवरण" : "वधू के जन्म-विवरण"} में सही समय न होने से हमने सूर्योदय के समय का अनुमान इस्तेमाल किया है। चंद्रमा एक ही दिन में राशि या नक्षत्र बदल सकता है — जो नीचे के अधिकांश कूट तय करता है — इसलिए सटीक समय मिलते ही यह मिलान दोबारा जांच लें।`
+                      : `${!p1?.tob && !p2?.tob ? "Both birth details" : !p1?.tob ? "The boy's birth details" : "The girl's birth details"} had no exact time, so we used a sunrise-based estimate. The Moon — which drives most of the kootas below — can shift into a new sign or nakshatra within a single day, so it's worth rechecking this match once you have the exact time.`}
+                  </p>
+                </div>
+              )}
 
               <Divider />
 

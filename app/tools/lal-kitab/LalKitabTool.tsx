@@ -19,6 +19,50 @@ function orderedPlanets(chart: Record<string, { house: number }>) {
   return PLANET_ORDER.filter((p) => p in chart);
 }
 
+/** The API's "indicator" field is the ASTROLOGICAL TRIGGER (e.g. "Venus in
+ *  the 5th house") — useful for a practitioner, meaningless to a first-time
+ *  visitor. This maps each of the 9 classical Lal Kitab debts to what it's
+ *  traditionally said to feel like or show up as in daily life, so the raw
+ *  debt name isn't the only thing shown. Keyed by the API's exact `name`. */
+const DEBT_MEANING: Record<string, { en: string; hi: string }> = {
+  "Swa Rin (Self Debt)": {
+    en: "Classically about an imbalance with your OWN self — it can show up as self-doubt, over-working to prove yourself, or difficulty simply resting without guilt.",
+    hi: "यह पारंपरिक रूप से स्वयं के साथ असंतुलन का प्रतीक है — आत्म-संदेह, स्वयं को साबित करने हेतु अत्यधिक परिश्रम, या बिना अपराध-बोध के आराम न कर पाने के रूप में दिख सकता है।",
+  },
+  "Pitru Rin (Father's Debt)": {
+    en: "Linked to your father or paternal lineage — often felt as a strained or distant relationship with your father, or a sense of unfinished duty toward the family line.",
+    hi: "पिता या पितृ-पक्ष से जुड़ा — प्रायः पिता के साथ दूरी या तनाव, अथवा परिवार के प्रति अधूरे कर्तव्य के भाव के रूप में महसूस होता है।",
+  },
+  "Matru Rin (Mother's Debt)": {
+    en: "Linked to your mother or maternal side — classically shows as guilt around not doing enough for your mother, or unmet emotional needs from childhood resurfacing later in life.",
+    hi: "माता या मातृ-पक्ष से जुड़ा — पारंपरिक रूप से माता के लिए पर्याप्त न कर पाने का अपराध-बोध, या बचपन की अधूरी भावनात्मक आवश्यकताओं के बाद में उभरने के रूप में दिखता है।",
+  },
+  "Stri Rin (Wife's Debt)": {
+    en: "About balance in how women in your life are treated — classically eases marriage and partnerships once honoured and respected consciously.",
+    hi: "जीवन की स्त्रियों के साथ व्यवहार के संतुलन से जुड़ा — सचेत सम्मान व आदर देने पर वैवाहिक व साझेदारी संबंध पारंपरिक रूप से सहज होते हैं।",
+  },
+  "Rishtedari Rin (Relatives' Debt)": {
+    en: "A debt toward the wider family circle — often shows as relatives repeatedly needing your help, or old unresolved friction among extended family.",
+    hi: "विस्तृत परिवार के प्रति ऋण — प्रायः रिश्तेदारों की बार-बार सहायता आवश्यकता, या परिवार में पुराने अनसुलझे मतभेद के रूप में दिखता है।",
+  },
+  "Bahin-Putri Rin (Sister/Daughter's Debt)": {
+    en: "Connected to sisters or daughters — classically felt as a strong pull of responsibility to protect and provide for the younger women in the family.",
+    hi: "बहनों या बेटियों से जुड़ा — पारंपरिक रूप से परिवार की युवा स्त्रियों की रक्षा व भरण-पोषण की प्रबल ज़िम्मेदारी के रूप में महसूस होता है।",
+  },
+  "Jalim Rin (Cruelty Debt)": {
+    en: "Traditionally tied to past harshness toward those with less power — softened, per Lal Kitab, through consistent kindness to workers, animals, and the vulnerable.",
+    hi: "पारंपरिक रूप से कमज़ोरों के प्रति अतीत की कठोरता से जुड़ा — लाल किताब के अनुसार कामगारों, पशुओं व असहायों के प्रति निरंतर दयालुता से इसका शमन होता है।",
+  },
+  "Ajanma Rin (Unborn's Debt)": {
+    en: "Traditionally linked to an unborn child in the family's past — addressed classically through supporting children's welfare and charitable giving.",
+    hi: "पारंपरिक रूप से परिवार के अतीत में किसी अजन्मे बालक से जुड़ा — शास्त्रानुसार बाल-कल्याण व दान द्वारा इसका निवारण होता है।",
+  },
+  "Daiviya Rin (Divine Debt)": {
+    en: "About gratitude and devotion toward the divine — classically felt as a restless, spiritually \"unsettled\" feeling until worship and selfless service become part of daily life.",
+    hi: "ईश्वर के प्रति कृतज्ञता व भक्ति से जुड़ा — जब तक पूजा व निःस्वार्थ सेवा जीवन का हिस्सा नहीं बनती, तब तक एक बेचैन, आध्यात्मिक रूप से अस्थिर भाव बना रहता है।",
+  },
+};
+
 export default function LalKitabTool() {
   const { t, lang } = useI18n();
   const isHi = lang === "hi";
@@ -137,6 +181,11 @@ export default function LalKitabTool() {
                 </table>
               </div>
               <p className="scroll-hint">{isHi ? "← अधिक देखने के लिए स्वाइप करें →" : "← Swipe to see more →"}</p>
+              <p className={`result-explain${isHi ? " devanagari" : ""}`}>
+                {isHi
+                  ? <><span className="hl">पक्का घर</span> का अर्थ है "स्थायी घर" — हर ग्रह के 1-2 ऐसे भाव होते हैं जहां वह घर जैसा सहज महसूस करता है और अपना पूरा, स्थिर फल देता है। ✓ का मतलब है वह ग्रह अभी उसी स्थायी घर में बैठा है — नीचे पूरी तालिका में सभी ग्रहों के लिए यह देखा जा सकता है।</>
+                  : <><span className="hl">Pakka Ghar</span> means "permanent house" — each planet has 1–2 houses where it feels naturally at home and gives its full, steady results. A ✓ means that planet is currently sitting in its own permanent house — see the full table further below for every planet.</>}
+              </p>
 
               {/* ── Debts ── */}
               <h3 className="num-sub-heading" style={{ marginTop: "1.75rem" }}>{isHi ? "ऋण (कर्ज)" : "Debts (Karz)"}</h3>
@@ -145,18 +194,29 @@ export default function LalKitabTool() {
                   <span style={{ color: "#1a7a3a", fontWeight: 700 }}>✓ {isHi ? "कोई सक्रिय ऋण नहीं" : "No Active Debts"}</span>
                 </div>
               ) : (
-                activeDebts.map((d, i) => (
-                  <div key={i} className="karmic-debt-card">
-                    <div className="karmic-debt-header">
-                      <span className="karmic-debt-num">⚠</span>
-                      <span className="karmic-debt-theme">{isHi ? d.name_hi : d.name}</span>
+                activeDebts.map((d, i) => {
+                  const meaning = DEBT_MEANING[d.name];
+                  return (
+                    <div key={i} className="karmic-debt-card">
+                      <div className="karmic-debt-header">
+                        <span className="karmic-debt-num">⚠</span>
+                        <span className="karmic-debt-theme">{isHi ? d.name_hi : d.name}</span>
+                      </div>
+                      {meaning && (
+                        <p className={`karmic-debt-meaning${isHi ? " devanagari" : ""}`}>
+                          {isHi ? meaning.hi : meaning.en}
+                        </p>
+                      )}
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", marginBottom: "0.6rem" }}>
+                        <strong>{isHi ? "कुंडली में कारण: " : "Seen in your chart as: "}</strong>
+                        {isHi ? d.indicator_hi : d.indicator}
+                      </p>
+                      <div className="karmic-debt-remedy">
+                        <strong>{isHi ? "उपाय:" : "Remedy:"}</strong> {isHi ? d.remedy_hi : d.remedy}
+                      </div>
                     </div>
-                    <p className="karmic-debt-meaning">{isHi ? d.indicator_hi : d.indicator}</p>
-                    <div className="karmic-debt-remedy">
-                      <strong>{isHi ? "उपाय:" : "Remedy:"}</strong> {isHi ? d.remedy_hi : d.remedy}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
               {inactiveDebts.length > 0 && (
                 <details style={{ marginTop: "0.5rem" }}>
