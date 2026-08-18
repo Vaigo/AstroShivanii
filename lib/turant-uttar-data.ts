@@ -333,7 +333,7 @@ export interface FeatureRedirect { href: string; label: { en: string; hi: string
 const FEATURE_PATTERNS: Array<{ test: RegExp; redirect: FeatureRedirect }> = [
   {
     test: /rectif|जन्म\s*समय\s*शुद्धिकरण|exact\s*(birth\s*)?time|birth\s*time.*(unknown|wrong|galat)|(जन्म\s*)?समय.*(पता\s*नहीं|गलत)/i,
-    redirect: { href: "/tools/time-rectification", label: { en: "Time Rectification — ₹1100", hi: "जन्म समय शुद्धिकरण — ₹1100" } },
+    redirect: { href: "/tools/kundli", label: { en: "View your Kundli", hi: "अपनी कुंडली देखें" } },
   },
   {
     test: /pdf\s*report|kundli\s*report|कुंडली.*रिपोर्ट|पूर्ण\s*कुंडली/i,

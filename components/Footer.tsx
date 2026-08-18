@@ -59,7 +59,6 @@ export default function Footer() {
             <li><Link href="/tools/karmic-debt">Karmic Debt & Missing Numbers</Link></li>
             <li><Link href="/tools/name-correction">Name Correction</Link></li>
             <li><Link href="/tools/turant-uttar">तुरंत उत्तर</Link></li>
-            <li><Link href="/tools/time-rectification">Time Rectification</Link></li>
             <li><Link href="/tools/numerology-suite">Numerology Suite</Link></li>
             <li><Link href="/tools/varshphal-yearly">Yearly Horoscope</Link></li>
             <li><Link href="/tools">All Free Tools →</Link></li>

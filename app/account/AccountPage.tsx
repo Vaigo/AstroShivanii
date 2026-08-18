@@ -172,7 +172,11 @@ export default function AccountPage() {
   const tabs: Array<{ key: Tab; hi: string; en: string; count: number }> = [
     { key: "orders", hi: "मेरे प्रश्न", en: "My Questions", count: orders.length },
     { key: "bookings", hi: "मेरी बुकिंग", en: "My Bookings", count: bookings.length },
-    { key: "rectifications", hi: "समय शुद्धिकरण", en: "Time Rectification", count: rectifications.length },
+    // Time Rectification is unpublished (not being sold) — only show this
+    // tab to customers who already have a past order, never as a new-purchase prompt.
+    ...(rectifications.length > 0
+      ? [{ key: "rectifications" as Tab, hi: "समय शुद्धिकरण", en: "Time Rectification", count: rectifications.length }]
+      : []),
     { key: "payments", hi: "भुगतान", en: "Payments", count: payments.length },
   ];
 
@@ -324,9 +328,6 @@ export default function AccountPage() {
               <p className={isHi ? "devanagari" : undefined} style={{ color: "var(--muted)", marginBottom: "1rem" }}>
                 {isHi ? "अभी तक कोई समय-शुद्धिकरण नहीं किया।" : "No time rectification done yet."}
               </p>
-              <Link href="/tools/time-rectification" className="btn btn-primary btn-sm devanagari">
-                {isHi ? "जन्म समय शुद्धिकरण शुरू करें ₹1100" : "Start Time Rectification ₹1100"}
-              </Link>
             </PatrikaFrame>
           ) : (
             <div style={{ display: "grid", gap: "0.75rem" }}>

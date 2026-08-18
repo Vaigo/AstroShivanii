@@ -103,29 +103,6 @@ export default function ToolsPage() {
           </PatrikaFrame>
         </Reveal>
 
-        {/* ── जन्म समय शुद्धिकरण — featured, paid tool ── */}
-        <Reveal>
-          <PatrikaFrame style={{ marginBottom: "2.5rem", border: "1.5px solid var(--gold)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-              <div className="service-card-icon" style={{ flexShrink: 0 }}>
-                <Icon name="clock" size={26} />
-              </div>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", marginBottom: "0.5rem" }}>
-                  ₹1100 · जन्म समय शुद्धिकरण
-                </span>
-                <h2 style={{ fontSize: "1.25rem", marginBottom: "0.2rem" }}>जन्म समय पता नहीं?</h2>
-                <p style={{ color: "var(--muted)", fontSize: "0.9rem", margin: 0 }}>
-                  अपने जीवन की कुछ निश्चित घटनाएं बताएं — हम दशा-गणना से आपका सही जन्म समय (और आवश्यकता होने पर तारीख) निकालते हैं
-                </p>
-              </div>
-              <Link href="/tools/time-rectification" className="btn btn-primary">
-                शुरू करें →
-              </Link>
-            </div>
-          </PatrikaFrame>
-        </Reveal>
-
         {/* ── Numerology Suite + Yearly Horoscope — featured, paid tools ── */}
         <Reveal>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
