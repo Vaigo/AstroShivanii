@@ -5,17 +5,29 @@ import type { Planet } from "@/lib/api/types";
  *  corner … H12 top-right corner. Sign number per house =
  *  ((lagna_sign_index + house − 1) mod 12) + 1. Never hand-place labels. */
 
+// Kendra houses (1,4,7,10) are the large kite quarters — sign number sits
+// toward the diamond's center, planets stack toward the kite's outer tip,
+// with a wide gap since there's real room. Corner houses (2,3,5,6,8,9,11,12)
+// are small triangles — sign number stays near the triangle's outer corner,
+// planets anchor near its centroid, both pushed as far apart as the small
+// shape allows (this is what was too tight before: e.g. house 10 had both
+// anchors within 47px of each other despite being a large kendra house).
 const SIGN_NUM_POS: Record<number, [number, number]> = {
-  1: [200, 152], 2: [100, 78], 3: [72, 105], 4: [152, 205],
-  5: [72, 305], 6: [100, 338], 7: [200, 266], 8: [300, 338],
-  9: [328, 305], 10: [248, 205], 11: [328, 105], 12: [300, 78],
+  1: [200, 160], 2: [95, 88], 3: [66, 96], 4: [160, 200],
+  5: [66, 304], 6: [95, 312], 7: [200, 240], 8: [305, 312],
+  9: [334, 304], 10: [240, 200], 11: [334, 96], 12: [305, 88],
 };
 
 const PLANET_ANCHOR: Record<number, [number, number]> = {
-  1: [200, 66], 2: [100, 40], 3: [52, 84], 4: [100, 188],
-  5: [52, 292], 6: [100, 350], 7: [200, 318], 8: [300, 350],
-  9: [352, 306], 10: [295, 196], 11: [350, 80], 12: [300, 40],
+  1: [200, 55], 2: [100, 32], 3: [45, 78], 4: [95, 200],
+  5: [45, 322], 6: [100, 368], 7: [200, 345], 8: [300, 368],
+  9: [355, 322], 10: [340, 200], 11: [355, 78], 12: [300, 32],
 };
+
+// Corner houses render fewer, smaller, more tightly-stacked lines — a small
+// triangle genuinely can't hold 4 lines of a 14.5px bold label without
+// running into the sign number or the house's own edges.
+const CORNER_HOUSES = new Set([2, 3, 5, 6, 8, 9, 11, 12]);
 
 const ABBR: Record<string, string> = {
   Sun: "सू", Moon: "चं", Mars: "मं", Mercury: "बु", Jupiter: "गु",
@@ -127,15 +139,21 @@ export default function KundliChart({ ascSignIndex, ascDegrees, ascDms, planets,
         );
       })}
 
-      {/* planets, stacked per house */}
+      {/* planets, stacked per house — corner houses get smaller text and
+          fewer lines since their triangles are genuinely too small for 4
+          full-size stacked labels without crowding the sign number */}
       {Array.from(byHouse.entries()).map(([house, list]) => {
         const [x, y] = PLANET_ANCHOR[house];
-        return list.slice(0, 4).map((p, i) => (
+        const isCorner = CORNER_HOUSES.has(house);
+        const fontSize = isCorner ? "12.5" : "14.5";
+        const lineStep = isCorner ? 13 : 17;
+        const maxLines = isCorner ? 3 : 4;
+        return list.slice(0, maxLines).map((p, i) => (
           <text
             key={`${house}-${i}`}
             x={x}
-            y={y + i * 17}
-            fontSize="14.5"
+            y={y + i * lineStep}
+            fontSize={fontSize}
             fill={p.modern ? "#6b5fa8" : "#1c2150"}
             textAnchor="middle"
             fontWeight="bold"

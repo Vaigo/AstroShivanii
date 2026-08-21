@@ -41,6 +41,8 @@ const HOUSE_LABEL_HI: Record<CategoryKey, string> = {
 const ORDINAL_HI = ["", "प्रथम", "द्वितीय", "तृतीय", "चतुर्थ", "पंचम", "षष्ठ", "सप्तम", "अष्टम", "नवम", "दशम", "एकादश", "द्वादश"];
 const STRENGTH_HI: Record<FactSheet["strength"], string> = { strong: "बलवान", neutral: "सामान्य", weak: "दुर्बल" };
 const STRENGTH_COLOR: Record<FactSheet["strength"], string> = { strong: "#1a7a3a", neutral: "#c99a3a", weak: "#c0392b" };
+const COMPAT_HI: Record<string, string> = { excellent: "उत्तम", good: "अच्छी", average: "सामान्य", poor: "कम" };
+const COMPAT_COLOR: Record<string, string> = { excellent: "#1a7a3a", good: "#1a7a3a", average: "#c99a3a", poor: "#c0392b" };
 
 type Step = "pick" | "birth" | "computing" | "teaser" | "narrating" | "unlocked";
 
@@ -68,6 +70,8 @@ function TurantUttarInner() {
   const [facts, setFacts] = useState<FactSheet | null>(null);
   const [birthData, setBirthData] = useState<BirthRequest | null>(null);
   const [birthDraft, setBirthDraft] = useState<BirthRequest | null>(null);
+  const [partnerData, setPartnerData] = useState<BirthRequest | null>(null);
+  const [partnerDraft, setPartnerDraft] = useState<BirthRequest | null>(null);
   const [userName, setUserName] = useState("");
   const [userGender, setUserGender] = useState<"" | "male" | "female">("");
   const [situation, setSituation] = useState("");
@@ -88,6 +92,7 @@ function TurantUttarInner() {
           setCategory(s.category);
           setQuestionText(s.questionText ?? "");
           setBirthData(s.birthData ?? null);
+          setPartnerData(s.partnerData ?? null);
           setKundli(s.kundli ?? null);
           setFacts(s.facts ?? null);
           setTier(s.tier ?? null);
@@ -119,10 +124,10 @@ function TurantUttarInner() {
     }
     try {
       window.sessionStorage.setItem("tu-state", JSON.stringify({
-        step, category, questionText, birthData, kundli, facts, tier, narration, refCode, situation,
+        step, category, questionText, birthData, partnerData, kundli, facts, tier, narration, refCode, situation,
       }));
     } catch { /* storage full/unavailable — degrade to pre-fix behavior */ }
-  }, [step, category, questionText, birthData, kundli, facts, tier, narration, refCode, situation]);
+  }, [step, category, questionText, birthData, partnerData, kundli, facts, tier, narration, refCode, situation]);
 
   // Scroll to the new step on every CHANGE — but not on first mount, so a
   // fresh visitor sees the title, explainer, and step map before anything else.
@@ -203,6 +208,9 @@ function TurantUttarInner() {
       clearInterval(lineTimer);
       setKundli(result);
       setBirthData(birth);
+      // Guard against a stale partnerDraft from a previously-selected
+      // needsPartner category leaking into one that doesn't use it.
+      setPartnerData(CATEGORIES.find((c) => c.key === category)?.needsPartner ? partnerDraft : null);
       setFacts(getFactSheet(result, category!));
       setTier(resolveTier(result, category!));
       setStep("teaser");
@@ -289,7 +297,7 @@ function TurantUttarInner() {
     try {
       const result = await fetchTurantUttarAI(
         birthData!, category!, questionText, lang, situation.trim() || undefined,
-        refCode, getSiteToken(), razorpayOrderId
+        refCode, getSiteToken(), razorpayOrderId, partnerData ?? undefined
       );
       // Until the AI key is configured the backend returns a facts-only
       // template. Blend in our hand-written tier verdict so the answer
@@ -414,7 +422,7 @@ function TurantUttarInner() {
                 <div className="tu-teaser-box" style={{ marginTop: "0.9rem" }}>
                   <p className={isHi ? "devanagari" : undefined}>
                     {isHi
-                      ? "तुरंत उत्तर आपकी अपनी जन्म-कुंडली पर आधारित व्यक्तिगत उत्तर है — यह हमारे बारे में सामान्य सवालों का जवाब नहीं देता। हमारे कुछ उत्तर लिखने में Astro Shivanii AI सहायता करता है, पर हर तथ्य आपकी असली कुंडली की गणना से ही आता है।"
+                      ? "तुरंत उत्तर आपकी अपनी जन्म-कुंडली पर आधारित व्यक्तिगत उत्तर है — यह हमारे बारे में सामान्य सवालों का जवाब नहीं देता। हमारे कुछ उत्तर लिखने में Astro Shivanii AI सहायता करती है, पर हर तथ्य आपकी असली कुंडली की गणना से ही आता है।"
                       : "तुरंत उत्तर gives a personal answer from your own birth chart — it isn't built to answer general questions about us. Astro Shivanii AI helps write some answers, but every fact still comes from your real chart's calculation."}
                   </p>
                   <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap", marginTop: "0.5rem" }}>
@@ -477,6 +485,25 @@ function TurantUttarInner() {
               </div>
 
               <BirthForm embedded onChange={setBirthDraft} />
+
+              {/* love/breakup/marriage inherently involve a second person —
+                  ask for their details here, before payment, rather than
+                  giving an answer that silently ignores them. Optional:
+                  skipping it just keeps today's single-chart answer. */}
+              {CATEGORIES.find((c) => c.key === category)?.needsPartner && (
+                <div className="form-group" style={{ borderTop: "1px dashed var(--gold)", paddingTop: "1rem", marginTop: "0.5rem" }}>
+                  <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginBottom: "0.75rem" }}>
+                    {isHi
+                      ? "यदि दिया जाए, तो हम एक वास्तविक जोड़ी-अनुकूलता जांच भी उत्तर में शामिल करेंगे — न देना चाहें तो छोड़ सकते हैं।"
+                      : "If given, we'll include a real pair-compatibility check in your answer — feel free to skip if you don't have their details."}
+                  </p>
+                  <BirthForm
+                    embedded
+                    onChange={setPartnerDraft}
+                    label={isHi ? "जिनके बारे में पूछ रहे हैं — उनका विवरण (वैकल्पिक)" : "Their details — the person this is about (optional)"}
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label" htmlFor="tu-situation">
@@ -548,6 +575,11 @@ function TurantUttarInner() {
               <div className="tu-tier-strip">
                 <div className="tu-tier-marker" style={{ left: `${tierPct}%` }} />
               </div>
+              {partnerData && (
+                <p className={`devanagari`} style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--saffron)", fontWeight: 700, marginBottom: "0.5rem" }}>
+                  {isHi ? "✓ जोड़ी-अनुकूलता जांच सहित" : "✓ Includes pair-compatibility check"}
+                </p>
+              )}
               <div className="tu-teaser-box">
                 <p className={isHi ? "devanagari" : undefined}>{isHi ? content.teaser.hi : content.teaser.en}</p>
               </div>
@@ -680,8 +712,23 @@ function TurantUttarInner() {
                   <span>
                     <strong style={{ color: "var(--muted)" }}>{isHi ? "वर्तमान महादशा" : "Current Mahadasha"}:</strong>{" "}
                     {isHi ? PLANET_HI[facts.dashaLord] ?? facts.dashaLord : facts.dashaLord}
-                    {facts.dashaEnd && ` (${isHi ? "तक" : "until"} ${facts.dashaEnd.slice(0, 10)})`}
+                    {facts.dashaEnd && (
+                      <span style={{ whiteSpace: "nowrap" }}>
+                        {" "}({isHi ? "तक" : "until"} {facts.dashaEnd.slice(0, 10)})
+                      </span>
+                    )}
                   </span>
+                  {narration?.dossier?.partner_compatibility && (
+                    <span>
+                      <strong style={{ color: "var(--muted)" }}>{isHi ? "जोड़ी-अनुकूलता" : "Pair compatibility"}:</strong>{" "}
+                      <span style={{ color: COMPAT_COLOR[narration.dossier.partner_compatibility.compatibility], fontWeight: 700 }}>
+                        {isHi
+                          ? COMPAT_HI[narration.dossier.partner_compatibility.compatibility] ?? narration.dossier.partner_compatibility.compatibility
+                          : narration.dossier.partner_compatibility.compatibility}
+                      </span>
+                      {" "}({narration.dossier.partner_compatibility.total_score}/{narration.dossier.partner_compatibility.max_score})
+                    </span>
+                  )}
                 </div>
               </div>
 

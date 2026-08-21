@@ -25,6 +25,12 @@ export interface CategoryDef {
   /** Lowercase keywords (Hindi + English + Hinglish) used to route a
    *  free-typed custom question to this category. No AI — plain matching. */
   keywords: string[];
+  /** True only for categories inherently about a second person (love,
+   *  breakup, marriage) — shows an optional partner-birth-details form
+   *  before payment, which adds a real Guna Milan compatibility factor to
+   *  the answer. Every other category is read entirely from the asker's
+   *  own chart, so this stays unset there. */
+  needsPartner?: boolean;
 }
 
 export const CATEGORIES: CategoryDef[] = [
@@ -37,6 +43,7 @@ export const CATEGORIES: CategoryDef[] = [
       { en: "How do I improve this relationship?", hi: "हमारे रिश्ते में सुधार कैसे लाऊं?" },
     ],
     keywords: ["love", "girlfriend", "boyfriend", "gf", "bf", "partner", "pyar", "प्यार", "रिश्ता", "relationship"],
+    needsPartner: true,
   },
   {
     key: "breakup", icon: "droplet",
@@ -46,6 +53,7 @@ export const CATEGORIES: CategoryDef[] = [
       { en: "How long to heal from this?", hi: "इस दर्द से उबरने में कितना समय लगेगा?" },
     ],
     keywords: ["ex", "breakup", "break up", "wapas", "वापस आएगा", "ब्रेकअप", "separation", "alag"],
+    needsPartner: true,
   },
   {
     key: "marriage", icon: "rings",
@@ -55,6 +63,7 @@ export const CATEGORIES: CategoryDef[] = [
       { en: "Will I marry the person I love?", hi: "क्या जिससे प्यार करता/करती हूं उसी से शादी होगी?" },
     ],
     keywords: ["marriage", "shaadi", "शादी", "vivah", "विवाह", "wedding"],
+    needsPartner: true,
   },
   {
     key: "career", icon: "briefcase",

@@ -100,10 +100,11 @@ export function recordBookingIntent(b: {
  *  a GrahaAPI developer key, only from this site. */
 export function fetchTurantUttarAI(
   birth: BirthRequest, category: string, question: string, language: "en" | "hi",
-  context?: string, refCode?: string, siteToken?: string | null, razorpayOrderId?: string
+  context?: string, refCode?: string, siteToken?: string | null, razorpayOrderId?: string,
+  partner?: BirthRequest
 ): Promise<TurantUttarAIResult> {
   return siteFetch<TurantUttarAIResult>("/v1/site/turant-uttar", {
-    body: { birth, category, question, language, context, ref_code: refCode, razorpay_order_id: razorpayOrderId },
+    body: { birth, category, question, language, context, ref_code: refCode, razorpay_order_id: razorpayOrderId, partner },
     headers: siteToken ? { "X-Site-Token": siteToken } : undefined,
   });
 }

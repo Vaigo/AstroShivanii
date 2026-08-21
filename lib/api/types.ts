@@ -317,6 +317,25 @@ export interface FestivalsResult {
 
 /* ── Turant Uttar AI narration (/v1/ai/turant-uttar) ────────────────────── */
 
+/** Only present when love/breakup/marriage were asked WITH partner details —
+ *  same real Guna Milan + manglik-dosha computation the free Matching tool
+ *  uses, folded into the तुरंत उत्तर dossier. */
+export interface TurantUttarPartnerCompatibility {
+  total_score: number;
+  max_score: number;
+  percentage: number;
+  compatibility: "excellent" | "good" | "average" | "poor";
+  manglik_dosha: { person1: boolean; person2: boolean; dosha_cancelled: boolean };
+  weak_factors: string[];
+}
+
+export interface TurantUttarDossier {
+  relevant_house: number;
+  partner_provided: boolean;
+  partner_compatibility?: TurantUttarPartnerCompatibility;
+  [key: string]: unknown;
+}
+
 export interface TurantUttarAIResult {
   opening: string;
   /** How Vedic astrology judges this topic in general — the educational lens. */
@@ -327,7 +346,7 @@ export interface TurantUttarAIResult {
   remedies: string[];
   /** Practical behaviour/timing suggestions, not rituals. */
   tips: string[];
-  dossier: Record<string, unknown>;
+  dossier: TurantUttarDossier;
   narrated_by: "haiku" | "template";
   powered_by: string;
 }
