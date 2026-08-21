@@ -14,6 +14,10 @@ function fmt(unix: number): string {
   return new Date(unix * 1000).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
+function fmtUsd(n: number | null | undefined): string {
+  return n == null ? "—" : `$${n.toFixed(4)}`;
+}
+
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div style={{ background: "var(--panel)", border: "1.5px solid rgba(201,154,58,0.45)", borderRadius: 3, padding: "1rem 1.2rem", flex: 1, minWidth: 150 }}>
@@ -172,6 +176,11 @@ export default function AdminPage() {
               <StatCard label="तुरंत उत्तर" value={ov.turant_uttar.total} sub={`${ov.turant_uttar.today} today`} />
               <StatCard label="TU Revenue" value={`₹${ov.turant_uttar.revenue_inr.toLocaleString("en-IN")}`} sub="self-attested until Razorpay" />
               <StatCard label="Bookings" value={ov.bookings.total} sub={`${ov.bookings.paid} paid`} />
+              <StatCard
+                label="AI Cost"
+                value={fmtUsd(ov.turant_uttar.ai_cost_usd + ov.bookings.report_ai_cost_usd)}
+                sub={`TU ${fmtUsd(ov.turant_uttar.ai_cost_usd)} · Reports ${fmtUsd(ov.bookings.report_ai_cost_usd)}`}
+              />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
@@ -212,7 +221,10 @@ export default function AdminPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
                 <thead><tr>
                   <th style={th}>Email</th><th style={th}>Name</th><th style={th}>Joined</th>
-                  <th style={th}>Questions</th><th style={th}>Bookings</th><th style={th}>Spent</th>
+                  <th style={th}>Questions</th><th style={th}>Bookings</th>
+                  <th style={th} title="Only orders linked to a logged-in account — Turant Uttar has no login step, so most guest orders won't show here. See Overview for total revenue.">
+                    Spent (linked)
+                  </th>
                 </tr></thead>
                 <tbody>
                   {users.map((u) => (
@@ -238,7 +250,8 @@ export default function AdminPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
                 <thead><tr>
                   <th style={th}>When</th><th style={th}>Question</th><th style={th}>Category</th>
-                  <th style={th}>User</th><th style={th}>Ref</th><th style={th}>Narration</th><th style={th}>₹</th>
+                  <th style={th}>User</th><th style={th}>Ref</th><th style={th}>Narration</th>
+                  <th style={th}>AI Cost</th><th style={th}>₹</th>
                 </tr></thead>
                 <tbody>
                   {orders.map((o) => (
@@ -249,10 +262,11 @@ export default function AdminPage() {
                       <td style={td}>{o.user_email ?? (o.name || "guest")}</td>
                       <td style={{ ...td, whiteSpace: "nowrap" }}>{o.ref_code ?? "—"}</td>
                       <td style={td}>{o.narrated_by}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{fmtUsd(o.ai_cost_usd)}</td>
                       <td style={{ ...td, fontWeight: 700 }}>{o.amount_inr}</td>
                     </tr>
                   ))}
-                  {orders.length === 0 && <tr><td style={td} colSpan={7}>No orders yet</td></tr>}
+                  {orders.length === 0 && <tr><td style={td} colSpan={8}>No orders yet</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -292,7 +306,7 @@ export default function AdminPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820 }}>
                 <thead><tr>
                   <th style={th}>Requested</th><th style={th}>Customer</th><th style={th}>Birth</th>
-                  <th style={th}>Status</th><th style={th}>₹</th><th style={th}>Actions</th>
+                  <th style={th}>Status</th><th style={th}>AI Cost</th><th style={th}>₹</th><th style={th}>Actions</th>
                 </tr></thead>
                 <tbody>
                   {reports.map((r) => (
@@ -312,6 +326,7 @@ export default function AdminPage() {
                           <div style={{ fontWeight: 400, fontSize: "0.72rem", color: "var(--muted)", maxWidth: 220 }}>{r.error}</div>
                         )}
                       </td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{fmtUsd(r.ai_cost_usd)}</td>
                       <td style={{ ...td, fontWeight: 700 }}>{r.amount_inr ?? "—"}</td>
                       <td style={{ ...td, whiteSpace: "nowrap" }}>
                         {r.status === "pending_review" && (
@@ -327,7 +342,7 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
-                  {reports.length === 0 && <tr><td style={td} colSpan={6}>No reports yet</td></tr>}
+                  {reports.length === 0 && <tr><td style={td} colSpan={7}>No reports yet</td></tr>}
                 </tbody>
               </table>
             </div>

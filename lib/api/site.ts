@@ -14,6 +14,9 @@ export interface TuOrder {
   id: number; ref_code: string | null; category: string; question: string;
   language: string; amount_inr: number; status: string; narrated_by: string; created_at: number;
   name?: string; user_email?: string; dob?: string; tob?: string;
+  /** Real Anthropic API cost for this answer's narration, in USD — null when
+   *  narrated_by is 'template' (no AI call was made) or on pre-tracking rows. */
+  ai_cost_usd?: number | null;
 }
 
 export interface SiteBooking {
@@ -186,14 +189,18 @@ export function fetchNameCorrectionResult(body: {
 export interface AdminOverview {
   users: { total: number; new_this_week: number };
   turant_uttar: {
-    total: number; today: number; revenue_inr: number;
+    total: number; today: number; revenue_inr: number; ai_cost_usd: number;
     by_category: Array<{ category: string; c: number }>;
     trend_14d: Array<{ d: string; c: number }>;
     narrated_by: Array<{ n: string; c: number }>;
   };
-  bookings: { total: number; paid: number; by_reading: Array<{ reading_slug: string; c: number }> };
+  bookings: { total: number; paid: number; by_reading: Array<{ reading_slug: string; c: number }>; report_ai_cost_usd: number };
 }
 export interface AdminUserRow extends SiteUser {
+  /** Sum of amount_inr across orders LINKED to this account (user_id set) —
+   *  Turant Uttar has no login step, so most orders are unlinked guest
+   *  checkouts and won't show here even though they were paid. Total real
+   *  revenue lives on the Overview tab instead. */
   tu_count: number; booking_count: number; spent_inr: number; created_at: number;
 }
 
@@ -208,6 +215,9 @@ export interface ReportJob {
   id: number; booking_id: number; status: string; error: string | null;
   created_at: number; updated_at: number; approved_at: number | null;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; amount_inr?: number;
+  /** Real Anthropic API cost across all ~27 section-narration calls for this
+   *  one report, in USD — set once generation finishes. */
+  ai_cost_usd?: number | null;
 }
 
 export const adminReports = (key: string) => siteFetch<{ reports: ReportJob[] }>("/v1/site/admin/reports", { headers: adminHeaders(key) });
