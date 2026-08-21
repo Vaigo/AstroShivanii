@@ -256,7 +256,18 @@ function TurantUttarInner() {
             setPaying(false);
           }
         },
-        modal: { ondismiss: () => setPaying(false) },
+        modal: {
+          // Fires whenever the widget closes without a successful payment —
+          // covers gateway-level rejections (e.g. a business/website check)
+          // that close the modal without the payment.failed event firing.
+          // Phrased neutrally since this ALSO fires on a deliberate close.
+          ondismiss: () => {
+            setPaying(false);
+            setPayError(isHi
+              ? "Checkout बंद हो गया। यदि आपने भुगतान पूरा किया है और वह यहां नहीं दिख रहा, तो कृपया WhatsApp पर संदेश करें, हम इसे सुलझा देंगे।"
+              : "Checkout closed. If you completed a payment and it isn't reflected here, message us on WhatsApp and we'll sort it out.");
+          },
+        },
       });
       rzp.on("payment.failed", () => {
         setPayError(isHi ? "भुगतान विफल रहा — पुनः प्रयास करें या WhatsApp से भुगतान करें" : "Payment failed — try again or pay via WhatsApp");
