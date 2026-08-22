@@ -116,7 +116,7 @@ export function fetchTurantUttarAI(
 export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
 
 export function createPaymentOrder(body: {
-  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction"; slug: string;
+  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction" | "palmistry"; slug: string;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
   // birth place — required for the birth-chart/kundli-report product so the
   // auto-generated PDF uses an accurate chart; harmless to omit elsewhere.
@@ -185,6 +185,101 @@ export function fetchNameCorrectionResult(body: {
   });
 }
 
+/* ── Palmistry (Hast Rekha Shastra) ── */
+
+export interface PalmistryLine {
+  present: boolean;
+  length?: "short" | "medium" | "long";
+  continuity?: "unbroken" | "broken" | "chained";
+  confidence: number;
+}
+export interface PalmistryMark { shape: string; near?: string; confidence: number; }
+export interface PalmistrySymbol { name: string; confidence: number; }
+export interface PalmistryMount { prominence: "flat" | "average" | "prominent"; confidence: number; }
+export interface PalmistryHand {
+  handedness: "Left" | "Right";
+  hand_detection_confidence?: number;
+  image_quality_score: number;
+  hand_shape: string;
+  hand_shape_confidence: number;
+  finger_ratios: Record<string, number>;
+  mounts: Record<string, PalmistryMount>;
+  lines: Record<string, PalmistryLine>;
+  marks: PalmistryMark[];
+  symbols: PalmistrySymbol[];
+  narration_note?: string;
+}
+export interface PalmistryResult {
+  opening: string; topic_insight: string; narrative: string; timing_note: string;
+  remedies: string[]; tips: string[];
+  dossier: { primary_hand: PalmistryHand; other_hand?: PalmistryHand };
+  narrated_by: "haiku" | "template";
+  powered_by: string;
+}
+
+export interface PalmistryPrecheckVerdict {
+  hand_detected: boolean;
+  image_quality_score: number;
+  verdict: "retake" | "usable" | "good";
+  reason: "no_hand_detected" | "low_quality" | "borderline_quality" | null;
+  message: string | null;
+}
+export interface PalmistryPrecheckResult {
+  palm: PalmistryPrecheckVerdict;
+  other_hand?: PalmistryPrecheckVerdict;
+}
+
+/** Free, no-payment, no-login pre-flight check — call this the moment a
+ *  photo is selected, BEFORE the paywall, so a bad photo is caught and the
+ *  user is told to retake it before they ever pay ₹299. Runs only the
+ *  deterministic engine server-side (no Anthropic call), so it's cheap to
+ *  call on every file selection. Deliberately NOT siteFetch (multipart). */
+export function precheckPalmistryPhotos(args: { palmImage: File; otherHandImage?: File }): Promise<PalmistryPrecheckResult> {
+  const form = new FormData();
+  form.append("palm_image", args.palmImage);
+  if (args.otherHandImage) form.append("other_hand_image", args.otherHandImage);
+
+  return fetch(`${BASE}/v1/site/palmistry/precheck`, { method: "POST", body: form }).then(async (res) => {
+    const json = await res.json();
+    if (!res.ok || json?.success === false) {
+      const err = json?.error ?? json?.detail ?? {};
+      throw new SiteApiError(err.code ?? "ERROR", err.message ?? `HTTP ${res.status}`);
+    }
+    return json.data as PalmistryPrecheckResult;
+  });
+}
+
+/** Palmistry's compute step — hard-gated server-side on a verified
+ *  razorpay_order_id (no self-attest fallback, same trust model as Time
+ *  Rectification: a vision-AI call is too costly per attempt to leave a
+ *  free path open). Deliberately NOT siteFetch — this sends real image
+ *  files as multipart form data, not a JSON body. */
+export function fetchPalmistryResult(args: {
+  palmImage: File; otherHandImage: File;
+  name?: string; gender?: "male" | "female"; ref_code?: string; razorpay_order_id: string; language: "en" | "hi";
+}): Promise<PalmistryResult> {
+  const form = new FormData();
+  form.append("palm_image", args.palmImage);
+  form.append("other_hand_image", args.otherHandImage);
+  form.append("name", args.name ?? "");
+  form.append("gender", args.gender ?? "");
+  form.append("ref_code", args.ref_code ?? "");
+  form.append("razorpay_order_id", args.razorpay_order_id);
+  form.append("language", args.language);
+
+  return fetch(`${BASE}/v1/site/palmistry`, {
+    method: "POST", body: form,
+    headers: { "X-Site-Token": getSiteToken() ?? "" },
+  }).then(async (res) => {
+    const json = await res.json();
+    if (!res.ok || json?.success === false) {
+      const err = json?.error ?? json?.detail ?? {};
+      throw new SiteApiError(err.code ?? "ERROR", err.message ?? `HTTP ${res.status}`);
+    }
+    return json.data as PalmistryResult;
+  });
+}
+
 /* ── admin ── */
 export interface AdminOverview {
   users: { total: number; new_this_week: number };
@@ -195,6 +290,7 @@ export interface AdminOverview {
     narrated_by: Array<{ n: string; c: number }>;
   };
   bookings: { total: number; paid: number; by_reading: Array<{ reading_slug: string; c: number }>; report_ai_cost_usd: number };
+  palmistry: { total: number; revenue_inr: number; ai_cost_usd: number };
 }
 export interface AdminUserRow extends SiteUser {
   /** Sum of amount_inr across orders LINKED to this account (user_id set) —

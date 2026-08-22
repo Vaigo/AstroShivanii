@@ -151,6 +151,21 @@ export default function ToolsPage() {
                 </Link>
               </div>
             </PatrikaFrame>
+            <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                <div className="service-card-icon"><Icon name="scroll" size={24} /></div>
+                <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                  ₹299 · हस्त रेखा विश्लेषण
+                </span>
+                <h2 style={{ fontSize: "1.15rem", margin: 0 }}>आपकी हथेली क्या कहती है?</h2>
+                <p style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                  तस्वीर से वास्तविक हस्त रेखा विश्लेषण — रेखाएं, पर्वत, बनावट, हर खोज के साथ ईमानदार भरोसे का स्तर
+                </p>
+                <Link href="/tools/palmistry" className="btn btn-primary" style={{ width: "100%" }}>
+                  शुरू करें →
+                </Link>
+              </div>
+            </PatrikaFrame>
           </div>
         </Reveal>
 

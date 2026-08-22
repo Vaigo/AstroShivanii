@@ -176,10 +176,11 @@ export default function AdminPage() {
               <StatCard label="तुरंत उत्तर" value={ov.turant_uttar.total} sub={`${ov.turant_uttar.today} today`} />
               <StatCard label="TU Revenue" value={`₹${ov.turant_uttar.revenue_inr.toLocaleString("en-IN")}`} sub="self-attested until Razorpay" />
               <StatCard label="Bookings" value={ov.bookings.total} sub={`${ov.bookings.paid} paid`} />
+              <StatCard label="Palmistry" value={ov.palmistry.total} sub={`₹${ov.palmistry.revenue_inr.toLocaleString("en-IN")} revenue`} />
               <StatCard
                 label="AI Cost"
-                value={fmtUsd(ov.turant_uttar.ai_cost_usd + ov.bookings.report_ai_cost_usd)}
-                sub={`TU ${fmtUsd(ov.turant_uttar.ai_cost_usd)} · Reports ${fmtUsd(ov.bookings.report_ai_cost_usd)}`}
+                value={fmtUsd(ov.turant_uttar.ai_cost_usd + ov.bookings.report_ai_cost_usd + ov.palmistry.ai_cost_usd)}
+                sub={`TU ${fmtUsd(ov.turant_uttar.ai_cost_usd)} · Reports ${fmtUsd(ov.bookings.report_ai_cost_usd)} · Palmistry ${fmtUsd(ov.palmistry.ai_cost_usd)}`}
               />
             </div>
 
