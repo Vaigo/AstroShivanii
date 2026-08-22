@@ -130,28 +130,34 @@ const ART: Record<ToolIconName, ReactNode> = {
       <circle className="ti-pulse" style={{ animationDelay: "2s" }} cx="16.5" cy="20.5" r="5" fill="#E0A93A" stroke="none" />
     </>
   ),
-  // A cobra — Kaal SARP (सर्प = snake) Dosha. Front-facing with the FLARED
-  // HOOD (the one feature that makes a cobra unmistakable — earlier
-  // hood-less attempts read as a squiggle), two eyes, a hanging forked
-  // tongue, rising out of coiled loops. The whole hood sways side to side
-  // like a cobra holding its strike pose.
+  // A KING COBRA in the classic Nag pose — कुंडली मारे बैठा (sitting on its
+  // own stacked coils, tail tip curling out), hood raised in SIDE VIEW (the
+  // one silhouette that reliably reads as a snake at 32px — every front-view
+  // attempt collapsed into a face, an egg, or a spinning top), with the
+  // king cobra's धारियां (crossbands) over the raised body.
   "kaal-sarp-dosha": (
     <>
-      {/* coiled base — two stacked loops */}
-      <ellipse cx="16" cy="26" rx="8.6" ry="2.9" />
-      <path d="M9.6 24.6c1.9-1.2 10.9-1.2 12.8 0" />
-      {/* hood + head in SIDE VIEW (uraeus pose, facing left) — the classic
-          cobra silhouette: a big convex hood back sweeping up and over into
-          a forward-jutting head, concave hood front below the jaw. Front-
-          view attempts at this size mushed into a cartoon face. Sways as
-          one menacing unit. */}
+      {/* कुंडली — two stacked coil loops + tail tip escaping right */}
+      <ellipse cx="16" cy="27.2" rx="8.4" ry="2.2" />
+      <path d="M8.2 25.6c1.6-1.5 4.4-2.1 7.4-2.1 3.2 0 6.2.7 7.7 2.3" />
+      <path d="M24.6 27.2c1.8.5 3.2 0 3.8-1.3" strokeWidth="1.3" />
+      {/* body sinking from the raised hood into the top coil loop */}
+      <path d="M14.7 21.3c-.15 1.3-.2 2.4-.15 3.4M19.8 21.5c.2 1.2.3 2.2.25 3.1" />
       <g className="ti-sway">
-        <path d="M19.8 23 C 25.6 19.6, 25.8 9.4, 20.6 5.6 C 17.8 3.6, 13.4 4, 11.8 6.4 C 10.9 7.8, 11.3 9.3, 12.6 9.9" />
-        <path d="M12.6 9.9 C 15.2 12.4, 15.4 17.6, 14.7 22.8" />
-        <circle cx="14.6" cy="7" r="0.65" fill="currentColor" stroke="none" />
+        {/* raised body in SIDE VIEW (the silhouette that actually reads as
+            a snake at 32px — front views kept collapsing into a face/top):
+            convex hood back sweeping up and over into the forward-jutting
+            head, concave throat line below the jaw */}
+        <path d="M19.8 21.5 C 25.6 18.1, 25.8 7.9, 20.6 4.1 C 17.8 2.1, 13.4 2.5, 11.8 4.9 C 10.9 6.3, 11.3 7.8, 12.6 8.4" />
+        <path d="M12.6 8.4 C 15.2 10.9, 15.4 16.1, 14.7 21.3" />
+        {/* धारियां — the king cobra's crossbands over the raised body */}
+        <path d="M14.2 9.9 C 17.5 11, 21.5 10.6, 23.9 8.9" strokeWidth="1.2" />
+        <path d="M15 13.4 C 18 14.5, 22 14.2, 24.9 12.5" strokeWidth="1.2" />
+        <path d="M15.2 17 C 18 18, 21.5 17.8, 24.2 16.2" strokeWidth="1.2" />
+        <circle cx="14.6" cy="5.5" r="0.65" fill="currentColor" stroke="none" />
         {/* tongue darting out ahead — quick flicks */}
         <g className="ti-flick">
-          <path d="M11.2 8.3l-2.9.6M8.3 8.9l-1.5-.9M8.3 8.9l-1.2 1.2" strokeWidth="1.2" />
+          <path d="M11.2 6.8l-2.9.6M8.3 7.4l-1.5-.9M8.3 7.4l-1.2 1.2" strokeWidth="1.2" />
         </g>
       </g>
     </>
