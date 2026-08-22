@@ -12,10 +12,14 @@ import type { Planet } from "@/lib/api/types";
 // planets anchor near its centroid, both pushed as far apart as the small
 // shape allows (this is what was too tight before: e.g. house 10 had both
 // anchors within 47px of each other despite being a large kendra house).
+// Note: the vertical-edge triangles (3, 5, 9, 11) keep their sign numbers
+// out of the widest horizontal band (y≈78–105 / 295–322) — that band is
+// where multi-planet stacks get nudged by the chord-fit below, and a sign
+// number sitting there collides with them.
 const SIGN_NUM_POS: Record<number, [number, number]> = {
-  1: [200, 160], 2: [95, 88], 3: [66, 96], 4: [160, 200],
-  5: [66, 304], 6: [95, 312], 7: [200, 240], 8: [305, 312],
-  9: [334, 304], 10: [240, 200], 11: [334, 96], 12: [305, 88],
+  1: [200, 160], 2: [95, 88], 3: [60, 124], 4: [160, 200],
+  5: [60, 282], 6: [95, 312], 7: [200, 240], 8: [305, 312],
+  9: [340, 282], 10: [240, 200], 11: [340, 124], 12: [305, 88],
 };
 
 const PLANET_ANCHOR: Record<number, [number, number]> = {
@@ -46,7 +50,8 @@ function shortDms(dms: string | undefined): string | null {
 
 /** The 12 fixed house regions of the North Indian chart (square 2..398 with
  *  both diagonals + the midpoint diamond; diagonal×diamond intersections at
- *  (101,101)/(299,101)/(299,299)/(101,299)). Used only for highlighting. */
+ *  (101,101)/(299,101)/(299,299)/(101,299)). Used for highlighting AND for
+ *  fitting text inside each house's real boundaries. */
 const HOUSE_POLY: Record<number, string> = {
   1: "200,2 299,101 200,200 101,101",
   2: "2,2 200,2 101,101",
@@ -61,6 +66,37 @@ const HOUSE_POLY: Record<number, string> = {
   11: "398,200 299,101 398,2",
   12: "398,2 299,101 200,2",
 };
+
+// Vertex arrays of the same polygons, for text-fitting geometry.
+const HOUSE_VERTS: Record<number, Array<[number, number]>> = Object.fromEntries(
+  Object.entries(HOUSE_POLY).map(([h, pts]) => [
+    h,
+    pts.split(" ").map((p) => p.split(",").map(Number) as [number, number]),
+  ])
+);
+
+/** Horizontal chord [xmin, xmax] of a (convex) house polygon at height y —
+ *  i.e. how much horizontal room the house actually has at that line. */
+function chordAt(house: number, y: number): [number, number] | null {
+  const verts = HOUSE_VERTS[house];
+  const xs: number[] = [];
+  for (let i = 0; i < verts.length; i++) {
+    const [x1, y1] = verts[i];
+    const [x2, y2] = verts[(i + 1) % verts.length];
+    if (y1 === y2) {
+      if (y1 === y) xs.push(x1, x2);
+      continue;
+    }
+    const t = (y - y1) / (y2 - y1);
+    if (t >= 0 && t <= 1) xs.push(x1 + t * (x2 - x1));
+  }
+  if (xs.length < 2) return null;
+  return [Math.min(...xs), Math.max(...xs)];
+}
+
+// Rough bold-Devanagari width per code unit. Matras count as units but render
+// near-zero width, so this overestimates slightly — the safe direction.
+const CHAR_W = 0.58;
 
 interface KundliChartProps {
   ascSignIndex: number;
@@ -140,27 +176,56 @@ export default function KundliChart({ ascSignIndex, ascDegrees, ascDms, planets,
       })}
 
       {/* planets, stacked per house — corner houses get smaller text and
-          fewer lines since their triangles are genuinely too small for 4
-          full-size stacked labels without crowding the sign number */}
+          fewer lines. Every line is then FITTED to its house's real
+          geometry: the label's estimated width is checked against the
+          polygon's horizontal chord at that line's height, the line is
+          nudged inward to stay inside, and only if it genuinely cannot fit
+          is its font shrunk (floor 9px). Fixed anchors alone let long
+          labels like "के(व)28°39'" cross the chart lines in the narrow
+          corner triangles. */}
       {Array.from(byHouse.entries()).map(([house, list]) => {
         const [x, y] = PLANET_ANCHOR[house];
         const isCorner = CORNER_HOUSES.has(house);
-        const fontSize = isCorner ? "12.5" : "14.5";
+        const baseFont = isCorner ? 12.5 : 14.5;
         const lineStep = isCorner ? 13 : 17;
         const maxLines = isCorner ? 3 : 4;
-        return list.slice(0, maxLines).map((p, i) => (
-          <text
-            key={`${house}-${i}`}
-            x={x}
-            y={y + i * lineStep}
-            fontSize={fontSize}
-            fill={p.modern ? "#6b5fa8" : "#1c2150"}
-            textAnchor="middle"
-            fontWeight="bold"
-          >
-            {p.label}
-          </text>
-        ));
+        return list.slice(0, maxLines).map((p, i) => {
+          const yBase = y + i * lineStep;
+          let fontSize = baseFont;
+          let cx = x;
+          // Room where the glyphs actually sit: intersect the chords at the
+          // baseline and at the glyph tops (the triangles taper).
+          const c1 = chordAt(house, yBase);
+          const c2 = chordAt(house, yBase - baseFont * 0.8);
+          if (c1 && c2) {
+            const min = Math.max(c1[0], c2[0]) + 4;
+            const max = Math.min(c1[1], c2[1]) - 4;
+            const avail = max - min;
+            let w = p.label.length * CHAR_W * fontSize;
+            if (w > avail && avail > 0) {
+              fontSize = Math.max(9, fontSize * (avail / w));
+              w = p.label.length * CHAR_W * fontSize;
+            }
+            if (w <= avail) {
+              cx = Math.min(Math.max(x, min + w / 2), max - w / 2);
+            } else {
+              cx = (min + max) / 2;
+            }
+          }
+          return (
+            <text
+              key={`${house}-${i}`}
+              x={cx}
+              y={yBase}
+              fontSize={fontSize}
+              fill={p.modern ? "#6b5fa8" : "#1c2150"}
+              textAnchor="middle"
+              fontWeight="bold"
+            >
+              {p.label}
+            </text>
+          );
+        });
       })}
     </svg>
   );
