@@ -3,7 +3,8 @@ import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PatrikaFrame from "@/components/PatrikaFrame";
-import Icon, { IconName } from "@/components/Icon";
+import Icon from "@/components/Icon";
+import ToolIcon, { ToolIconName } from "@/components/ToolIcon";
 import { CATEGORIES } from "@/lib/turant-uttar-data";
 
 export const metadata: Metadata = {
@@ -13,21 +14,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/" },
 };
 
-const TOOLS: Array<{ slug: string; icon: IconName; name: string; nameHi: string; desc: string }> = [
-  { slug: "panchang",   icon: "sun",    name: "Panchang",              nameHi: "पंचांग",                desc: "Tithi, nakshatra, Rahu Kaal, Abhijit muhurta — any date, any city, plus a monthly calendar view" },
-  { slug: "kundli",     icon: "scroll", name: "Kundli / Birth Chart",  nameHi: "कुंडली / जन्म चार्ट",  desc: "North Indian chart, planetary positions, yogas, current dasha" },
-  { slug: "baal-kundli", icon: "leaf",  name: "Baal Kundli",           nameHi: "बाल कुंडली",           desc: "Free baby & child birth chart — naming syllable, temperament, health tendencies" },
-  { slug: "matching",   icon: "rings",  name: "Marriage Matching",     nameHi: "गुण मिलान",             desc: "36-point Ashtakoot Guna Milan + Mangal Dosha check" },
-  { slug: "rashifal",   icon: "star",   name: "Daily Rashifal",        nameHi: "दैनिक राशिफल",          desc: "Today's horoscope for your moon sign (rashi)" },
-  { slug: "numerology", icon: "hash",   name: "Numerology",            nameHi: "अंक ज्योतिष",           desc: "Mulank, Bhagyank, Name Number, Lo Shu Grid, Karmic Numbers" },
-  { slug: "sade-sati",  icon: "planet", name: "Sade Sati Check",       nameHi: "साढ़े साती जांच",         desc: "Is Saturn's 7.5-year period currently active for you?" },
-  { slug: "tarot",      icon: "cards",  name: "Tarot Reading",         nameHi: "टैरो पाठन",             desc: "3-card Vedic tarot spread for your question" },
-  { slug: "lal-kitab",          icon: "book",     name: "Lal Kitab Calculator",         nameHi: "लाल किताब गणना",             desc: "Planetary houses, debts (karz), pakka ghar & remedies" },
-  { slug: "lucky-colors",       icon: "droplet",  name: "Lucky Color Calculator",       nameHi: "शुभ रंग गणना",               desc: "Auspicious colors from your Lagna and Nakshatra lord" },
-  { slug: "kaal-sarp-dosha",    icon: "shield",   name: "Kaal Sarp Dosha Checker",      nameHi: "काल सर्प दोष जांच",           desc: "Is Kaal Sarp Dosha present in your birth chart?" },
-  { slug: "favorable-alphabet", icon: "type",     name: "Favorable Alphabet",           nameHi: "शुभ अक्षर गणना",             desc: "Cornerstone & Capstone letter numerology from your name" },
-  { slug: "personal-year",      icon: "calendar", name: "Personal Year Number",         nameHi: "व्यक्तिगत वर्षांक",           desc: "This year's dominant theme, ruling planet & gemstone" },
-  { slug: "karmic-debt",        icon: "eye",      name: "Karmic Debt & Missing Numbers", nameHi: "कार्मिक ऋण व अनुपस्थित अंक", desc: "Karmic debt numbers plus missing & repeated number lessons" },
+const TOOLS: Array<{ slug: ToolIconName; name: string; nameHi: string; desc: string }> = [
+  { slug: "panchang",    name: "Panchang",              nameHi: "पंचांग",                desc: "Tithi, nakshatra, Rahu Kaal, Abhijit muhurta — any date, any city, plus a monthly calendar view" },
+  { slug: "kundli",      name: "Kundli / Birth Chart",  nameHi: "कुंडली / जन्म चार्ट",  desc: "North Indian chart, planetary positions, yogas, current dasha" },
+  { slug: "baal-kundli", name: "Baal Kundli",           nameHi: "बाल कुंडली",           desc: "Free baby & child birth chart — naming syllable, temperament, health tendencies" },
+  { slug: "matching",    name: "Marriage Matching",     nameHi: "गुण मिलान",             desc: "36-point Ashtakoot Guna Milan + Mangal Dosha check" },
+  { slug: "rashifal",    name: "Daily Rashifal",        nameHi: "दैनिक राशिफल",          desc: "Today's horoscope for your moon sign (rashi)" },
+  { slug: "numerology",  name: "Numerology",            nameHi: "अंक ज्योतिष",           desc: "Mulank, Bhagyank, Name Number, Lo Shu Grid, Karmic Numbers" },
+  { slug: "sade-sati",   name: "Sade Sati Check",       nameHi: "साढ़े साती जांच",         desc: "Is Saturn's 7.5-year period currently active for you?" },
+  { slug: "tarot",       name: "Tarot Reading",         nameHi: "टैरो पाठन",             desc: "3-card Vedic tarot spread for your question" },
+  { slug: "lal-kitab",          name: "Lal Kitab Calculator",         nameHi: "लाल किताब गणना",             desc: "Planetary houses, debts (karz), pakka ghar & remedies" },
+  { slug: "lucky-colors",       name: "Lucky Color Calculator",       nameHi: "शुभ रंग गणना",               desc: "Auspicious colors from your Lagna and Nakshatra lord" },
+  { slug: "kaal-sarp-dosha",    name: "Kaal Sarp Dosha Checker",      nameHi: "काल सर्प दोष जांच",           desc: "Is Kaal Sarp Dosha present in your birth chart?" },
+  { slug: "favorable-alphabet", name: "Favorable Alphabet",           nameHi: "शुभ अक्षर गणना",             desc: "Cornerstone & Capstone letter numerology from your name" },
+  { slug: "personal-year",      name: "Personal Year Number",         nameHi: "व्यक्तिगत वर्षांक",           desc: "This year's dominant theme, ruling planet & gemstone" },
+  { slug: "karmic-debt",        name: "Karmic Debt & Missing Numbers", nameHi: "कार्मिक ऋण व अनुपस्थित अंक", desc: "Karmic debt numbers plus missing & repeated number lessons" },
 ];
 
 export default function ToolsPage() {
@@ -108,7 +109,7 @@ export default function ToolsPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
             <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                <div className="service-card-icon"><Icon name="hash" size={24} /></div>
+                <div className="service-card-icon tool-card-icon"><ToolIcon name="numerology" size={36} /></div>
                 <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                   ₹299 · अंक ज्योतिष सूट
                 </span>
@@ -123,7 +124,7 @@ export default function ToolsPage() {
             </PatrikaFrame>
             <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                <div className="service-card-icon"><Icon name="calendar" size={24} /></div>
+                <div className="service-card-icon tool-card-icon"><ToolIcon name="varshphal" size={36} /></div>
                 <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                   ₹1,499 · वार्षिक भविष्यफल
                 </span>
@@ -138,7 +139,7 @@ export default function ToolsPage() {
             </PatrikaFrame>
             <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                <div className="service-card-icon"><Icon name="sparkle" size={24} /></div>
+                <div className="service-card-icon tool-card-icon"><ToolIcon name="name-correction" size={36} /></div>
                 <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                   ₹501 · नाम सुधार
                 </span>
@@ -153,7 +154,7 @@ export default function ToolsPage() {
             </PatrikaFrame>
             <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                <div className="service-card-icon"><Icon name="scroll" size={24} /></div>
+                <div className="service-card-icon tool-card-icon"><ToolIcon name="palmistry" size={36} /></div>
                 <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                   ₹299 · हस्त रेखा विश्लेषण
                 </span>
@@ -174,8 +175,8 @@ export default function ToolsPage() {
             <Reveal key={tool.slug} delay={i * 60}>
               <Link href={`/tools/${tool.slug}`} style={{ textDecoration: "none", display: "block", height: "100%" }}>
                 <div className="service-card" style={{ cursor: "pointer", height: "100%", display: "flex", flexDirection: "column" }}>
-                  <div className="service-card-icon">
-                    <Icon name={tool.icon} size={24} />
+                  <div className="service-card-icon tool-card-icon">
+                    <ToolIcon name={tool.slug} size={36} />
                   </div>
                   <div className="service-card-title">{tool.name}</div>
                   <div className="service-card-title-hi devanagari">{tool.nameHi}</div>
