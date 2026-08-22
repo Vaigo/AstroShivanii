@@ -51,7 +51,7 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <nav className="footer-links" aria-label="Free tools">
+        <nav className="footer-links footer-links-flow" aria-label="Free tools">
           <h4>Free Tools</h4>
 
           <p className="footer-subhead">Kundli &amp; Dosha</p>
