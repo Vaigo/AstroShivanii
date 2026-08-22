@@ -695,6 +695,36 @@ a:hover { color: var(--saffron); }
   50%       { opacity: 1;   transform: scale(1.05); }
 }
 
+/* ── ToolIcon micro-animations (ti-*) ─────────────────────────────────────
+   Subject-matched motion for the tool-grid illustrations in ToolIcon.tsx —
+   the cobra sways, Saturn's ring orbits, the year-wheel turns, the palm
+   waves. transform-box: fill-box makes transform-origin relative to each
+   SVG element's own bounding box (without it, SVG children rotate around
+   the whole viewBox corner). All transform/opacity only; the global
+   prefers-reduced-motion rule at the end of this file disables them. */
+@keyframes tiPulse   { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.14); } }
+@keyframes tiTwinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.65); } }
+@keyframes tiBlink   { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes tiRock    { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes tiSway    { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes tiWave    { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes tiFlick   { 0%, 74%, 100% { opacity: 0; } 78%, 94% { opacity: 1; } }
+@keyframes tiSpin    { to { transform: rotate(360deg); } }
+@keyframes tiOrbit   { to { stroke-dashoffset: -14; } }
+@keyframes tiWrite   { 0% { stroke-dashoffset: 100; } 55%, 100% { stroke-dashoffset: 0; } }
+
+.ti-pulse   { transform-box: fill-box; transform-origin: 50% 50%; animation: tiPulse 3s ease-in-out infinite; }
+.ti-twinkle { transform-box: fill-box; transform-origin: 50% 50%; animation: tiTwinkle 2.4s ease-in-out infinite; }
+.ti-blink   { animation: tiBlink 3.6s ease-in-out infinite; }
+.ti-rock    { transform-box: fill-box; transform-origin: 50% 100%; animation: tiRock 3.2s ease-in-out infinite; }
+/* The cobra: quicker than everything else on the page — alert, coiled to strike */
+.ti-sway    { transform-box: fill-box; transform-origin: 50% 100%; animation: tiSway 1.7s ease-in-out infinite; }
+.ti-wave    { transform-box: fill-box; transform-origin: 55% 100%; animation: tiWave 2.6s ease-in-out infinite; }
+.ti-flick   { animation: tiFlick 2.6s linear infinite; }
+.ti-spin    { transform-box: fill-box; transform-origin: 50% 50%; animation: tiSpin 24s linear infinite; }
+.ti-orbit   { animation: tiOrbit 2.8s linear infinite; }
+.ti-write   { stroke-dasharray: 100; animation: tiWrite 4.5s ease-in-out infinite; }
+
 /* ─── Scroll Reveal ─────────────────────────────────────────────────────────── */
 .reveal {
   opacity: 0;
