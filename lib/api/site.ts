@@ -207,27 +207,49 @@ export interface MuhurtaProfile {
 export interface MuhurtaDate {
   date: string; weekday: string; nakshatra: string; tithi: string; paksha: string;
   tara: string; tara_quality: string; chandrabala_good: boolean;
-  karaka_transit_ok: boolean; score: number; quality: "Excellent" | "Good";
+  karaka_transit_ok: boolean; score: number; quality: "Excellent" | "Good" | "Fair";
   auspicious_slots: Array<{ choghadiya: string; start: string; end: string }>;
   notes: MuhurtaCaution[];
+  // v2 weighted-method fields
+  tithi_num: number; tithi_group: string;
+  yoga: string; yoga_shubh: boolean;
+  karana: string; karana_shubh: boolean;
+  vaar_tier: "shubh" | "saumya" | "krur";
+  nakshatra_ok: boolean;
+  score_breakdown: { tara: number; yoga: number; karana: number; vaar: number; nakshatra: number; tithi: number };
+  relaxed: MuhurtaCaution[];
+  // marriage (dual-kundli) only
+  partner?: { tara: string; tara_quality: string; chandrabala_good: boolean;
+              moon_house_from_natal: number; score: number; quality: string };
+  combined_score?: number;
 }
 export interface MuhurtaPreviewResult {
   purpose: MuhurtaPurpose; from_date: string; to_date: string;
-  profile: MuhurtaProfile; total_found: number;
+  profile: MuhurtaProfile; profile2?: MuhurtaProfile; total_found: number;
+  relaxation_applied: MuhurtaCaution[];
   best_date: MuhurtaDate | null; remaining_count: number;
 }
 export interface MuhurtaFullResult {
   purpose: MuhurtaPurpose; from_date: string; to_date: string;
-  profile: MuhurtaProfile; dates: MuhurtaDate[]; total_found: number;
+  profile: MuhurtaProfile; profile2?: MuhurtaProfile; dates: MuhurtaDate[]; total_found: number;
+  relaxation_applied: MuhurtaCaution[];
 }
 
+export interface MuhurtaBirth {
+  dob: string; tob?: string; lat: number; lon: number; tz: number;
+}
 interface MuhurtaBirthBody {
   dob: string; tob?: string; lat: number; lon: number; tz: number;
   purpose: MuhurtaPurpose; ref_code?: string;
+  /** Target month "YYYY-MM" — scan window clamps to it (within tomorrow→+92d). */
+  month?: string;
+  /** Marriage only: the second person's birth details — both kundlis are
+   *  screened and only the common dates come back. */
+  birth2?: MuhurtaBirth;
 }
 
 /** Free teaser: natal snapshot + the single best date + how many more sit
- *  behind the ₹199 paywall. Deterministic compute — genuinely free. */
+ *  behind the ₹51 paywall. Deterministic compute — genuinely free. */
 export function fetchMuhurtaPreview(body: MuhurtaBirthBody): Promise<MuhurtaPreviewResult> {
   return siteFetch<MuhurtaPreviewResult>("/v1/site/muhurta-personal/preview", { body });
 }

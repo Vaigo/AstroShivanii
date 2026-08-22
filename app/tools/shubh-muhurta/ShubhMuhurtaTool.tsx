@@ -56,6 +56,9 @@ export default function ShubhMuhurtaTool() {
 
   const [purpose, setPurpose] = useState<MuhurtaPurpose | null>(null);
   const [birth, setBirth] = useState<BirthRequest | null>(null);
+  const [month, setMonth] = useState("");                       // "" = full 3 months
+  const [birth2, setBirth2] = useState<BirthRequest | null>(null);   // marriage: second person
+  const [birthDraft, setBirthDraft] = useState<BirthRequest | null>(null); // marriage: first person (embedded form)
   const [preview, setPreview] = useState<MuhurtaPreviewResult | null>(null);
   const [result, setResult] = useState<MuhurtaFullResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -75,6 +78,8 @@ export default function ShubhMuhurtaTool() {
         if (s.step && s.purpose) {
           setPurpose(s.purpose);
           setBirth(s.birth ?? null);
+          setMonth(s.month ?? "");
+          setBirth2(s.birth2 ?? null);
           setPreview(s.preview ?? null);
           setResult(s.result ?? null);
           setOrderId(s.orderId ?? "");
@@ -83,7 +88,10 @@ export default function ShubhMuhurtaTool() {
           // the backend accepts a verified order_id again, so re-fetch it now.
           if (s.orderId && !s.result && s.birth && s.purpose) {
             setStep("computing");
-            fetchMuhurtaPersonal({ ...s.birth, purpose: s.purpose, ref_code: s.refCode, razorpay_order_id: s.orderId })
+            fetchMuhurtaPersonal({
+              ...s.birth, purpose: s.purpose, ref_code: s.refCode, razorpay_order_id: s.orderId,
+              ...(s.month ? { month: s.month } : {}), ...(s.birth2 ? { birth2: s.birth2 } : {}),
+            })
               .then((res) => { setResult(res); setStep("result"); })
               .catch(() => setStep(s.preview ? "preview" : "intake"));
             return;
@@ -105,10 +113,10 @@ export default function ShubhMuhurtaTool() {
     }
     try {
       window.sessionStorage.setItem("muhurta-state", JSON.stringify({
-        step, purpose, birth, preview, result, refCode, orderId,
+        step, purpose, birth, month, birth2, preview, result, refCode, orderId,
       }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [step, purpose, birth, preview, result, refCode, orderId]);
+  }, [step, purpose, birth, month, birth2, preview, result, refCode, orderId]);
 
   // Browser BACK steps back one screen (result → preview → intake) instead of
   // dumping the user out of the flow; data survives via the saved session.
@@ -146,16 +154,40 @@ export default function ShubhMuhurtaTool() {
     document.body.appendChild(script);
   }, []);
 
+  const isMarriage = purpose === "marriage";
+
+  // Month chips: current + next two (the backend clamps to tomorrow→+92d).
+  const monthOptions = (() => {
+    const out: Array<{ value: string; label: string }> = [];
+    const now = new Date();
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      out.push({
+        value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        label: d.toLocaleDateString(isHi ? "hi-IN" : "en-IN", { month: "long", year: "numeric" }),
+      });
+    }
+    return out;
+  })();
+
   async function handleBirthSubmit(b: BirthRequest) {
     if (!purpose) {
       setError(isHi ? "पहले ऊपर से काम चुनें — किस चीज़ का मुहूर्त चाहिए?" : "First pick the purpose above — what do you need a date for?");
+      return;
+    }
+    if (isMarriage && !birth2) {
+      setError(isHi ? "विवाह के लिए वर और वधू दोनों का जन्म-विवरण चाहिए" : "Marriage needs BOTH the groom's and the bride's birth details");
       return;
     }
     setBirth(b);
     setError("");
     setLoading(true);
     try {
-      const p = await fetchMuhurtaPreview({ ...b, purpose, ref_code: refCode });
+      const p = await fetchMuhurtaPreview({
+        ...b, purpose, ref_code: refCode,
+        ...(month ? { month } : {}),
+        ...(isMarriage && birth2 ? { birth2 } : {}),
+      });
       setPreview(p);
       setStep("preview");
     } catch (e) {
@@ -214,7 +246,11 @@ export default function ShubhMuhurtaTool() {
     setOrderId(razorpayOrderId);
     setStep("computing");
     try {
-      const res = await fetchMuhurtaPersonal({ ...birth, purpose, ref_code: refCode, razorpay_order_id: razorpayOrderId });
+      const res = await fetchMuhurtaPersonal({
+        ...birth, purpose, ref_code: refCode, razorpay_order_id: razorpayOrderId,
+        ...(month ? { month } : {}),
+        ...(isMarriage && birth2 ? { birth2 } : {}),
+      });
       setResult(res);
       setStep("result");
     } catch (e) {
@@ -227,10 +263,26 @@ export default function ShubhMuhurtaTool() {
 
   const purposeLabel = purpose ? PURPOSES.find((p) => p.key === purpose) : null;
 
-  function renderProfile(profile: MuhurtaPreviewResult["profile"]) {
+  function renderRelaxation(relaxation: MuhurtaPreviewResult["relaxation_applied"]) {
+    if (!relaxation || relaxation.length === 0) return null;
     return (
-      <div className="result-box">
-        <div className="result-label">{isHi ? "आपकी कुंडली में क्या देखा गया" : "What We Checked In Your Chart"}</div>
+      <div className="result-box" style={{ border: "1px solid rgba(201,120,58,0.55)", background: "rgba(201,120,58,0.07)" }}>
+        <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--maroon-deep)", margin: 0 }}>
+          {isHi
+            ? "पारदर्शिता: इस अवधि में कोई तारीख सभी शर्तें पास नहीं कर पाई — विधि के अनुसार सबसे कम महत्व वाली शर्तें छोड़ी गईं:"
+            : "Transparency: no date passed every condition in this window — per the method, the lowest-weight conditions were relaxed:"}
+        </p>
+        <ul className={isHi ? "devanagari" : undefined} style={{ paddingLeft: "1.1rem", fontSize: "0.8rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+          {relaxation.map((c, i) => <li key={i}>{isHi ? c.hi : c.en}</li>)}
+        </ul>
+      </div>
+    );
+  }
+
+  function renderProfile(profile: MuhurtaPreviewResult["profile"], heading?: string) {
+    return (
+      <div className="result-box" key={heading ?? "p1"}>
+        <div className="result-label">{heading ?? (isHi ? "आपकी कुंडली में क्या देखा गया" : "What We Checked In Your Chart")}</div>
         <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.87rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
           {isHi
             ? <>इस काम के कारक ग्रह <strong>{profile.karaka}</strong> हैं — आपकी कुंडली में वे <strong>{profile.karaka_condition.sign}</strong> राशि ({profile.karaka_condition.dignity}) में, भाव {profile.karaka_condition.house} में हैं। आपका जन्म-नक्षत्र <strong>{profile.birth_nakshatra}</strong> है — नीचे की हर तारीख इसी से ताराबल जांच कर चुनी गई है।</>
@@ -274,7 +326,8 @@ export default function ShubhMuhurtaTool() {
             {fmtDate(d.date, isHi)} · {isHi ? WEEKDAY_HI[d.weekday] ?? d.weekday : d.weekday}
           </strong>
           <span className="trait-chip" style={d.quality === "Excellent" ? { background: "rgba(26,122,58,0.1)", borderColor: "rgba(26,122,58,0.4)", fontWeight: 700 } : undefined}>
-            {d.quality === "Excellent" ? (isHi ? "उत्तम" : "Excellent") : (isHi ? "शुभ" : "Good")}
+            {d.quality === "Excellent" ? (isHi ? "उत्तम" : "Excellent") : d.quality === "Good" ? (isHi ? "शुभ" : "Good") : (isHi ? "साधारण" : "Fair")}
+            {" · "}{Math.round(d.combined_score ?? d.score)}/100
           </span>
         </div>
         <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", margin: "0.4rem 0 0.4rem" }}>
@@ -282,6 +335,25 @@ export default function ShubhMuhurtaTool() {
             ? <>{d.nakshatra} नक्षत्र · {d.tithi} ({d.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} पक्ष) · आपके लिए <strong>{TARA_HI[d.tara] ?? d.tara} तारा</strong>{d.chandrabala_good ? " · चंद्रबल अनुकूल" : ""}</>
             : <>{d.nakshatra} nakshatra · {d.tithi} ({d.paksha} paksha) · <strong>{d.tara} tara</strong> for you{d.chandrabala_good ? " · chandrabala favorable" : ""}</>}
         </p>
+        {d.yoga && (
+          <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", margin: "0 0 0.4rem" }}>
+            {isHi
+              ? <>योग {d.yoga}{d.yoga_shubh ? "" : " ⚠"} · करण {d.karana}{d.karana_shubh ? "" : " ⚠"} · तिथि-वर्ग {d.tithi_group} · वार {d.vaar_tier === "shubh" ? "शुभ" : d.vaar_tier === "saumya" ? "सौम्य" : "क्रूर ⚠"}</>
+              : <>Yoga {d.yoga}{d.yoga_shubh ? "" : " ⚠"} · Karana {d.karana}{d.karana_shubh ? "" : " ⚠"} · Tithi group {d.tithi_group} · Vaar {d.vaar_tier}{d.vaar_tier === "krur" ? " ⚠" : ""}</>}
+          </p>
+        )}
+        {d.partner && (
+          <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "var(--ink-light)", margin: "0 0 0.4rem" }}>
+            {isHi
+              ? <>दूसरी कुंडली से भी शुभ: <strong>{TARA_HI[d.partner.tara] ?? d.partner.tara} तारा</strong>{d.partner.chandrabala_good ? " · चंद्रबल अनुकूल" : ""} · अंक {Math.round(d.partner.score)}/100</>
+              : <>Auspicious for the second chart too: <strong>{d.partner.tara} tara</strong>{d.partner.chandrabala_good ? " · chandrabala favorable" : ""} · score {Math.round(d.partner.score)}/100</>}
+          </p>
+        )}
+        {(d.relaxed ?? []).map((c, i) => (
+          <p key={`rx${i}`} className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.76rem", color: "#9a5b1f", margin: "0 0 0.3rem" }}>
+            ⚠ {isHi ? c.hi : c.en}
+          </p>
+        ))}
         {d.auspicious_slots.length > 0 && (
           <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", margin: 0 }}>
             <strong style={{ color: "var(--muted)" }}>{isHi ? "शुभ समय: " : "Good hours: "}</strong>
@@ -334,7 +406,53 @@ export default function ShubhMuhurtaTool() {
                   ))}
                 </div>
               </div>
-              <BirthForm onSubmit={handleBirthSubmit} loading={loading} />
+              <div className="form-group">
+                <label className="form-label">{isHi ? "किस महीने में चाहिए?" : "Which month do you want it in?"}</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                  {[{ value: "", label: isHi ? "अगले 3 महीने" : "Next 3 months" }, ...monthOptions].map((mo) => (
+                    <button
+                      key={mo.value} type="button"
+                      onClick={() => setMonth(mo.value)}
+                      className={isHi ? "devanagari" : undefined}
+                      style={{
+                        padding: "0.45rem 0.8rem", borderRadius: "2px", cursor: "pointer", fontSize: "0.82rem", fontWeight: 600,
+                        border: month === mo.value ? "2px solid var(--maroon)" : "1px solid rgba(201,154,58,0.45)",
+                        background: month === mo.value ? "rgba(110,30,42,0.08)" : "rgba(255,255,255,0.5)",
+                        color: "var(--maroon-deep)",
+                      }}
+                    >
+                      {mo.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {isMarriage ? (
+                <>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontWeight: 700, color: "var(--maroon-deep)", margin: "0.4rem 0 0.6rem" }}>
+                    {isHi ? "वर का जन्म-विवरण" : "Groom's birth details"}
+                  </p>
+                  <BirthForm embedded onChange={setBirthDraft} />
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontWeight: 700, color: "var(--maroon-deep)", margin: "1rem 0 0.6rem" }}>
+                    {isHi ? "वधू का जन्म-विवरण" : "Bride's birth details"}
+                  </p>
+                  <BirthForm embedded onChange={setBirth2} />
+                  <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ margin: "0.4rem 0 0.9rem" }}>
+                    {isHi
+                      ? "विवाह में पूरी जांच दोनों कुंडलियों पर चलती है — सिर्फ वही तारीखें आती हैं जो दोनों में शुभ हों।"
+                      : "For marriage the entire screen runs on BOTH charts — only dates auspicious for both come back."}
+                  </p>
+                  <button
+                    type="button" className="btn btn-primary" style={{ width: "100%" }}
+                    disabled={loading || !birthDraft || !birth2}
+                    onClick={() => birthDraft && handleBirthSubmit(birthDraft)}
+                  >
+                    {loading ? (isHi ? "गणना हो रही है…" : "Calculating…") : (isHi ? "गणना करें" : "Calculate")}
+                  </button>
+                </>
+              ) : (
+                <BirthForm onSubmit={handleBirthSubmit} loading={loading} />
+              )}
               {/* BirthForm ends with its submit button — this hint needs real
                   clearance below it, not the negative pull-up used after
                   hint-ending forms (it overlapped the button). */}
@@ -360,7 +478,9 @@ export default function ShubhMuhurtaTool() {
                 </p>
               </div>
 
-              {renderProfile(preview.profile)}
+              {renderProfile(preview.profile, preview.profile2 ? (isHi ? "वर की कुंडली में क्या देखा गया" : "Checked In The Groom's Chart") : undefined)}
+              {preview.profile2 && renderProfile(preview.profile2, isHi ? "वधू की कुंडली में क्या देखा गया" : "Checked In The Bride's Chart")}
+              {renderRelaxation(preview.relaxation_applied)}
 
               {preview.total_found === 0 ? (
                 <div className="result-box">
@@ -433,7 +553,9 @@ export default function ShubhMuhurtaTool() {
                 </p>
               </div>
 
-              {renderProfile(result.profile)}
+              {renderProfile(result.profile, result.profile2 ? (isHi ? "वर की कुंडली में क्या देखा गया" : "Checked In The Groom's Chart") : undefined)}
+              {result.profile2 && renderProfile(result.profile2, isHi ? "वधू की कुंडली में क्या देखा गया" : "Checked In The Bride's Chart")}
+              {renderRelaxation(result.relaxation_applied)}
               {result.dates.map((d, i) => renderDate(d, i === 0))}
 
               <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", textAlign: "center", marginTop: "0.9rem" }}>
