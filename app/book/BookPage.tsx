@@ -43,6 +43,25 @@ function BookForm() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  // A refresh right after paying must show the confirmation again, not the
+  // pre-filled payment form (which invites a double payment). The receipt is
+  // kept for 12 hours in this tab's session.
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem("book-success");
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.slug && Date.now() - (s.at ?? 0) < 12 * 3600 * 1000) {
+          setSlug(s.slug);
+          setSuccess(true);
+        } else {
+          window.sessionStorage.removeItem("book-success");
+        }
+      }
+    } catch { /* corrupted state — start fresh */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const reading = getReading(slug);
   const isLive = slug === "live-consultation";
   // The deluxe kundli PDF report generates automatically from an exact
@@ -107,6 +126,7 @@ function BookForm() {
           try {
             await verifyPayment(r);
             setSuccess(true);
+            try { window.sessionStorage.setItem("book-success", JSON.stringify({ slug, at: Date.now() })); } catch { /* non-fatal */ }
           } catch (err) {
             setError(err instanceof SiteApiError ? err.message
               : (isHi ? "भुगतान सत्यापन में समस्या — WhatsApp पर संपर्क करें" : "Verification issue — please contact us on WhatsApp"));
@@ -184,6 +204,18 @@ function BookForm() {
           </Link>
         )}
         <Link href="/" className={isKundliReport ? "btn btn-ghost" : "btn btn-primary"}>{isHi ? "होम पर वापस जाएं" : "Back to Home"}</Link>
+        <p style={{ marginTop: "1rem" }}>
+          <button
+            type="button"
+            onClick={() => {
+              try { window.sessionStorage.removeItem("book-success"); } catch { /* non-fatal */ }
+              setSuccess(false);
+            }}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}
+          >
+            {isHi ? "एक और बुकिंग करें" : "Book another reading"}
+          </button>
+        </p>
       </PatrikaFrame>
     );
   }

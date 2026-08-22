@@ -5,7 +5,7 @@ import ShubhMuhurtaTool from "./ShubhMuhurtaTool";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "शुभ मुहूर्त ₹199 — Personal Muhurta from Your Kundli",
+  title: "शुभ मुहूर्त ₹51 — Personal Muhurta from Your Kundli",
   description:
     "Best dates in the next 3 months for buying a vehicle, property, starting a business, griha pravesh or travel — screened against YOUR birth chart: tarabala, chandrashtama, karaka strength, tithi-vara-nakshatra shuddhi.",
 };
@@ -19,7 +19,7 @@ const appJsonLd = {
   url: `${SITE_URL}/tools/shubh-muhurta/`,
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Any",
-  offers: { "@type": "Offer", price: "199", priceCurrency: "INR" },
+  offers: { "@type": "Offer", price: "51", priceCurrency: "INR" },
   provider: { "@type": "Person", name: "Shivanii", url: `${SITE_URL}/about/` },
 };
 

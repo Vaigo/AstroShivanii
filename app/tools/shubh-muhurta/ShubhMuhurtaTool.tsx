@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-const PRICE = 199;
+const PRICE = 51;
 
 type Step = "intake" | "preview" | "computing" | "result";
 
@@ -62,7 +62,75 @@ export default function ShubhMuhurtaTool() {
   const [error, setError] = useState("");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
-  const [refCode] = useState(() => `MH-${Date.now().toString(36).toUpperCase()}`);
+  const [refCode, setRefCode] = useState(() => `MH-${Date.now().toString(36).toUpperCase()}`);
+  const [orderId, setOrderId] = useState("");
+
+  // On mount: restore a saved session — an accidental refresh must never lose
+  // a preview, the birth details, or (above all) a PAID date list.
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem("muhurta-state");
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.step && s.purpose) {
+          setPurpose(s.purpose);
+          setBirth(s.birth ?? null);
+          setPreview(s.preview ?? null);
+          setResult(s.result ?? null);
+          setOrderId(s.orderId ?? "");
+          if (s.refCode) setRefCode(s.refCode);
+          // Paid but the result didn't make it into storage (refresh mid-compute):
+          // the backend accepts a verified order_id again, so re-fetch it now.
+          if (s.orderId && !s.result && s.birth && s.purpose) {
+            setStep("computing");
+            fetchMuhurtaPersonal({ ...s.birth, purpose: s.purpose, ref_code: s.refCode, razorpay_order_id: s.orderId })
+              .then((res) => { setResult(res); setStep("result"); })
+              .catch(() => setStep(s.preview ? "preview" : "intake"));
+            return;
+          }
+          // never restore into the transient computing state
+          setStep(s.step === "computing" ? "preview" : s.step);
+        }
+      }
+    } catch { /* corrupted state — start fresh */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist the flow so refresh/tab-restore continues where the user left off.
+  // orderId is kept because a verified order can re-fetch the paid list.
+  useEffect(() => {
+    if (step === "intake" && !preview && !result) {
+      window.sessionStorage.removeItem("muhurta-state");
+      return;
+    }
+    try {
+      window.sessionStorage.setItem("muhurta-state", JSON.stringify({
+        step, purpose, birth, preview, result, refCode, orderId,
+      }));
+    } catch { /* storage full/unavailable — degrade gracefully */ }
+  }, [step, purpose, birth, preview, result, refCode, orderId]);
+
+  // Browser BACK steps back one screen (result → preview → intake) instead of
+  // dumping the user out of the flow; data survives via the saved session.
+  useEffect(() => {
+    if (step === "computing") return; // transient
+    if (window.history.state?.mhStep === step) return;
+    if (step === "intake" && !window.history.state?.mhStep) return; // initial entry
+    window.history.pushState({ ...window.history.state, mhStep: step }, "");
+  }, [step]);
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const s = e.state?.mhStep;
+      if (s === "intake" || s === "preview" || s === "result") {
+        setStep(s);
+      } else if (s === undefined && window.location.pathname.includes("shubh-muhurta")) {
+        setStep("intake");
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -143,6 +211,7 @@ export default function ShubhMuhurtaTool() {
   // HARD-gated: full list only after a verified razorpay_order_id.
   async function handleCompute(razorpayOrderId: string) {
     if (!birth || !purpose) return;
+    setOrderId(razorpayOrderId);
     setStep("computing");
     try {
       const res = await fetchMuhurtaPersonal({ ...birth, purpose, ref_code: refCode, razorpay_order_id: razorpayOrderId });

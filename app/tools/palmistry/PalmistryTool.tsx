@@ -167,7 +167,64 @@ export default function PalmistryTool() {
   const [payError, setPayError] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<PalmistryResult | null>(null);
-  const [refCode] = useState(() => `PM-${Date.now().toString(36).toUpperCase()}`);
+  const [refCode, setRefCode] = useState(() => `PM-${Date.now().toString(36).toUpperCase()}`);
+  const [orderId, setOrderId] = useState("");
+
+  // On mount: restore a saved session. The uploaded photos are File objects
+  // and cannot survive a refresh, so the PAID result body itself is what gets
+  // persisted — a refresh at the result step must never vaporize a ₹299 reading.
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem("palmistry-state");
+      if (saved) {
+        const s = JSON.parse(saved);
+        setUserName(s.userName ?? "");
+        if (s.gender) setGender(s.gender);
+        setOrderId(s.orderId ?? "");
+        if (s.refCode) setRefCode(s.refCode);
+        if (s.result) {
+          setResult(s.result);
+          setStep("result");
+        }
+        // No result yet → restart at intake (photos are gone; the paywall
+        // without photos would be a dead end).
+      }
+    } catch { /* corrupted state — start fresh */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist as soon as anything worth keeping exists — above all the result,
+  // written the moment it arrives so even a crash right after payment keeps it.
+  useEffect(() => {
+    if (!result && !userName && !gender && !orderId) return;
+    try {
+      window.sessionStorage.setItem("palmistry-state", JSON.stringify({ userName, gender, result, refCode, orderId }));
+    } catch { /* storage full/unavailable — degrade gracefully */ }
+  }, [userName, gender, result, refCode, orderId]);
+
+  // Browser BACK steps back one screen instead of leaving the tool; the
+  // paywall is only a valid target while the photos still exist in memory.
+  useEffect(() => {
+    if (step === "computing") return; // transient
+    if (window.history.state?.pmStep === step) return;
+    if (step === "intake" && !window.history.state?.pmStep) return; // initial entry
+    window.history.pushState({ ...window.history.state, pmStep: step }, "");
+  }, [step]);
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const s = e.state?.pmStep;
+      if (s === "paywall") {
+        setStep(palmFile && otherHandFile ? "paywall" : "intake");
+      } else if (s === "intake" || s === "result") {
+        setStep(s);
+      } else if (s === undefined && window.location.pathname.includes("palmistry")) {
+        setStep("intake");
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [palmFile, otherHandFile]);
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -288,6 +345,7 @@ export default function PalmistryTool() {
   // vision-AI call is too costly per attempt to leave a free path open).
   async function handleAnalyze(razorpayOrderId: string) {
     if (!palmFile || !otherHandFile) return;
+    setOrderId(razorpayOrderId);
     setResultError("");
     setStep("computing");
     try {

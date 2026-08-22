@@ -98,6 +98,7 @@ export default function TimeRectificationTool() {
         setHasOwnTobGuess(!!s.hasOwnTobGuess);
         if (Array.isArray(s.rows) && s.rows.length) setRows(s.rows);
         setResult(s.result ?? null);
+        setKpResult(s.kpResult ?? null);
         if (s.refCode) setRefCode(s.refCode);
         setStep(s.step === "computing" ? "events" : (s.step ?? "birth"));
       }
@@ -109,10 +110,10 @@ export default function TimeRectificationTool() {
     try {
       window.sessionStorage.setItem("rect-state", JSON.stringify({
         step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName,
-        ascOptions, selectedStart, hasOwnTobGuess, rows, result, refCode,
+        ascOptions, selectedStart, hasOwnTobGuess, rows, result, kpResult, refCode,
       }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, hasOwnTobGuess, rows, result, refCode]);
+  }, [step, dayUnknown, birthDraft, approxTob, timeRangeMinutes, userName, ascOptions, selectedStart, hasOwnTobGuess, rows, result, kpResult, refCode]);
 
   const isFirstRender = useRef(true);
   useEffect(() => {

@@ -324,7 +324,7 @@ export default function HomePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
                   <div className="service-card-icon tool-card-icon"><ToolIcon name="shubh-muhurta" size={36} /></div>
                   <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
-                    ₹199 · शुभ मुहूर्त
+                    ₹51 · शुभ मुहूर्त
                   </span>
                   <h2 style={{ fontSize: "1.15rem", margin: 0 }}>
                     {isHi ? "गाड़ी, घर, नई शुरुआत — कब करें?" : "A vehicle, a home, a new start — when?"}

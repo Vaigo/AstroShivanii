@@ -43,8 +43,8 @@ export default function Footer() {
         <nav className="footer-links" aria-label="Paid services">
           <h4>Paid Services</h4>
           <ul>
+            <li><Link href="/tools/shubh-muhurta">शुभ मुहूर्त — ₹51</Link></li>
             <li><Link href="/tools/turant-uttar">तुरंत उत्तर — ₹149</Link></li>
-            <li><Link href="/tools/shubh-muhurta">शुभ मुहूर्त — ₹199</Link></li>
             <li><Link href="/tools/numerology-suite">Numerology Suite — ₹299</Link></li>
             <li><Link href="/tools/palmistry">Palmistry (हस्त रेखा) — ₹299</Link></li>
             <li><Link href="/tools/name-correction">Name Correction — ₹501</Link></li>
