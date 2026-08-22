@@ -129,22 +129,28 @@ const ART: Record<ToolIconName, ReactNode> = {
       <circle className="ti-pulse" style={{ animationDelay: "2s" }} cx="16.5" cy="20.5" r="5" fill="#E0A93A" stroke="none" />
     </>
   ),
-  // A cobra — Kaal SARP (सर्प = snake) Dosha. Coiled base, raised head
-  // swaying like a cobra ready to strike, forked tongue flicking. The
-  // earlier attempt (an abstract wavy line) didn't read as a snake at all.
+  // A cobra — Kaal SARP (सर्प = snake) Dosha. Front-facing with the FLARED
+  // HOOD (the one feature that makes a cobra unmistakable — earlier
+  // hood-less attempts read as a squiggle), two eyes, a hanging forked
+  // tongue, rising out of coiled loops. The whole hood sways side to side
+  // like a cobra holding its strike pose.
   "kaal-sarp-dosha": (
     <>
-      {/* coiled base */}
-      <ellipse cx="16" cy="26" rx="8.5" ry="3.1" />
-      <path d="M11 24.6c1.3-.9 3-1.4 5-1.4s3.7.5 5 1.4" />
-      {/* rising neck + head — sways as one menacing unit */}
+      {/* coiled base — two stacked loops */}
+      <ellipse cx="16" cy="26" rx="8.6" ry="2.9" />
+      <path d="M9.6 24.6c1.9-1.2 10.9-1.2 12.8 0" />
+      {/* hood + head in SIDE VIEW (uraeus pose, facing left) — the classic
+          cobra silhouette: a big convex hood back sweeping up and over into
+          a forward-jutting head, concave hood front below the jaw. Front-
+          view attempts at this size mushed into a cartoon face. Sways as
+          one menacing unit. */}
       <g className="ti-sway">
-        <path d="M21 25.3c3.2-2.4 3-7-.6-8.9-2.9-1.5-6-.8-6.6-3.4-.4-2 1.2-3.7 3.2-3.4" />
-        <circle cx="18.3" cy="9.3" r="2.5" />
-        <circle cx="19.2" cy="8.6" r="0.55" fill="currentColor" stroke="none" />
-        {/* forked tongue — quick flicks */}
+        <path d="M19.8 23 C 25.6 19.6, 25.8 9.4, 20.6 5.6 C 17.8 3.6, 13.4 4, 11.8 6.4 C 10.9 7.8, 11.3 9.3, 12.6 9.9" />
+        <path d="M12.6 9.9 C 15.2 12.4, 15.4 17.6, 14.7 22.8" />
+        <circle cx="14.6" cy="7" r="0.65" fill="currentColor" stroke="none" />
+        {/* tongue darting out ahead — quick flicks */}
         <g className="ti-flick">
-          <path d="M20.7 9.6l2.6.7M20.7 9.6l2.4-1.2" strokeWidth="1.2" />
+          <path d="M11.2 8.3l-2.9.6M8.3 8.9l-1.5-.9M8.3 8.9l-1.2 1.2" strokeWidth="1.2" />
         </g>
       </g>
     </>
