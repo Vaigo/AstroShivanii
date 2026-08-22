@@ -99,19 +99,16 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <nav className="footer-links" aria-label="Information">
-          <h4>Info</h4>
-          <ul>
-            <li><Link href="/about">About Shivanii</Link></li>
-            <li><Link href="/faq">FAQ</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
-            <li><Link href="/privacy">{t("footer.privacy")}</Link></li>
-            <li><Link href="/terms">{t("footer.terms")}</Link></li>
-          </ul>
-        </nav>
       </div>
 
       <div className="footer-bottom">
+        <nav className="footer-info-row" aria-label="Information">
+          <Link href="/about">About Shivanii</Link>
+          <Link href="/faq">FAQ</Link>
+          <Link href="/contact">Contact</Link>
+          <Link href="/privacy">{t("footer.privacy")}</Link>
+          <Link href="/terms">{t("footer.terms")}</Link>
+        </nav>
         <p style={{ marginBottom: "0.5rem" }}>{t("footer.disclaimer")}</p>
         <p style={{ marginTop: "0.75rem", color: "var(--muted-light)" }}>
           &copy; {new Date().getFullYear()} Astrologer Shivanii. All rights reserved. ·{" "}

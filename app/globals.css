@@ -591,16 +591,23 @@ a:hover { color: var(--saffron); }
   border-image: linear-gradient(90deg, transparent, var(--gold) 18%, var(--gold-bright) 50%, var(--gold) 82%, transparent) 1;
   margin-top: 4rem;
 }
-.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 2rem; max-width: 1140px; margin: 0 auto 2rem; }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 2rem; max-width: 1140px; margin: 0 auto 2rem; }
 .footer-brand h3 { font-family: var(--font-display); color: var(--gold-bright); font-size: 1.2rem; margin-bottom: 0.5rem; }
 .footer-brand p { font-size: 0.85rem; color: var(--muted-light); line-height: 1.6; }
 .footer-links h4 { font-family: var(--font-display); color: var(--gold); font-size: 0.95rem; margin-bottom: 0.75rem; font-weight: 700; }
 .footer-subhead { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-light); opacity: 0.7; font-weight: 700; margin: 1rem 0 0.35rem; }
 .footer-subhead:first-of-type { margin-top: 0; }
-.footer-links ul { list-style: none; }
-.footer-links ul li { margin-bottom: 0.4rem; }
+/* Wrap horizontally instead of one link per line — keeps long grouped
+   lists (Free Tools' categories) compact instead of towering vertically. */
+.footer-links ul { list-style: none; display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 0.15rem; column-gap: 0; }
+.footer-links ul li { margin: 0; display: inline-flex; align-items: baseline; }
+/* ::before on the NEXT item (not ::after on the previous one) — an ::after
+   glued to a long item that wraps its own text onto two lines can end up
+   stranded alone on a third line; ::before always rides with the item
+   that follows it, wherever that item naturally lands. */
+.footer-links ul li:not(:first-child)::before { content: "·"; color: var(--gold); opacity: 0.5; margin: 0 0.5rem; }
 /* Block + padding = comfortable tap target on touch screens */
-.footer-links ul a { color: var(--muted-light); font-size: 0.875rem; text-decoration: none; transition: color 0.2s; display: inline-block; padding: 0.3rem 0; }
+.footer-links ul a { color: var(--muted-light); font-size: 0.875rem; text-decoration: none; transition: color 0.2s; display: inline-block; padding: 0.25rem 0; }
 .footer-links ul a:hover { color: var(--gold-bright); }
 .footer-bottom {
   border-top: 1px solid rgba(201, 154, 58, 0.25);
@@ -611,6 +618,9 @@ a:hover { color: var(--saffron); }
   color: var(--muted-light);
   line-height: 1.6;
 }
+.footer-info-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.4rem; margin-bottom: 1.1rem; }
+.footer-info-row a { color: var(--muted-light); font-size: 0.82rem; text-decoration: none; transition: color 0.2s; padding: 0.2rem 0; }
+.footer-info-row a:hover { color: var(--gold-bright); }
 
 /* ─── Loading ───────────────────────────────────────────────────────────────── */
 /* One branded loader everywhere — matches the तुरंत उत्तर chakra */
