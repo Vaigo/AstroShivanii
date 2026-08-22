@@ -34,7 +34,7 @@ export default function Footer() {
             <li><Link href="/readings/birth-chart">Birth Chart Reading</Link></li>
             <li><Link href="/readings/marriage-matching">Marriage Matching</Link></li>
             <li><Link href="/readings/annual-forecast">Annual Forecast</Link></li>
-            <li><Link href="/readings/ask-one-question">Ask One Question</Link></li>
+            <li><Link href="/readings/ask-one-question">Ask Shivanii Directly</Link></li>
             <li><Link href="/readings/live-consultation">Live Consultation</Link></li>
             <li><Link href="/readings">All Readings →</Link></li>
           </ul>

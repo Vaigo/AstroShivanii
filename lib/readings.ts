@@ -28,7 +28,7 @@ export function getReading(slug: string): Reading | undefined {
 
 export function readingName(slug: string, lang: "en" | "hi"): string {
   const names: Record<string, { en: string; hi: string }> = {
-    "ask-one-question":   { en: "Ask One Question",      hi: "एक प्रश्न पूछें" },
+    "ask-one-question":   { en: "Ask Shivanii Directly", hi: "शिवानी जी से सीधे पूछें" },
     "birth-chart":        { en: "Birth Chart Reading",   hi: "कुंडली विश्लेषण" },
     "marriage-matching":  { en: "Marriage Matching",     hi: "गुण मिलान" },
     "career-money":       { en: "Career & Money",        hi: "करियर और धन" },
@@ -44,8 +44,8 @@ export function readingName(slug: string, lang: "en" | "hi"): string {
 export function readingDesc(slug: string, lang: "en" | "hi"): string {
   const descs: Record<string, { en: string; hi: string }> = {
     "ask-one-question": {
-      en: "Have one burning question — a job offer, a relationship, property, health? Shivanii casts a special chart for the exact moment you ask and gives you a clear, direct answer, along with how confident she is in it.",
-      hi: "कोई एक ज़रूरी सवाल है — नौकरी, रिश्ता, संपत्ति, स्वास्थ्य? शिवानी आपके प्रश्न के क्षण की विशेष कुंडली बनाकर स्पष्ट और सीधा उत्तर देती हैं — अपने ईमानदार विश्वास स्तर के साथ।",
+      en: "This is you, asking Shivanii — no tool, no template. Write your one question (a job offer, a relationship, property, health…), and she personally casts a chart for it, studies it herself, and sends you a clear, direct answer on WhatsApp — along with how confident she honestly is in it.",
+      hi: "यह सीधे शिवानी जी से पूछना है — कोई टूल नहीं, कोई बना-बनाया जवाब नहीं। अपना एक सवाल लिखिए (नौकरी, रिश्ता, संपत्ति, स्वास्थ्य…) — वे स्वयं उसकी कुंडली बनाकर, खुद पढ़कर, WhatsApp पर आपको साफ़ और सीधा जवाब भेजती हैं — अपने ईमानदार विश्वास स्तर के साथ।",
     },
     "birth-chart": {
       en: "The complete story of your birth chart, told in plain language: your nature, your strengths, your career direction, your relationships, and which phase of life you are in right now. Shivanii's most popular reading.",
@@ -86,7 +86,7 @@ export function readingDesc(slug: string, lang: "en" | "hi"): string {
 /** One plain-language line: who should choose this reading. */
 export function readingBestFor(slug: string, lang: "en" | "hi"): string {
   const items: Record<string, { en: string; hi: string }> = {
-    "ask-one-question":   { en: "One urgent, specific question that needs a clear answer", hi: "एक ज़रूरी, स्पष्ट सवाल जिसका साफ़ जवाब चाहिए" },
+    "ask-one-question":   { en: "One urgent question you want Shivanii herself to answer", hi: "एक ज़रूरी सवाल, जिसका जवाब आप शिवानी जी से ही चाहते हैं" },
     "birth-chart":        { en: "Understanding yourself and your current phase of life",   hi: "स्वयं को और जीवन के वर्तमान दौर को समझना" },
     "marriage-matching":  { en: "Families finalising a marriage proposal",                 hi: "विवाह प्रस्ताव तय कर रहे परिवार" },
     "career-money":       { en: "Job change, business decisions, financial planning",      hi: "नौकरी बदलना, व्यापार निर्णय, वित्तीय योजना" },

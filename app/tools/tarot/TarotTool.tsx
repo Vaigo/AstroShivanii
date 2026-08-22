@@ -260,7 +260,7 @@ export default function TarotTool() {
                 hi: "कार्ड क्षण की ऊर्जा दिखाते हैं। जन्म कुंडली दशक की दिशा — और प्रश्न ज्योतिष एक सवाल का सटीक उत्तर देता है।",
               }}
               waText={`Namaste Shivanii ji! I drew a tarot spread on your website${result.question ? ` about: "${result.question}"` : ""}. I would like a proper Prashna reading for my question.`}
-              reading={{ href: "/readings/ask-one-question", labelEn: "Ask One Question (Prashna) ₹499", labelHi: "एक प्रश्न पूछें (प्रश्न ज्योतिष) ₹499" }}
+              reading={{ href: "/readings/ask-one-question", labelEn: "Ask Shivanii Directly ₹499", labelHi: "शिवानी जी से सीधे पूछें ₹499" }}
             />
           </PatrikaFrame>
           </div>

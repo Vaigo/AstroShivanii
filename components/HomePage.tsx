@@ -25,7 +25,7 @@ const READINGS: Array<{
   tag?: { en: string; hi: string };
 }> = [
   { slug: "ask-one-question",   icon: "question",  price: "₹499",   key: "prashna",
-    tag: { en: "Focused", hi: "केंद्रित" } },
+    tag: { en: "Direct to Shivanii", hi: "सीधे शिवानी से" } },
   { slug: "birth-chart",        icon: "scroll",    price: "₹999",   key: "kundli", mostLoved: true },
   { slug: "marriage-matching",  icon: "rings",     price: "₹1,299", key: "matching",
     tag: { en: "36-Point", hi: "36 गुण" } },

@@ -373,7 +373,7 @@ export const GUIDES: Guide[] = [
       },
       {
         q: "Which reading should I book if I have no birth time?",
-        a: "For a whole-life reading, Bhrigu Nadi Deep is designed for exactly this case. For one specific question, Ask One Question (Prashna) needs no birth data at all.",
+        a: "For a whole-life reading, Bhrigu Nadi Deep is designed for exactly this case. For one specific question, Ask Shivanii Directly (one question) needs no birth data at all.",
       },
     ],
     tryTool: { href: "/tools/kundli", label: "Try the free Kundli — works without birth time" },

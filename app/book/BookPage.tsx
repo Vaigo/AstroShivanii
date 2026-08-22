@@ -49,6 +49,9 @@ function BookForm() {
   // chart — it needs real lat/lon/timezone, not just a date, plus gender
   // for correct Hindi grammar and spouse-karaka selection in the report.
   const isKundliReport = slug === "birth-chart";
+  // Ask-Shivanii-directly: the question IS the product — an order without
+  // one is unfulfillable, so the notes field becomes a required question box.
+  const isAskQuestion = slug === "ask-one-question";
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -259,16 +262,32 @@ function BookForm() {
         )}
 
         <div className="form-group">
-          <label className="form-label" htmlFor="notes">{t("book.notes")}</label>
+          <label className="form-label" htmlFor="notes">
+            {isAskQuestion
+              ? (isHi ? "शिवानी जी से आपका सवाल *" : "Your question for Shivanii *")
+              : t("book.notes")}
+          </label>
           <textarea
             id="notes"
             className="form-input"
-            rows={3}
-            placeholder={isHi ? "कोई खास विषय जिस पर शिवानी जी ध्यान दें?" : "Any specific area you want Shivanii to focus on?"}
+            rows={isAskQuestion ? 4 : 3}
+            placeholder={isAskQuestion
+              ? (isHi
+                  ? "जैसे: क्या मुझे यह नौकरी का ऑफर लेना चाहिए? / क्या यह रिश्ता आगे बढ़ाना ठीक रहेगा? — जितना खुलकर लिखेंगे, जवाब उतना सटीक मिलेगा"
+                  : "e.g. Should I take this job offer? / Is this relationship right to move forward with? — the more openly you write, the more precise her answer")
+              : (isHi ? "कोई खास विषय जिस पर शिवानी जी ध्यान दें?" : "Any specific area you want Shivanii to focus on?")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
+            required={isAskQuestion}
             style={{ resize: "vertical" }}
           />
+          {isAskQuestion && (
+            <span className={`form-hint${isHi ? " devanagari" : ""}`}>
+              {isHi
+                ? "यह सवाल सीधे शिवानी जी के पास जाता है — वे स्वयं आपकी कुंडली देखकर 24–48 घंटे में WhatsApp पर जवाब देती हैं।"
+                : "This goes straight to Shivanii — she studies your chart herself and replies on your WhatsApp within 24–48 hours."}
+            </span>
+          )}
         </div>
 
         {error && <p className="form-error" style={{ marginBottom: "1rem" }}>{error}</p>}
@@ -308,7 +327,7 @@ function BookForm() {
           </div>
         )}
 
-        <button type="submit" className="btn btn-primary" disabled={loading || (isKundliReport && !birthPlace)} style={{ width: "100%", fontSize: "1.05rem" }}>
+        <button type="submit" className="btn btn-primary" disabled={loading || (isKundliReport && !birthPlace) || (isAskQuestion && !notes.trim())} style={{ width: "100%", fontSize: "1.05rem" }}>
           {loading ? t("book.paying") : `${t("book.pay")} — ₹${reading?.priceINR.toLocaleString("en-IN") ?? ""}`}
         </button>
 

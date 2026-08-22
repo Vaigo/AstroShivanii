@@ -78,7 +78,7 @@ export default function ReadingDetail({ reading }: Props) {
             </h3>
             <ul style={{ paddingLeft: "1.2rem", color: "var(--ink-light)", fontSize: "0.9rem", lineHeight: 1.8 }}>
               <li>{isHi ? "शिवानी द्वारा व्यक्तिगत विश्लेषण — कोई टेम्पलेट नहीं" : "Personalised analysis by Shivanii — not a template"}</li>
-              <li>{isHi ? "लिखित पाठन 48 घंटे में (एक प्रश्न — 24 घंटे में)" : "Written reading delivered within 48 hours (24 hours for Ask One Question)"}</li>
+              <li>{isHi ? "लिखित पाठन 48 घंटे में (शिवानी जी से सीधे पूछें — 24 घंटे में)" : "Written reading delivered within 48 hours (24 hours for Ask Shivanii Directly)"}</li>
               <li>{isHi ? "WhatsApp पर एक फ़ॉलो-अप प्रश्न शामिल" : "One follow-up question via WhatsApp included"}</li>
               {reading.slug === "live-consultation" && (
                 <li>{isHi ? "बुकिंग के बाद Zoom / फ़ोन कॉल लिंक" : "Zoom / phone call link sent after booking confirmation"}</li>

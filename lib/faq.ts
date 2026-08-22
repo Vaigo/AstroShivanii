@@ -40,7 +40,7 @@ export const FAQS: FaqItem[] = [
       hi: "पाठन मिलने में कितना समय लगता है?",
     },
     a: {
-      en: "Written readings are delivered within 48 hours on WhatsApp or email (Ask One Question within 24 hours). Live consultations are scheduled at a mutually convenient slot after booking.",
+      en: "Written readings are delivered within 48 hours on WhatsApp or email (Ask Shivanii Directly within 24 hours). Live consultations are scheduled at a mutually convenient slot after booking.",
       hi: "लिखित पाठन 48 घंटे के भीतर WhatsApp या ईमेल पर मिल जाता है (एक प्रश्न — 24 घंटे में)। लाइव परामर्श बुकिंग के बाद सुविधाजनक समय पर निर्धारित होता है।",
     },
   },

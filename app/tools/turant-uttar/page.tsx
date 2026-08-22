@@ -30,7 +30,7 @@ export default function Page() {
       <TurantUttarTool />
       <div className="container" style={{ maxWidth: "760px", margin: "-2rem auto 0", padding: "0 1rem 2.5rem", textAlign: "center" }}>
         <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-          Related: <Link href="/readings/ask-one-question">Book Ask One Question</Link> ·{" "}
+          Related: <Link href="/readings/ask-one-question">Ask Shivanii Directly</Link> ·{" "}
           <Link href="/guides/birth-time-missing-astrology">No birth time? What astrology can still tell you</Link>
         </p>
       </div>

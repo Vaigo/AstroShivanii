@@ -31,7 +31,7 @@ export default function Page() {
       <div className="container" style={{ maxWidth: "760px", margin: "-2rem auto 0", padding: "0 1rem 2.5rem", textAlign: "center" }}>
         <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
           Related: <Link href="/tools/turant-uttar">Turant Uttar — Instant Answer</Link> ·{" "}
-          <Link href="/readings/ask-one-question">Book Ask One Question</Link>
+          <Link href="/readings/ask-one-question">Ask Shivanii Directly</Link>
         </p>
       </div>
     </>
