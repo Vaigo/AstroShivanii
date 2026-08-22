@@ -599,31 +599,55 @@ a:hover { color: var(--saffron); }
   border-image: linear-gradient(90deg, transparent, var(--gold) 18%, var(--gold-bright) 50%, var(--gold) 82%, transparent) 1;
   margin-top: 4rem;
 }
-.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 2rem; max-width: 1140px; margin: 0 auto 2rem; }
-.footer-brand h3 { font-family: var(--font-display); color: var(--gold-bright); font-size: 1.2rem; margin-bottom: 0.5rem; }
-.footer-brand p { font-size: 0.85rem; color: var(--muted-light); line-height: 1.6; }
-.footer-links h4 { font-family: var(--font-display); color: var(--gold); font-size: 0.95rem; margin-bottom: 0.75rem; font-weight: 700; }
-.footer-subhead { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-light); opacity: 0.7; font-weight: 700; margin: 1rem 0 0.35rem; }
-.footer-subhead:first-of-type { margin-top: 0; }
+/* Brand column gets extra width for the story + connect block; link columns
+   share the rest. Below 1080px the brand takes a full row and the four link
+   columns wrap in pairs. */
+.footer-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 2.25rem 2rem; max-width: 1140px; margin: 0 auto 2rem; }
+@media (max-width: 1080px) {
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-brand { grid-column: 1 / -1; max-width: 460px; }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+}
+.footer-brand h3 { font-family: var(--font-display); color: var(--gold-bright); font-size: 1.2rem; margin-bottom: 0.35rem; }
+.footer-brand p { font-size: 0.85rem; color: var(--muted-light); line-height: 1.7; }
+.footer-brand-lead { color: var(--gold-bright); font-weight: 700; }
+.footer-why {
+  display: inline-block; margin: 0.9rem 0 0.4rem; color: var(--gold);
+  font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s;
+}
+.footer-why:hover { color: var(--gold-bright); text-decoration: underline; }
+/* Uppercase micro-headings shared by the link columns and the connect block */
+.footer-links h4, .footer-connect-head {
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--gold);
+  font-size: 0.72rem; font-weight: 800; margin-bottom: 0.9rem;
+}
+/* Wide tracking breaks Devanagari conjuncts/matras apart — Hindi headings get
+   near-normal tracking and a slightly larger size (uppercase doesn't apply). */
+.footer-links h4.devanagari, .footer-connect-head.devanagari {
+  letter-spacing: 0.02em; font-size: 0.85rem;
+}
+.footer-connect-head { margin: 1.4rem 0 0.7rem; }
+.footer-connect { display: flex; gap: 0.6rem; }
+.footer-social {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid rgba(201, 154, 58, 0.5); color: var(--gold-pale);
+  transition: all 0.2s;
+}
+.footer-social:hover { background: var(--gold); border-color: var(--gold); color: var(--maroon-deep); transform: translateY(-2px); }
 .footer-links ul { list-style: none; }
-.footer-links ul li { margin-bottom: 0.4rem; }
+.footer-links ul li { margin-bottom: 0.45rem; }
 /* Block + padding = comfortable tap target on touch screens */
 .footer-links ul a { color: var(--muted-light); font-size: 0.875rem; text-decoration: none; transition: color 0.2s; display: inline-block; padding: 0.3rem 0; }
 .footer-links ul a:hover { color: var(--gold-bright); }
-
-/* Horizontal wrap-with-separator — ONLY for Free Tools' per-category lists,
-   where items are short enough to actually pack multiple per line. Applying
-   this generally (Readings, Paid Services, Learn) left a stray "·" at the
-   start of nearly every row instead, since those items are each too long
-   to ever share a line. */
-.footer-links-flow ul { display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 0.15rem; column-gap: 0; }
-.footer-links-flow ul li { margin: 0; display: inline-flex; align-items: baseline; }
-/* ::before on the NEXT item (not ::after on the previous one) — an ::after
-   glued to a long item that wraps its own text onto two lines can end up
-   stranded alone on a third line; ::before always rides with the item
-   that follows it, wherever that item naturally lands. */
-.footer-links-flow ul li:not(:first-child)::before { content: "·"; color: var(--gold); opacity: 0.5; margin: 0 0.5rem; }
-.footer-links-flow ul a { padding: 0.25rem 0; }
+.footer-badge {
+  display: inline-block; margin-left: 0.45rem; padding: 0.1rem 0.45rem;
+  border-radius: 999px; background: var(--gold); color: var(--maroon-deep);
+  font-size: 0.58rem; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; vertical-align: 0.12em;
+}
 .footer-bottom {
   border-top: 1px solid rgba(201, 154, 58, 0.25);
   padding-top: 1.5rem;
@@ -2101,22 +2125,6 @@ a:hover { color: var(--saffron); }
   opacity: 0.7;
   margin-bottom: 1.5rem;
 }
-.footer-wa {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
-  padding: 0.4rem 0.9rem;
-  border: 1px solid var(--gold);
-  border-radius: 99px;
-  color: var(--gold-bright) !important;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.2s, transform 0.2s var(--ease-out);
-}
-.footer-wa:hover { background: rgba(201, 154, 58, 0.15); transform: translateY(-2px); }
-
 /* ─── SVG icon styling (replaces emoji) ─────────────────────────────────────── */
 .service-card-icon,
 .diff-card-icon {
