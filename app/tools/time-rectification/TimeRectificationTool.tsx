@@ -8,7 +8,6 @@ import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import LifeEventRows, { emptyEventRow, isValidRow, type EventRow } from "@/components/LifeEventRows";
 import { EVENT_TYPES } from "@/lib/rectification-data";
-import { waLink } from "@/lib/config";
 import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints";
 import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError } from "@/lib/api/site";
 import type { BirthRequest, AscendantOptionsResult, AscendantWindow, EventScoreResult, KpRulingResult } from "@/lib/api/types";
@@ -227,15 +226,15 @@ export default function TimeRectificationTool() {
         },
       });
       rzp.on("payment.failed", () => {
-        setPayError(isHi ? "भुगतान विफल रहा — पुनः प्रयास करें या WhatsApp से भुगतान करें" : "Payment failed — try again or pay via WhatsApp");
+        setPayError(isHi ? "भुगतान विफल रहा — कृपया पुनः प्रयास करें" : "Payment failed — please try again");
         setPaying(false);
       });
       rzp.open();
     } catch {
       setPaying(false);
       setPayError(isHi
-        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया WhatsApp वाला तरीका इस्तेमाल करें"
-        : "Online payment unavailable right now — please use the WhatsApp option");
+        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया थोड़ी देर बाद पुनः प्रयास करें"
+        : "Online payment unavailable right now — please try again in a moment");
     }
   }
 
@@ -300,9 +299,6 @@ export default function TimeRectificationTool() {
     setStep("birth");
   }
 
-  const waMessage =
-    `Namaste Shivanii ji! 🙏 मैंने आपकी वेबसाइट पर "जन्म समय शुद्धिकरण" के लिए भुगतान करना है — ₹${PRICE}.\n` +
-    `Reference: ${refCode}`;
 
   const phase = step === "birth" ? 1 : step === "teaser" || step === "events" ? 2 : 3;
   const phases = [
@@ -664,15 +660,6 @@ export default function TimeRectificationTool() {
                     {resultError}
                   </p>
                 )}
-                <a
-                  href={waLink(waMessage)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost btn-sm"
-                  style={{ width: "100%", color: "var(--gold-bright)", borderColor: "var(--gold)" }}
-                >
-                  {isHi ? "WhatsApp से भुगतान" : "Pay via WhatsApp"}
-                </a>
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
                   Ref: {refCode}
                 </p>

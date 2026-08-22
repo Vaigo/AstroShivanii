@@ -8,7 +8,6 @@ import Divider from "@/components/Divider";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import { READINGS, readingName, getReading } from "@/lib/readings";
-import { WHATSAPP_NUMBER } from "@/lib/config";
 import { createPaymentOrder, verifyPayment, SiteApiError } from "@/lib/api/site";
 import BirthForm from "@/components/BirthForm";
 import type { BirthRequest } from "@/lib/api/types";
@@ -80,13 +79,12 @@ function BookForm() {
             : {}),
         });
       } catch (err) {
-        // Never surface raw API error codes at the payment moment — always
-        // steer to the WhatsApp fallback that's on this page.
+        // Never surface raw API error codes at the payment moment.
         void err;
         throw new Error(
           isHi
-            ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। कृपया नीचे दिए गए WhatsApp बटन से बुक करें — वही विवरण वहां भेज दें।"
-            : "Online payment isn't available right now. Please book via the WhatsApp button below — just send the same details there."
+            ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। कृपया थोड़ी देर बाद पुनः प्रयास करें।"
+            : "Online payment isn't available right now. Please try again in a moment."
         );
       }
 
@@ -125,8 +123,8 @@ function BookForm() {
       rzp.on("payment.failed", () => {
         setError(
           isHi
-            ? "भुगतान विफल रहा। कृपया पुनः प्रयास करें या WhatsApp पर संपर्क करें।"
-            : "Payment failed. Please try again or contact us on WhatsApp."
+            ? "भुगतान विफल रहा। कृपया पुनः प्रयास करें।"
+            : "Payment failed. Please try again."
         );
         setLoading(false);
       });
@@ -318,22 +316,6 @@ function BookForm() {
           {t("book.secureNote")}
         </p>
       </form>
-
-      <Divider />
-
-      <div style={{ textAlign: "center" }}>
-        <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: "0.75rem" }} className={isHi ? "devanagari" : undefined}>
-          {isHi ? "WhatsApp से बुक करना चाहते हैं?" : "Prefer to book via WhatsApp?"}
-        </p>
-        <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Namaste! I'd like to book: ${readingName(slug, "en")}`)}`}
-          className="btn btn-ghost"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {t("book.orWhatsapp")}
-        </a>
-      </div>
     </PatrikaFrame>
   );
 }

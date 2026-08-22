@@ -10,7 +10,6 @@ import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
 import ResultCTA from "@/components/ResultCTA";
 import KundliChart from "@/components/KundliChart";
-import { waLink } from "@/lib/config";
 import { fetchKundli } from "@/lib/api/endpoints";
 import { getSiteToken, createPaymentOrder, verifyPayment, fetchTurantUttarAI } from "@/lib/api/site";
 
@@ -278,20 +277,19 @@ function TurantUttarInner() {
         },
       });
       rzp.on("payment.failed", () => {
-        setPayError(isHi ? "भुगतान विफल रहा — पुनः प्रयास करें या WhatsApp से भुगतान करें" : "Payment failed — try again or pay via WhatsApp");
+        setPayError(isHi ? "भुगतान विफल रहा — कृपया पुनः प्रयास करें" : "Payment failed — please try again");
         setPaying(false);
       });
       rzp.open();
     } catch {
       setPaying(false);
       setPayError(isHi
-        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया WhatsApp वाला तरीका इस्तेमाल करें"
-        : "Online payment unavailable right now — please use the WhatsApp option");
+        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया थोड़ी देर बाद पुनः प्रयास करें"
+        : "Online payment unavailable right now — please try again in a moment");
     }
   }
 
-  /** Fallback path (WhatsApp-relay + self-attest) and the post-payment
-   *  unlock both land here; a verified order id marks history 'paid'. */
+  /** A verified razorpay_order_id lands here and marks history 'paid'. */
   async function handleUnlock(razorpayOrderId?: string) {
     setStep("narrating");
     try {
@@ -334,10 +332,6 @@ function TurantUttarInner() {
     { n: 2, hi: "जन्म विवरण", en: "Birth details" },
     { n: 3, hi: `उत्तर पाएं (₹${PRICE})`, en: `Get answer (₹${PRICE})` },
   ];
-
-  const waMessage =
-    `Namaste Shivanii ji! 🙏 मैंने आपकी वेबसाइट पर "तुरंत उत्तर" के लिए भुगतान करना है — ₹${PRICE}.\n` +
-    `Reference: ${refCode}\nप्रश्न: ${questionText}`;
 
   return (
     <section className="section">
@@ -607,32 +601,6 @@ function TurantUttarInner() {
                     {payError}
                   </p>
                 )}
-                {/* flexWrap + minWidth:0 are both required here, not just
-                    one — flex items default to min-width:auto (refuse to
-                    shrink below their unwrapped text width), which was
-                    forcing this row wider than the screen on mobile and
-                    clipping both buttons' text at the edges. flexWrap lets
-                    them stack to full width on very narrow screens instead
-                    of being squeezed. */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                  <a
-                    href={waLink(waMessage)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-ghost btn-sm"
-                    style={{ flex: "1 1 140px", minWidth: 0, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
-                  >
-                    {isHi ? "WhatsApp से भुगतान" : "Pay via WhatsApp"}
-                  </a>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    style={{ flex: "1 1 140px", minWidth: 0, color: "var(--gold-bright)", borderColor: "var(--gold)" }}
-                    onClick={() => handleUnlock()}
-                  >
-                    {isHi ? "भुगतान हो गया — उत्तर देखें" : "Paid — Show Answer"}
-                  </button>
-                </div>
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
                   Ref: {refCode}
                 </p>

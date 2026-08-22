@@ -5,7 +5,6 @@ import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
-import { waLink } from "@/lib/config";
 import { calcMulank, calcBhagyank } from "@/lib/numerology-calc";
 import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError } from "@/lib/api/site";
 import type { NumerologySuiteResult } from "@/lib/api/types";
@@ -139,15 +138,15 @@ export default function NumerologySuiteTool() {
         },
       });
       rzp.on("payment.failed", () => {
-        setPayError(isHi ? "भुगतान विफल रहा — पुनः प्रयास करें या WhatsApp से भुगतान करें" : "Payment failed — try again or pay via WhatsApp");
+        setPayError(isHi ? "भुगतान विफल रहा — कृपया पुनः प्रयास करें" : "Payment failed — please try again");
         setPaying(false);
       });
       rzp.open();
     } catch {
       setPaying(false);
       setPayError(isHi
-        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया WhatsApp वाला तरीका इस्तेमाल करें"
-        : "Online payment unavailable right now — please use the WhatsApp option");
+        ? "ऑनलाइन भुगतान अभी उपलब्ध नहीं — कृपया थोड़ी देर बाद पुनः प्रयास करें"
+        : "Online payment unavailable right now — please try again in a moment");
     }
   }
 
@@ -169,10 +168,6 @@ export default function NumerologySuiteTool() {
       setStep("paywall");
     }
   }
-
-  const waMessage =
-    `Namaste Shivanii ji! 🙏 मैंने आपकी वेबसाइट पर "अंक ज्योतिष संगतता सूट" के लिए भुगतान करना है — ₹${PRICE}.\n` +
-    `Reference: ${refCode}`;
 
   const phase = step === "intake" ? 1 : step === "teaser" ? 2 : 3;
   const phases = [
@@ -297,9 +292,6 @@ export default function NumerologySuiteTool() {
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
                 {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{resultError}</p>}
-                <a href={waLink(waMessage)} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm" style={{ width: "100%", color: "var(--gold-bright)", borderColor: "var(--gold)" }}>
-                  {isHi ? "WhatsApp से भुगतान" : "Pay via WhatsApp"}
-                </a>
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
               </div>
             </PatrikaFrame>
