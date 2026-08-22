@@ -11,6 +11,7 @@ import Testimonials from "./Testimonials";
 import GoogleReviews from "./GoogleReviews";
 import HowItWorks from "./HowItWorks";
 import Icon, { IconName } from "./Icon";
+import ToolIcon, { ToolIconName } from "./ToolIcon";
 import { FAQS } from "@/lib/faq";
 import { GUIDES } from "@/lib/guides";
 import { CATEGORIES } from "@/lib/turant-uttar-data";
@@ -42,21 +43,21 @@ const READINGS: Array<{
     tag: { en: "Most In-Depth", hi: "सबसे गहन" } },
 ];
 
-const FREE_TOOLS: Array<{ slug: string; icon: IconName; key: string }> = [
-  { slug: "panchang",            icon: "sun",      key: "panchang" },
-  { slug: "kundli",              icon: "scroll",   key: "kundli" },
-  { slug: "baal-kundli",         icon: "leaf",     key: "baalKundli" },
-  { slug: "matching",            icon: "rings",    key: "matching" },
-  { slug: "rashifal",            icon: "star",     key: "rashifal" },
-  { slug: "sade-sati",           icon: "planet",   key: "sadeSati" },
-  { slug: "numerology",          icon: "hash",     key: "numerology" },
-  { slug: "tarot",               icon: "cards",    key: "tarot" },
-  { slug: "lal-kitab",           icon: "book",     key: "lalKitab" },
-  { slug: "lucky-colors",        icon: "droplet",  key: "luckyColors" },
-  { slug: "kaal-sarp-dosha",     icon: "shield",   key: "kaalSarpDosha" },
-  { slug: "favorable-alphabet",  icon: "type",     key: "favorableAlphabet" },
-  { slug: "personal-year",       icon: "calendar", key: "personalYear" },
-  { slug: "karmic-debt",         icon: "eye",      key: "karmicDebt" },
+const FREE_TOOLS: Array<{ slug: ToolIconName; key: string }> = [
+  { slug: "panchang",            key: "panchang" },
+  { slug: "kundli",              key: "kundli" },
+  { slug: "baal-kundli",         key: "baalKundli" },
+  { slug: "matching",            key: "matching" },
+  { slug: "rashifal",            key: "rashifal" },
+  { slug: "sade-sati",           key: "sadeSati" },
+  { slug: "numerology",          key: "numerology" },
+  { slug: "tarot",               key: "tarot" },
+  { slug: "lal-kitab",           key: "lalKitab" },
+  { slug: "lucky-colors",        key: "luckyColors" },
+  { slug: "kaal-sarp-dosha",     key: "kaalSarpDosha" },
+  { slug: "favorable-alphabet",  key: "favorableAlphabet" },
+  { slug: "personal-year",       key: "personalYear" },
+  { slug: "karmic-debt",         key: "karmicDebt" },
 ];
 
 export default function HomePage() {
@@ -195,8 +196,8 @@ export default function HomePage() {
               <Reveal key={tool.slug} delay={i * 70}>
                 <Link href={`/tools/${tool.slug}`} style={{ textDecoration: "none", display: "block", height: "100%" }}>
                   <div className="service-card" style={{ cursor: "pointer", height: "100%" }}>
-                    <div className="service-card-icon">
-                      <Icon name={tool.icon} size={24} />
+                    <div className="service-card-icon tool-card-icon">
+                      <ToolIcon name={tool.slug} size={36} />
                     </div>
                     <div className="service-card-title">
                       {t(`tools.${tool.key}` as Parameters<typeof t>[0])}
@@ -264,7 +265,7 @@ export default function HomePage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                  <div className="service-card-icon"><Icon name="hash" size={24} /></div>
+                  <div className="service-card-icon tool-card-icon"><ToolIcon name="numerology" size={36} /></div>
                   <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                     ₹299 · अंक ज्योतिष सूट
                   </span>
@@ -283,7 +284,7 @@ export default function HomePage() {
               </PatrikaFrame>
               <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                  <div className="service-card-icon"><Icon name="calendar" size={24} /></div>
+                  <div className="service-card-icon tool-card-icon"><ToolIcon name="varshphal" size={36} /></div>
                   <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                     ₹1,499 · वार्षिक भविष्यफल
                   </span>
@@ -302,7 +303,7 @@ export default function HomePage() {
               </PatrikaFrame>
               <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
-                  <div className="service-card-icon"><Icon name="sparkle" size={24} /></div>
+                  <div className="service-card-icon tool-card-icon"><ToolIcon name="name-correction" size={36} /></div>
                   <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                     ₹501 · नाम सुधार
                   </span>
@@ -315,6 +316,25 @@ export default function HomePage() {
                       : "Personal, business, or other name — Destiny-Life Path match check with natural correction suggestions"}
                   </p>
                   <Link href="/tools/name-correction" className="btn btn-primary" style={{ width: "100%" }}>
+                    {isHi ? "शुरू करें →" : "Get Started →"}
+                  </Link>
+                </div>
+              </PatrikaFrame>
+              <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                  <div className="service-card-icon tool-card-icon"><ToolIcon name="palmistry" size={36} /></div>
+                  <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                    ₹299 · हस्त रेखा विश्लेषण
+                  </span>
+                  <h2 style={{ fontSize: "1.15rem", margin: 0 }}>
+                    {isHi ? "आपकी हथेली क्या कहती है?" : "What does your palm say?"}
+                  </h2>
+                  <p className={isHi ? "devanagari" : undefined} style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                    {isHi
+                      ? "तस्वीर से वास्तविक हस्त रेखा विश्लेषण — रेखाएं, पर्वत, बनावट, हर खोज के साथ ईमानदार भरोसे का स्तर"
+                      : "Real palmistry analysis from a photo — lines, mounts, hand shape, each finding with an honest confidence score"}
+                  </p>
+                  <Link href="/tools/palmistry" className="btn btn-primary" style={{ width: "100%" }}>
                     {isHi ? "शुरू करें →" : "Get Started →"}
                   </Link>
                 </div>
