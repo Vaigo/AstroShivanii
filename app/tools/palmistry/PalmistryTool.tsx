@@ -40,35 +40,31 @@ const SHAPE_LABEL: Record<string, { hi: string; en: string }> = {
   mishrit: { hi: "मिश्रित", en: "Mixed" },
 };
 
-/** A hand-drawn illustration (not a real photo — no photo has permanent-use
- *  consent for this purpose) showing what a good submission looks like:
- *  flat hand, fingers naturally spread, filling a well-lit frame. */
+/** A real reference photo (CC BY-SA 4.0, Wikimedia Commons — see
+ *  public/palmistry/ATTRIBUTION.md) showing what a good submission looks
+ *  like: flat hand, fingers naturally spread, filling a well-lit frame.
+ *  An earlier hand-drawn SVG attempt at this read as an unrecognizable
+ *  blob — a real photo doesn't have that risk. */
 function PalmSampleDiagram() {
   return (
-    <svg viewBox="0 0 220 220" role="img" aria-label="Example: an open hand with fingers spread, filling the photo frame"
-      style={{ width: "150px", height: "150px", flexShrink: 0 }}>
-      <rect x="8" y="8" width="204" height="204" rx="18" fill="none" stroke="var(--gold)" strokeWidth="2" strokeDasharray="6 5" />
-      {/* light cue */}
-      <circle cx="34" cy="34" r="9" fill="var(--gold-bright)" opacity="0.85" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
-        <line key={a} x1="34" y1="34" x2={34 + 15 * Math.cos((a * Math.PI) / 180)} y2={34 + 15 * Math.sin((a * Math.PI) / 180)}
-          stroke="var(--gold-bright)" strokeWidth="1.5" opacity="0.6" />
-      ))}
-      {/* fingers, fanned from a pivot near the top of the palm */}
-      <g stroke="var(--maroon)" strokeWidth="1.5">
-        <rect x="101" y="22" width="18" height="80" rx="9" fill="var(--gold-pale)" transform="rotate(0 110 100)" />
-        <rect x="101" y="32" width="16" height="70" rx="8" fill="var(--gold-pale)" transform="rotate(-16 110 100)" />
-        <rect x="101" y="32" width="16" height="70" rx="8" fill="var(--gold-pale)" transform="rotate(16 110 100)" />
-        <rect x="101" y="48" width="14" height="54" rx="7" fill="var(--gold-pale)" transform="rotate(34 110 100)" />
-        <rect x="70" y="96" width="17" height="52" rx="8" fill="var(--gold-pale)" transform="rotate(-52 78 140)" />
-      </g>
-      {/* palm + wrist */}
-      <ellipse cx="110" cy="146" rx="45" ry="52" fill="var(--gold-pale)" stroke="var(--maroon)" strokeWidth="1.5" />
-      <rect x="86" y="188" width="48" height="24" rx="10" fill="var(--gold-pale)" stroke="var(--maroon)" strokeWidth="1.5" />
-      {/* good-example badge */}
-      <circle cx="186" cy="186" r="17" fill="#4caf7d" />
-      <path d="M178 186 l5 6 l11 -14" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <div style={{ position: "relative", width: "150px", height: "150px", flexShrink: 0 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/palmistry/sample-good-photo.jpg"
+        alt="Example of a good palm photo: flat hand, fingers spread, palm facing the camera, filling the frame"
+        width={150}
+        height={150}
+        style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "2px dashed var(--gold)" }}
+      />
+      <span style={{
+        position: "absolute", bottom: "-8px", right: "-8px", width: "26px", height: "26px", borderRadius: "50%",
+        background: "#4caf7d", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--panel-solid)",
+      }} aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 12l5 5L20 6" />
+        </svg>
+      </span>
+    </div>
   );
 }
 
