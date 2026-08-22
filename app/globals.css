@@ -737,6 +737,23 @@ a:hover { color: var(--saffron); }
   transform: none;
   filter: blur(0);
 }
+/* Mobile: no scroll-reveal at all — content is simply there, like a native
+   app. On a one-column phone layout the desktop treatment compounds into
+   "blank space, then content pops in": the negative rootMargin makes each
+   card trigger only after it's 48px into view, the per-index stagger delays
+   (built for 3-per-row desktop grids) stack up to ~1s on single-column
+   flows, and the blur filter is expensive on mobile GPUs. Pure CSS (no JS
+   check) so it also covers the pre-hydration window on slow connections,
+   where JS-driven reveals would leave scrolled-to content invisible until
+   the bundle loads. */
+@media (max-width: 768px) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
 
 /* ─── Hero Entrance Stagger ─────────────────────────────────────────────────── */
 .hero-stagger > * {
