@@ -595,6 +595,8 @@ a:hover { color: var(--saffron); }
 .footer-brand h3 { font-family: var(--font-display); color: var(--gold-bright); font-size: 1.2rem; margin-bottom: 0.5rem; }
 .footer-brand p { font-size: 0.85rem; color: var(--muted-light); line-height: 1.6; }
 .footer-links h4 { font-family: var(--font-display); color: var(--gold); font-size: 0.95rem; margin-bottom: 0.75rem; font-weight: 700; }
+.footer-subhead { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-light); opacity: 0.7; font-weight: 700; margin: 1rem 0 0.35rem; }
+.footer-subhead:first-of-type { margin-top: 0; }
 .footer-links ul { list-style: none; }
 .footer-links ul li { margin-bottom: 0.4rem; }
 /* Block + padding = comfortable tap target on touch screens */

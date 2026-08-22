@@ -53,21 +53,35 @@ export default function Footer() {
 
         <nav className="footer-links" aria-label="Free tools">
           <h4>Free Tools</h4>
+
+          <p className="footer-subhead">Kundli &amp; Dosha</p>
           <ul>
-            <li><Link href="/tools/panchang">Panchang</Link></li>
             <li><Link href="/tools/kundli">Kundli / Birth Chart</Link></li>
             <li><Link href="/tools/baal-kundli">Baal Kundli</Link></li>
             <li><Link href="/tools/matching">Marriage Matching</Link></li>
-            <li><Link href="/tools/rashifal">Daily Rashifal</Link></li>
-            <li><Link href="/tools/numerology">Numerology</Link></li>
             <li><Link href="/tools/sade-sati">Sade Sati Check</Link></li>
-            <li><Link href="/tools/tarot">Tarot Reading</Link></li>
-            <li><Link href="/tools/lal-kitab">Lal Kitab Calculator</Link></li>
-            <li><Link href="/tools/lucky-colors">Lucky Color Calculator</Link></li>
             <li><Link href="/tools/kaal-sarp-dosha">Kaal Sarp Dosha Checker</Link></li>
-            <li><Link href="/tools/favorable-alphabet">Favorable Alphabet</Link></li>
+          </ul>
+
+          <p className="footer-subhead">Daily &amp; Panchang</p>
+          <ul>
+            <li><Link href="/tools/panchang">Panchang</Link></li>
+            <li><Link href="/tools/rashifal">Daily Rashifal</Link></li>
+          </ul>
+
+          <p className="footer-subhead">Numerology</p>
+          <ul>
+            <li><Link href="/tools/numerology">Numerology</Link></li>
             <li><Link href="/tools/personal-year">Personal Year Number</Link></li>
             <li><Link href="/tools/karmic-debt">Karmic Debt & Missing Numbers</Link></li>
+            <li><Link href="/tools/lucky-colors">Lucky Color Calculator</Link></li>
+            <li><Link href="/tools/favorable-alphabet">Favorable Alphabet</Link></li>
+          </ul>
+
+          <p className="footer-subhead">Tarot &amp; Lal Kitab</p>
+          <ul>
+            <li><Link href="/tools/tarot">Tarot Reading</Link></li>
+            <li><Link href="/tools/lal-kitab">Lal Kitab Calculator</Link></li>
             <li><Link href="/tools">All Free Tools →</Link></li>
           </ul>
         </nav>
