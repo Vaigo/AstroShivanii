@@ -144,9 +144,10 @@ export default function KundliChart({ ascSignIndex, ascDegrees, ascDms, planets,
   return (
     <svg
       width="100%"
-      height="auto"
       viewBox="0 0 400 400"
-      style={{ maxWidth: size, display: "block" }}
+      // height belongs in CSS ("auto" is invalid as an SVG attribute and
+      // throws a console error on every render)
+      style={{ maxWidth: size, height: "auto", display: "block" }}
       role="img"
       aria-label="जन्म कुंडली — North Indian chart"
     >
