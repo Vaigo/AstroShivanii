@@ -453,6 +453,11 @@ export default function NumerologyTool() {
                 <p className="num-section-sub">
                   {isHi ? `मूलांक ${r.mulank.value} — ${mulankProfile.planet.hi} द्वारा शासित` : `Mulank ${r.mulank.value} — ruled by ${mulankProfile.planet.en}`}
                 </p>
+                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0 0 0.9rem" }}>
+                  {isHi
+                    ? "इन्हें ऐसे इस्तेमाल करें — कोई ज़रूरी काम हो तो अपने शुभ दिन या शुभ तिथि पर रखें; इंटरव्यू या परीक्षा में शुभ रंग पहनें; नई शुरुआत शुभ दिशा की ओर मुंह करके करें। ये सब आपके मूलांक के स्वामी ग्रह को बल देने के छोटे-छोटे, परंपरागत तरीके हैं।"
+                    : "How to actually use these — schedule important work on your favorable day or dates; wear your favorable colors to an interview or exam; face your favorable direction when starting something new. Each is a small traditional way of strengthening your Mulank's ruling planet."}
+                </p>
 
                 <div className="fav-grid">
                   {([

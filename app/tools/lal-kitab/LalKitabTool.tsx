@@ -189,6 +189,11 @@ export default function LalKitabTool() {
 
               {/* ── Debts ── */}
               <h3 className="num-sub-heading" style={{ marginTop: "1.75rem" }}>{isHi ? "ऋण (कर्ज)" : "Debts (Karz)"}</h3>
+              <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0 0 0.75rem" }}>
+                {isHi
+                  ? "लाल किताब में 'ऋण' पैसों का कर्ज नहीं है — यह पूर्वजों से चला आ रहा एक अधूरा दायित्व माना जाता है, जो कुंडली में ग्रहों की खास स्थिति से पहचाना जाता है। अच्छी बात यह है कि हर ऋण का एक सीधा, करने-योग्य उपाय होता है — और उपाय पूरा होने पर ऋण का असर शांत माना जाता है।"
+                  : "In Lal Kitab, a 'debt' isn't money owed — it's an unfinished family obligation carried down from ancestors, identified by specific planet placements in your chart. The good news: every debt has a direct, doable remedy — and once the remedy is completed, the debt's effect is considered settled."}
+              </p>
               {activeDebts.length === 0 ? (
                 <div className="result-box" style={{ background: "rgba(26,122,58,0.05)", borderColor: "rgba(26,122,58,0.3)" }}>
                   <span style={{ color: "#1a7a3a", fontWeight: 700 }}>✓ {isHi ? "कोई सक्रिय ऋण नहीं" : "No Active Debts"}</span>

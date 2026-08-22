@@ -38,6 +38,24 @@ function ColorDot({ name }: { name: string }) {
   );
 }
 
+/** Classical planet knowledge used to make the result readable as a story
+ *  instead of three bare rows — each planet's weekday and what it governs
+ *  (standard Vedic associations, nothing invented). */
+const PLANET_INFO: Record<string, {
+  day_en: string; day_hi: string;
+  governs_en: string; governs_hi: string;
+}> = {
+  Sun:     { day_en: "Sunday",    day_hi: "रविवार",  governs_en: "confidence, health, recognition at work", governs_hi: "आत्मविश्वास, स्वास्थ्य, काम में पहचान" },
+  Moon:    { day_en: "Monday",    day_hi: "सोमवार",  governs_en: "peace of mind, emotions, public connection", governs_hi: "मन की शांति, भावनाएं, लोगों से जुड़ाव" },
+  Mars:    { day_en: "Tuesday",   day_hi: "मंगलवार", governs_en: "courage, energy, winning competitions", governs_hi: "साहस, ऊर्जा, प्रतियोगिता में जीत" },
+  Mercury: { day_en: "Wednesday", day_hi: "बुधवार",  governs_en: "speech, studies, business dealings", governs_hi: "वाणी, पढ़ाई, व्यापारिक लेन-देन" },
+  Jupiter: { day_en: "Thursday",  day_hi: "गुरुवार", governs_en: "wisdom, luck, wealth, blessings of elders", governs_hi: "बुद्धि, भाग्य, धन, बड़ों का आशीर्वाद" },
+  Venus:   { day_en: "Friday",    day_hi: "शुक्रवार", governs_en: "love, charm, comfort, artistic success", governs_hi: "प्रेम, आकर्षण, सुख-सुविधा, कला में सफलता" },
+  Saturn:  { day_en: "Saturday",  day_hi: "शनिवार",  governs_en: "discipline, patience, long-term career stability", governs_hi: "अनुशासन, धैर्य, करियर की दीर्घकालिक स्थिरता" },
+  Rahu:    { day_en: "Saturday",  day_hi: "शनिवार",  governs_en: "ambition, unconventional gains, foreign connections", governs_hi: "महत्वाकांक्षा, अप्रत्याशित लाभ, विदेश-संबंध" },
+  Ketu:    { day_en: "Tuesday",   day_hi: "मंगलवार", governs_en: "intuition, detachment, spiritual depth", governs_hi: "अंतर्ज्ञान, वैराग्य, आध्यात्मिक गहराई" },
+};
+
 export default function LuckyColorsTool() {
   const { t, lang } = useI18n();
   const isHi = lang === "hi";
@@ -139,17 +157,18 @@ export default function LuckyColorsTool() {
                 )}
               </div>
 
+              {/* The "why" story — the chain (lagna → its lord → that
+                  planet's classical colors) told in one readable paragraph,
+                  so the values below read as an explanation, not a data dump. */}
               <div className="result-box">
-                <div className="result-label">{isHi ? "लग्न" : "Ascendant (Lagna)"}</div>
-                <div className="result-value">{isHi ? SIGN_HI[result.lagna] ?? result.lagna : result.lagna}</div>
-              </div>
-              <div className="result-box">
-                <div className="result-label">{isHi ? "लग्न स्वामी" : "Lagna Lord"}</div>
-                <div className="result-value">{isHi ? PLANET_HI[result.lagna_lord] ?? result.lagna_lord : result.lagna_lord}</div>
-              </div>
-              <div className="result-box">
-                <div className="result-label">{isHi ? "नक्षत्र स्वामी" : "Nakshatra Lord"}</div>
-                <div className="result-value">{isHi ? PLANET_HI[result.nakshatra_lord] ?? result.nakshatra_lord : result.nakshatra_lord}</div>
+                <div className="result-label">{isHi ? "आपके रंग ऐसे चुने गए" : "How your colors were found"}</div>
+                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                  {isHi ? (
+                    <>जन्म के समय पूर्व दिशा में <strong>{SIGN_HI[result.lagna] ?? result.lagna}</strong> राशि उदय हो रही थी — यही आपकी <strong>लग्न</strong> है, आपकी कुंडली का चेहरा। इस राशि के स्वामी <strong>{PLANET_HI[result.lagna_lord] ?? result.lagna_lord}</strong> हैं, इसलिए उनके रंग आपके पूरे व्यक्तित्व को बल देते हैं। साथ ही, जन्म के समय चंद्रमा जिस नक्षत्र में था उसके स्वामी <strong>{PLANET_HI[result.nakshatra_lord] ?? result.nakshatra_lord}</strong> हैं — उनके रंग आपके मन और रोज़मर्रा के मूड को सहारा देते हैं।</>
+                  ) : (
+                    <>At the moment you were born, <strong>{result.lagna}</strong> was rising on the eastern horizon — that&apos;s your <strong>Ascendant (Lagna)</strong>, the face of your chart. Its ruling planet is <strong>{result.lagna_lord}</strong>, so that planet&apos;s colors strengthen your whole personality. Alongside it, the Moon at your birth sat in a nakshatra ruled by <strong>{result.nakshatra_lord}</strong> — that planet&apos;s colors support your mind and day-to-day mood.</>
+                  )}
+                </p>
               </div>
 
               {/* Shown grouped by WHICH lord each color belongs to — these
@@ -157,39 +176,49 @@ export default function LuckyColorsTool() {
                   lord and Nakshatra lord), and showing them as one
                   undifferentiated list looked like a data error when
                   checked against either planet's classical colors alone. */}
-              <div className="result-box">
-                <div className="result-label" style={{ marginBottom: "0.5rem" }}>
-                  {isHi
-                    ? `शुभ रंग — लग्न स्वामी (${PLANET_HI[result.auspicious_colors_by_source.lagna_lord.planet] ?? result.auspicious_colors_by_source.lagna_lord.planet})`
-                    : `Auspicious Colors — Lagna Lord (${result.auspicious_colors_by_source.lagna_lord.planet})`}
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                  {result.auspicious_colors_by_source.lagna_lord.colors.map((c) => (
-                    <span key={c} className="trait-chip" style={{ background: "rgba(26,122,58,0.08)", borderColor: "rgba(26,122,58,0.3)" }}>
-                      <ColorDot name={c} />{isHi ? colorHi(c) : c}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="result-box">
-                <div className="result-label" style={{ marginBottom: "0.5rem" }}>
-                  {isHi
-                    ? `शुभ रंग — नक्षत्र स्वामी (${PLANET_HI[result.auspicious_colors_by_source.nakshatra_lord.planet] ?? result.auspicious_colors_by_source.nakshatra_lord.planet})`
-                    : `Auspicious Colors — Nakshatra Lord (${result.auspicious_colors_by_source.nakshatra_lord.planet})`}
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                  {result.auspicious_colors_by_source.nakshatra_lord.colors.map((c) => (
-                    <span key={c} className="trait-chip" style={{ background: "rgba(26,122,58,0.08)", borderColor: "rgba(26,122,58,0.3)" }}>
-                      <ColorDot name={c} />{isHi ? colorHi(c) : c}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              {([
+                { src: result.auspicious_colors_by_source.lagna_lord,
+                  title_hi: "व्यक्तित्व के रंग", title_en: "Your Personality Colors",
+                  role_hi: "लग्न स्वामी", role_en: "Lagna lord",
+                  use_hi: "बड़े मौकों के लिए — इंटरव्यू, प्रस्तुति, पहली मुलाकात, शुभ कार्य",
+                  use_en: "For the big moments — interviews, presentations, first meetings, auspicious ceremonies" },
+                { src: result.auspicious_colors_by_source.nakshatra_lord,
+                  title_hi: "मन के रंग", title_en: "Your Mind's Colors",
+                  role_hi: "नक्षत्र स्वामी", role_en: "Nakshatra lord",
+                  use_hi: "रोज़मर्रा के लिए — पढ़ाई, काम का दिन, मन शांत रखने के लिए",
+                  use_en: "For everyday wear — study days, workdays, keeping the mind settled" },
+              ] as const).map((block) => {
+                const planet = block.src.planet;
+                const info = PLANET_INFO[planet];
+                return (
+                  <div className="result-box" key={block.title_en}>
+                    <div className="result-label" style={{ marginBottom: "0.5rem" }}>
+                      {isHi
+                        ? `${block.title_hi} — ${block.role_hi} ${PLANET_HI[planet] ?? planet} से`
+                        : `${block.title_en} — from your ${block.role_en}, ${planet}`}
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                      {block.src.colors.map((c) => (
+                        <span key={c} className="trait-chip" style={{ background: "rgba(26,122,58,0.08)", borderColor: "rgba(26,122,58,0.3)" }}>
+                          <ColorDot name={c} />{isHi ? colorHi(c) : c}
+                        </span>
+                      ))}
+                    </div>
+                    {info && (
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
+                        {isHi
+                          ? <>{PLANET_HI[planet] ?? planet} {info.governs_hi} के कारक हैं। {block.use_hi}। <strong>{info.day_hi}</strong> को ये रंग पहनना विशेष शुभ माना जाता है — वह {PLANET_HI[planet] ?? planet} का अपना दिन है।</>
+                          : <>{planet} governs {info.governs_en}. {block.use_en}. Wearing these on <strong>{info.day_en}</strong> is considered especially auspicious — that&apos;s {planet}&apos;s own day.</>}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
 
               {result.inauspicious_colors.length > 0 && (
                 <div className="result-box">
                   <div className="result-label" style={{ marginBottom: "0.5rem" }}>
-                    {isHi ? "बचने योग्य रंग" : "Colors to Avoid"}
+                    {isHi ? "बड़े मौकों पर इनसे बचें" : "Skip These on Important Days"}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
                     {result.inauspicious_colors.map((c) => (
@@ -198,15 +227,37 @@ export default function LuckyColorsTool() {
                       </span>
                     ))}
                   </div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
+                    {isHi
+                      ? "ये रंग उन ग्रहों के हैं जो आपके लग्न स्वामी से स्वाभाविक मेल नहीं रखते। घबराने की कोई बात नहीं — इन्हें अलमारी से निकालने की ज़रूरत नहीं है। बस इंटरव्यू, परीक्षा या किसी शुभ कार्य जैसे बड़े दिन पर इनके बजाय ऊपर वाले रंग चुनें।"
+                      : "These belong to planets that don't sit naturally with your Lagna lord. Nothing to worry about — no need to empty your wardrobe. Just reach for the colors above instead of these on a big day like an interview, exam, or auspicious ceremony."}
+                  </p>
                 </div>
               )}
 
+              {/* Practical cheat-sheet — the "so what do I actually DO with
+                  this" answer, in concrete everyday situations. */}
               <div className="result-box">
-                <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                  {isHi
-                    ? "अपने ग्रह के दिन इन शुभ रंगों को पहनने से उसका शुभ प्रभाव और बढ़ता है।"
-                    : result.note}
-                </p>
+                <div className="result-label" style={{ marginBottom: "0.5rem" }}>
+                  {isHi ? "इनका उपयोग कैसे करें" : "How to Actually Use This"}
+                </div>
+                <ul className={isHi ? "devanagari" : undefined} style={{ paddingLeft: "1.1rem", fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.75, margin: 0 }}>
+                  {isHi ? (
+                    <>
+                      <li><strong>इंटरव्यू / प्रस्तुति / शुभ कार्य:</strong> व्यक्तित्व के रंग (लग्न स्वामी वाले) पहनें — शर्ट, साड़ी, दुपट्टा या पगड़ी में।</li>
+                      <li><strong>परीक्षा / पढ़ाई / मानसिक शांति:</strong> मन के रंग (नक्षत्र स्वामी वाले) चुनें — पेन, डायरी या कपड़ों में।</li>
+                      <li><strong>पूरा रंग ज़रूरी नहीं:</strong> रुमाल, घड़ी का पट्टा, धागा या दुपट्टे जैसी छोटी चीज़ भी परंपरा में पर्याप्त मानी जाती है।</li>
+                      <li><strong>घर में:</strong> पूजा स्थान या पढ़ाई की मेज़ पर इन रंगों का कपड़ा या सजावट रख सकते हैं।</li>
+                    </>
+                  ) : (
+                    <>
+                      <li><strong>Interview / presentation / ceremony:</strong> wear your personality colors (Lagna lord&apos;s) — in a shirt, saree, dupatta, or turban.</li>
+                      <li><strong>Exams / study / mental calm:</strong> pick your mind&apos;s colors (Nakshatra lord&apos;s) — even in a pen, diary, or clothing.</li>
+                      <li><strong>It needn&apos;t be head-to-toe:</strong> a handkerchief, watch strap, thread, or scarf in the color is traditionally considered enough.</li>
+                      <li><strong>At home:</strong> use these colors in a cloth or décor at your puja space or study desk.</li>
+                    </>
+                  )}
+                </ul>
               </div>
 
               <Divider />

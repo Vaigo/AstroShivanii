@@ -419,43 +419,68 @@ export default function KundliResultView({
         </div>
       )}
 
-      {/* अवकहड़ा चक्र — matching essentials, computed from moon rashi + nakshatra */}
+      {/* अवकहड़ा चक्र — matching essentials, computed from moon rashi + nakshatra.
+          Each entry carries a one-line plain-language meaning: these Sanskrit
+          terms (Varna/Vashya/Yoni/Gana/Nadi) are exactly the ones a
+          first-time visitor has never seen explained anywhere — a bare
+          key:value table here read as gibberish. */}
       {av && (() => {
-        const rows: Array<[string, string, string, string]> = [
-          ["राशि", `${av.rashi} (स्वामी ${av.rashiLord})`, "गण / Gana", av.gana],
-          ["नक्षत्र–चरण", `${av.nakshatraPada} (स्वामी ${av.nakshatraLord})`, "योनि / Yoni", av.yoni],
-          ["वर्ण / Varna", av.varna, "नाड़ी / Nadi", av.nadi],
-          ["वश्य / Vashya", av.vashya, "तत्व / Tatva", av.tatva],
+        const entries: Array<{ term: string; value: string; hi: string; en: string }> = [
+          { term: isHi ? "राशि" : "Rashi (Moon sign)", value: `${av.rashi} (स्वामी ${av.rashiLord})`,
+            hi: "जन्म के समय चंद्रमा जिस राशि में था — आपके मन और भावनाओं की मूल प्रकृति यहीं से पढ़ी जाती है।",
+            en: "The sign the Moon occupied at your birth — the root of your emotional nature; daily rashifal is read from this." },
+          { term: isHi ? "नक्षत्र–चरण" : "Nakshatra–Pada", value: `${av.nakshatraPada} (स्वामी ${av.nakshatraLord})`,
+            hi: "27 नक्षत्रों में से चंद्रमा का ठिकाना, चौथाई-भाग (चरण) तक — व्यक्तित्व की सबसे बारीक परत।",
+            en: "The Moon's exact station among the 27 lunar mansions, down to its quarter (pada) — the finest layer of personality." },
+          { term: isHi ? "वर्ण" : "Varna", value: av.varna,
+            hi: "स्वभाव की मूल प्रवृत्ति — चिंतनशील, नेतृत्वकारी, व्यवहारकुशल या परिश्रमी। विवाह-मिलान में 1 गुण इसी से मिलता है।",
+            en: "Your temperament's basic bent — contemplative, leading, enterprising, or hard-working. Worth 1 of the 36 matching points." },
+          { term: isHi ? "वश्य" : "Vashya", value: av.vashya,
+            hi: "किस प्रकार के स्वभाव वाले लोगों से आपकी सहज बनती है और कौन आपको सहज प्रभावित कर पाता है — मिलान में 2 गुण।",
+            en: "Which temperaments you naturally get along with, and who can naturally influence you — worth 2 matching points." },
+          { term: isHi ? "योनि" : "Yoni", value: av.yoni,
+            hi: "आपके नक्षत्र का प्रतीक-पशु — सहज स्वभाव और निकटता की अनुकूलता इसी से आंकी जाती है। मिलान में 4 गुण।",
+            en: "Your nakshatra's symbolic animal — instinctive nature and physical compatibility are judged from it. Worth 4 matching points." },
+          { term: isHi ? "गण" : "Gana", value: av.gana,
+            hi: "तीन जीवन-दृष्टियों में आपका स्थान: देव (सौम्य), मनुष्य (व्यावहारिक), राक्षस (तीव्र व निडर — नाम से घबराएं नहीं, यह बुरा नहीं है)। मिलान में 6 गुण।",
+            en: "Your place among three life-outlooks: Deva (gentle), Manushya (practical), Rakshasa (intense & fearless — despite the name, not bad). Worth 6 matching points." },
+          { term: isHi ? "नाड़ी" : "Nadi", value: av.nadi,
+            hi: "शारीरिक प्रकृति की धारा (आदि/मध्य/अन्त्य) — स्वास्थ्य व संतान की अनुकूलता इसी से देखी जाती है। मिलान में सबसे भारी, पूरे 8 गुण।",
+            en: "Your constitutional stream (Adi/Madhya/Antya) — health and progeny compatibility are read from it. The heaviest factor in matching: 8 full points." },
+          { term: isHi ? "तत्व" : "Tatva", value: av.tatva,
+            hi: "आपकी राशि का मूल तत्व — अग्नि (जोश), पृथ्वी (स्थिरता), वायु (विचार) या जल (भावना)।",
+            en: "Your sign's element — Fire (drive), Earth (steadiness), Air (ideas), or Water (feeling)." },
+          { term: isHi ? "नामाक्षर" : "Naming syllable", value: `"${av.nameSyllable}"`,
+            hi: "परंपरा में नाम इसी अक्षर से रखा जाता है — ताकि नाम हर उच्चारण पर आपके जन्म-नक्षत्र से जुड़ा रहे।",
+            en: "Tradition names a child starting with this syllable — so every utterance of the name stays tied to the birth nakshatra." },
         ];
         return (
           <div className="result-box">
-            <div className="result-label" style={{ marginBottom: "0.5rem" }}>
-              {isHi ? "अवकहड़ा चक्र (मिलान के मूल तत्व)" : "Avakahada Chakra (matching essentials)"}
+            <div className="result-label" style={{ marginBottom: "0.25rem" }}>
+              {isHi ? "अवकहड़ा चक्र" : "Avakahada Chakra"}
             </div>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", fontSize: "0.82rem", borderCollapse: "collapse" }}>
-                <tbody>
-                  {rows.map(([k1, v1, k2, v2]) => (
-                    <tr key={k1} style={{ borderBottom: "1px solid rgba(201,154,58,0.15)" }}>
-                      <td style={{ padding: "0.3rem 0.5rem", color: "var(--muted)", fontWeight: 600 }}>{k1}</td>
-                      <td style={{ padding: "0.3rem 0.5rem" }} className="devanagari">{v1}</td>
-                      <td style={{ padding: "0.3rem 0.5rem", color: "var(--muted)", fontWeight: 600 }}>{k2}</td>
-                      <td style={{ padding: "0.3rem 0.5rem" }} className="devanagari">{v2}</td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td style={{ padding: "0.3rem 0.5rem", color: "var(--muted)", fontWeight: 600 }}>नामाक्षर</td>
-                    <td style={{ padding: "0.3rem 0.5rem" }} className="devanagari" colSpan={3}>
-                      &ldquo;{av.nameSyllable}&rdquo; {isHi ? "— परम्परा में इसी अक्षर से नाम रखा जाता है" : "— the traditional naming syllable for this pada"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem" }}>
+            <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "var(--ink-light)", lineHeight: 1.6, margin: "0 0 0.75rem" }}>
               {isHi
-                ? "ये तत्व विवाह-मिलान (अष्टकूट) और नामकरण में प्रयुक्त होते हैं — मिलान हमारे निःशुल्क टूल से करें।"
-                : "These values drive Ashtakoot matching and naming — try the free matching tool."}
+                ? "पंडित जी विवाह-मिलान और नामकरण से पहले सबसे पहले यही तालिका बनाते हैं — आपकी कुंडली का 'पहचान-पत्र', जो केवल चंद्रमा की स्थिति से बनता है।"
+                : "This is the first table a traditional astrologer prepares before matching or naming — your chart's 'identity card', built entirely from the Moon's position."}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+              {entries.map((e) => (
+                <div key={e.term} style={{ borderBottom: "1px solid rgba(201,154,58,0.15)", paddingBottom: "0.5rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap", alignItems: "baseline" }}>
+                    <span style={{ color: "var(--muted)", fontWeight: 600, fontSize: "0.82rem" }}>{e.term}</span>
+                    <span className="devanagari" style={{ fontWeight: 600, fontSize: "0.88rem" }}>{e.value}</span>
+                  </div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--ink-light)", lineHeight: 1.55, margin: "0.2rem 0 0" }}>
+                    {isHi ? e.hi : e.en}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: "0.6rem" }}>
+              {isHi
+                ? <>इन्हीं तत्वों से विवाह के 36 गुण मिलाए जाते हैं — <a href="/tools/matching" style={{ color: "var(--maroon)", fontWeight: 600 }}>निःशुल्क गुण मिलान</a> में आज़माएं।</>
+                : <>These are the exact ingredients of the 36-point marriage match — try them in the <a href="/tools/matching" style={{ color: "var(--maroon)", fontWeight: 600 }}>free matching tool</a>.</>}
             </p>
           </div>
         );

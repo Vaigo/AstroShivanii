@@ -111,6 +111,23 @@ export default function KaalSarpTool() {
 
               {kaalSarp ? (
                 <>
+                  {/* Plain-language "what this actually means" — shown FIRST,
+                      before any technical detail, because this dosha's scary
+                      reputation is exactly what a worried visitor arrives
+                      with. Honest, calm framing — no fear-selling. */}
+                  <div className="result-box">
+                    <div className="result-label">{isHi ? "इसका असल मतलब क्या है" : "What This Actually Means"}</div>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                      {isHi
+                        ? "सबसे पहले — घबराइए नहीं। इसका अर्थ केवल इतना है कि आपके सातों ग्रह राहु-केतु की धुरी के एक ही ओर इकट्ठे हैं। शास्त्रों में इसे ऊर्जा का एक ही दिशा में सिमट जाना माना गया है — जिससे जीवन में कुछ क्षेत्रों में मेहनत का फल देर से मिलता है, काम बनते-बनते अटकते हैं, पर रुकते नहीं। यह मृत्यु या विनाश का सूचक बिल्कुल नहीं है — यह एक बहुत आम स्थिति है, और अनगिनत सफल लोगों की कुंडली में यह मौजूद है।"
+                        : "First things first — don't panic. All this means is that your seven classical planets are gathered on one side of the Rahu–Ketu axis. Classical texts read it as energy concentrated in one direction — so in some areas of life, effort pays off slower, and things stall just before completion, but they don't stop. It is absolutely not an omen of death or ruin — it's a very common pattern, present in the charts of countless successful people."}
+                    </p>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.6rem 0 0" }}>
+                      {isHi
+                        ? "इसका प्रभाव पूरे जीवन एक-सा नहीं रहता — यह मुख्यतः राहु या केतु की दशा-अंतर्दशा में महसूस होता है, और कई कुंडलियों में भंग योग (cancellation) होने से यह लगभग निष्क्रिय भी हो जाता है।"
+                        : "Its effect isn't constant through life either — it's mainly felt during Rahu or Ketu's dasha periods, and in many charts a cancellation (Kaal Sarp Bhang) renders it nearly inactive."}
+                    </p>
+                  </div>
                   <div className="result-box">
                     <div className="result-label">{isHi ? "प्रकार" : "Direction"}</div>
                     <div className="result-value">
@@ -166,13 +183,32 @@ export default function KaalSarpTool() {
                   </div>
                 </>
               ) : (
-                <div className="result-box">
-                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                    {isHi
-                      ? "आपके सातों ग्रह राहु-केतु अक्ष के दोनों ओर फैले हुए हैं — इसलिए काल सर्प दोष की शर्त पूरी नहीं होती।"
-                      : "Your seven classical planets are spread on both sides of the Rahu–Ketu axis — the condition for Kaal Sarp Dosha isn't met."}
-                  </p>
-                </div>
+                <>
+                  <div className="result-box">
+                    <div className="result-label">{isHi ? "आपकी जांच में क्या देखा गया" : "What We Checked"}</div>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                      {isHi
+                        ? "काल सर्प दोष तभी बनता है जब सूर्य, चंद्र, मंगल, बुध, गुरु, शुक्र और शनि — सातों ग्रह — राहु-केतु की धुरी के एक ही ओर फंसे हों। आपकी कुंडली में ग्रह इस धुरी के दोनों ओर फैले हुए हैं, इसलिए यह स्थिति नहीं बनती। यदि कहीं और आपको यह दोष बताया गया है, तो यह जांच उसका सीधा उत्तर है — शर्त ही पूरी नहीं होती।"
+                        : "Kaal Sarp Dosha only forms when all seven planets — Sun, Moon, Mars, Mercury, Jupiter, Venus and Saturn — are hemmed on ONE side of the Rahu–Ketu axis. In your chart, the planets are spread across both sides of that axis, so the pattern simply doesn't form. If someone elsewhere told you that you have this dosha, this check is your direct answer — the defining condition isn't met."}
+                    </p>
+                  </div>
+                  <div className="result-box">
+                    <div className="result-label">{isHi ? "राहु-केतु फिर भी मायने रखते हैं" : "Rahu & Ketu Still Matter"}</div>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                      {isHi
+                        ? "दोष न होने का अर्थ यह नहीं कि राहु-केतु आपकी कुंडली में निष्क्रिय हैं — हर कुंडली में यह धुरी इच्छाओं (राहु) और वैराग्य (केतु) की दिशा बताती है। ये किन भावों में बैठे हैं, यही तय करता है कि जीवन का कौन-सा क्षेत्र आपको सबसे ज़्यादा खींचता है और किससे मन स्वाभाविक रूप से हटता है। यह पूर्ण कुंडली विश्लेषण का विषय है।"
+                        : "Not having the dosha doesn't mean Rahu and Ketu are silent in your chart — in every chart, this axis marks the direction of your strongest cravings (Rahu) and your natural detachment (Ketu). Which houses they occupy decides which area of life pulls you hardest and which you effortlessly let go — that's a full-chart-reading conversation."}
+                    </p>
+                  </div>
+                  <div className="result-box">
+                    <div className="result-label">{isHi ? "आगे क्या जांचें" : "What to Check Next"}</div>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                      {isHi
+                        ? <>काल सर्प तो साफ़ निकला — पर कुंडली में देखने योग्य और भी स्थितियां हैं। हमारे निःशुल्क टूल से <a href="/tools/sade-sati" style={{ color: "var(--maroon)", fontWeight: 600 }}>साढ़े साती</a> जांचें (क्या शनि की 7.5 वर्षीय अवधि चल रही है?), या <a href="/tools/matching" style={{ color: "var(--maroon)", fontWeight: 600 }}>गुण मिलान</a> में मंगल दोष देखें।</>
+                        : <>Kaal Sarp came back clear — but there are other patterns worth checking. Use our free tools to check <a href="/tools/sade-sati" style={{ color: "var(--maroon)", fontWeight: 600 }}>Sade Sati</a> (is Saturn&apos;s 7.5-year period active for you?), or <a href="/tools/matching" style={{ color: "var(--maroon)", fontWeight: 600 }}>Marriage Matching</a> which includes a Mangal Dosha check.</>}
+                    </p>
+                  </div>
+                </>
               )}
 
               <Divider />
