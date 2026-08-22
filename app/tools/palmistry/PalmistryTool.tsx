@@ -47,14 +47,17 @@ const SHAPE_LABEL: Record<string, { hi: string; en: string }> = {
  *  blob — a real photo doesn't have that risk. */
 function PalmSampleDiagram() {
   return (
-    <div style={{ position: "relative", width: "150px", height: "150px", flexShrink: 0 }}>
+    <div style={{ position: "relative", width: "132px", height: "180px", flexShrink: 0 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/palmistry/sample-good-photo.jpg"
         alt="Example of a good palm photo: flat hand, fingers spread, palm facing the camera, filling the frame"
-        width={150}
-        height={150}
-        style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "2px dashed var(--gold)" }}
+        width={132}
+        height={180}
+        style={{
+          width: "132px", height: "180px", objectFit: "contain", objectPosition: "center",
+          background: "var(--gold-pale)", borderRadius: "8px", border: "2px dashed var(--gold)",
+        }}
       />
       <span style={{
         position: "absolute", bottom: "-8px", right: "-8px", width: "26px", height: "26px", borderRadius: "50%",
