@@ -68,6 +68,79 @@ function PalmSampleDiagram() {
   );
 }
 
+/** Real in-browser camera capture. `capture="environment"` on a plain file
+ *  input only HINTS mobile browsers to prefer the camera — on desktop, and
+ *  inconsistently on some mobile browsers, it just opens the same file
+ *  picker as the gallery button, which is exactly the "Take Photo does
+ *  nothing different" complaint this replaces. Uses getUserMedia for an
+ *  actual live camera view with its own capture button. */
+function CameraCapture({ onCapture, onClose, isHi }: { onCapture: (file: File) => void; onClose: () => void; isHi: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+      .then((stream) => {
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+      })
+      .catch(() => setError(isHi
+        ? "कैमरा एक्सेस नहीं मिला — ब्राउज़र को अनुमति दें, या गैलरी से चुनें"
+        : "Couldn't access the camera — allow permission in your browser, or upload from gallery instead"));
+    return () => {
+      cancelled = true;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, [isHi]);
+
+  function handleCapture() {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) onCapture(new File([blob], `camera-${Date.now()}.jpg`, { type: "image/jpeg" }));
+    }, "image/jpeg", 0.92);
+  }
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(20,8,10,0.92)", zIndex: 1000,
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.25rem",
+    }}>
+      {error ? (
+        <>
+          <p className={isHi ? "devanagari" : undefined} style={{ color: "#fff", marginBottom: "1.2rem", textAlign: "center", maxWidth: "360px" }}>{error}</p>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} style={{ color: "#fff", borderColor: "#fff" }}>
+            {isHi ? "बंद करें" : "Close"}
+          </button>
+        </>
+      ) : (
+        <>
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video ref={videoRef} autoPlay playsInline muted
+            style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: "8px", border: "2px solid var(--gold)" }} />
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+            <button type="button" className="btn btn-primary" onClick={handleCapture}>
+              📸 {isHi ? "फ़ोटो लें" : "Capture"}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} style={{ color: "#fff", borderColor: "#fff" }}>
+              {isHi ? "रद्द करें" : "Cancel"}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function PalmistryTool() {
   const { lang } = useI18n();
   const isHi = lang === "hi";
@@ -84,10 +157,9 @@ export default function PalmistryTool() {
   const [gender, setGender] = useState<"" | "male" | "female">("");
   const [error, setError] = useState("");
 
-  const palmCameraRef = useRef<HTMLInputElement>(null);
   const palmGalleryRef = useRef<HTMLInputElement>(null);
-  const otherCameraRef = useRef<HTMLInputElement>(null);
   const otherGalleryRef = useRef<HTMLInputElement>(null);
+  const [cameraFor, setCameraFor] = useState<"palm" | "other" | null>(null);
 
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
@@ -280,6 +352,16 @@ export default function PalmistryTool() {
 
   return (
     <section className="section">
+      {cameraFor && (
+        <CameraCapture
+          isHi={isHi}
+          onClose={() => setCameraFor(null)}
+          onCapture={(file) => {
+            if (cameraFor === "palm") pickPalmFile(file); else pickOtherFile(file);
+            setCameraFor(null);
+          }}
+        />
+      )}
       <div className="container" style={{ maxWidth: step === "result" ? "900px" : "720px" }}>
         <h1 className="section-heading">हस्त रेखा विश्लेषण</h1>
         <p className="section-heading-hi devanagari">Palmistry Reading (Hast Rekha Shastra) · ₹{PRICE}</p>
@@ -329,15 +411,13 @@ export default function PalmistryTool() {
                     : "This is the main photo — lines, mounts and hand shape are all read from it. The clearer it is, the more confident the reading."}
                 </span>
                 <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => palmCameraRef.current?.click()}>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCameraFor("palm")}>
                     📷 {isHi ? "तस्वीर लें" : "Take Photo"}
                   </button>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => palmGalleryRef.current?.click()}>
                     🖼️ {isHi ? "गैलरी से चुनें" : "Upload from Gallery"}
                   </button>
                 </div>
-                <input ref={palmCameraRef} id="pm-palm-camera" type="file" accept="image/*" capture="environment"
-                  style={{ display: "none" }} onChange={(e) => pickPalmFile(e.target.files?.[0] ?? null)} />
                 <input ref={palmGalleryRef} id="pm-palm-gallery" type="file" accept="image/*"
                   style={{ display: "none" }} onChange={(e) => pickPalmFile(e.target.files?.[0] ?? null)} />
 
@@ -368,15 +448,13 @@ export default function PalmistryTool() {
                     : "Comparing both hands is real classical technique — one shows innate tendency, the other how it's developed so far. A full reading needs both photos."}
                 </span>
                 <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => otherCameraRef.current?.click()}>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCameraFor("other")}>
                     📷 {isHi ? "तस्वीर लें" : "Take Photo"}
                   </button>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => otherGalleryRef.current?.click()}>
                     🖼️ {isHi ? "गैलरी से चुनें" : "Upload from Gallery"}
                   </button>
                 </div>
-                <input ref={otherCameraRef} id="pm-other-camera" type="file" accept="image/*" capture="environment"
-                  style={{ display: "none" }} onChange={(e) => pickOtherFile(e.target.files?.[0] ?? null)} />
                 <input ref={otherGalleryRef} id="pm-other-gallery" type="file" accept="image/*"
                   style={{ display: "none" }} onChange={(e) => pickOtherFile(e.target.files?.[0] ?? null)} />
 
