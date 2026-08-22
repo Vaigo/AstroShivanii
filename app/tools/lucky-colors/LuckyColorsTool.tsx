@@ -120,7 +120,9 @@ export default function LuckyColorsTool() {
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
             <BirthForm onSubmit={handleSubmit} loading={loading} />
-            <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "-0.5rem" }}>
+            {/* BirthForm ends with its submit button — the hint needs real
+                clearance below it (negative pull-up overlapped the button). */}
+            <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.9rem" }}>
               {isHi
                 ? "यह उपकरण आपकी लग्न (Ascendant) पर आधारित है, जो लगभग हर 2 घंटे में बदलती है — सटीक जन्म समय दिए बिना परिणाम अनुमानित (सूर्योदय-कुंडली) रहता है।"
                 : "This tool is based on your Ascendant, which shifts roughly every 2 hours — without an exact birth time, the result stays an approximation (calculated from a sunrise chart)."}

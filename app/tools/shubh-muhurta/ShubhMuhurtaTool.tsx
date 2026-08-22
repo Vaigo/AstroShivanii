@@ -335,7 +335,10 @@ export default function ShubhMuhurtaTool() {
                 </div>
               </div>
               <BirthForm onSubmit={handleBirthSubmit} loading={loading} />
-              <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "-0.5rem" }}>
+              {/* BirthForm ends with its submit button — this hint needs real
+                  clearance below it, not the negative pull-up used after
+                  hint-ending forms (it overlapped the button). */}
+              <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.9rem" }}>
                 {isHi
                   ? "तारीखें आपकी कुंडली से जांची जाती हैं — ताराबल आपके जन्म-नक्षत्र से, चंद्राष्टम आपकी राशि से। इसीलिए एक ही तारीख किसी के लिए शुभ और किसी के लिए नहीं होती।"
                   : "Dates are checked against YOUR chart — tarabala from your birth star, chandrashtama from your Moon sign. That's why the same date can be right for one person and wrong for another."}
