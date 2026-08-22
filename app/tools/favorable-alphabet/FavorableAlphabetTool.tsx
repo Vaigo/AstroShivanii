@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import DobNameForm from "@/components/DobNameForm";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
@@ -97,7 +98,8 @@ export default function FavorableAlphabetTool() {
         )}
 
         {result && !loading && (
-          <div ref={resultRef} style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Favorable-Alphabet" />
             <PatrikaFrame>
               {/* Plain-language framing FIRST — "Cornerstone/Capstone/Chaldean
                   value" were shown below with zero in-result explanation. */}

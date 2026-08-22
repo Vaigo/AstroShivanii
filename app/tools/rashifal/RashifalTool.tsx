@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import { fetchRashifal, fetchWeeklyRashifal } from "@/lib/api/endpoints";
@@ -175,7 +176,8 @@ export default function RashifalTool() {
         )}
 
         {result && texts && !loading && (
-          <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Rashifal" />
           <PatrikaFrame>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
               <div>
@@ -270,7 +272,8 @@ export default function RashifalTool() {
         )}
 
         {weeklyResult && !loading && (
-          <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Rashifal" />
           <PatrikaFrame>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
               <div>

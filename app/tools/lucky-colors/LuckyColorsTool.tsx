@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import BirthForm from "@/components/BirthForm";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
@@ -136,7 +137,8 @@ export default function LuckyColorsTool() {
         )}
 
         {result && !loading && (
-          <div ref={resultRef} style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Lucky-Colors" />
             <PatrikaFrame>
               <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
                 <div style={{ color: "var(--gold)", marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>

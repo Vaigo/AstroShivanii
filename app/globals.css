@@ -2766,3 +2766,32 @@ a:hover { color: var(--saffron); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── Print / "Download PDF" (DownloadReportButton) ────────────────────────
+   Free-tool results can be saved as a PDF via the browser's print dialog.
+   Chrome (nav/footer/floating buttons/forms/CTAs) never belongs in a saved
+   report; when the download button set body.print-report, everything
+   OUTSIDE the result's .print-area is hidden too. */
+.print-brand { display: none; }
+@media print {
+  @page { margin: 12mm; }
+  body { background: #fff !important; }
+  header, nav, footer, .footer, .invocation-strip, .breadcrumbs,
+  .floating-whatsapp, .floating-call, .back-to-top,
+  form, button, .btn, .tu-steps, .faq-cta, .no-print { display: none !important; }
+  .print-brand {
+    display: block;
+    text-align: center;
+    padding-bottom: 4mm;
+    margin-bottom: 6mm;
+    border-bottom: 2px solid #C99A3A;
+  }
+  .print-brand-name { font-family: var(--font-display); font-weight: 700; font-size: 20pt; color: #511320; }
+  .print-brand-sub { font-size: 9.5pt; color: #666; margin-top: 1mm; }
+  /* Button-initiated download: isolate the result region entirely */
+  body.print-report * { visibility: hidden; }
+  body.print-report .print-area, body.print-report .print-area * { visibility: visible; }
+  body.print-report .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+  /* Keep the parchment panels readable as plain paper */
+  .patrika-frame, .result-box { box-shadow: none !important; }
+}

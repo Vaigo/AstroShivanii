@@ -27,7 +27,7 @@ export default function ResultCTA({ locked, hook, waText, reading, hideTurantUtt
   const isHi = lang === "hi";
 
   return (
-    <div style={{ marginTop: "1.25rem" }}>
+    <div className="no-print" style={{ marginTop: "1.25rem" }}>
       {locked && locked.length > 0 && (
         <div className="locked-box">
           <div className="locked-title">

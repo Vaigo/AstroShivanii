@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import { WHATSAPP_NUMBER } from "@/lib/config";
 import Icon, { IconName } from "@/components/Icon";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import { calcMulank, calcBhagyank, calcNameNumber, calcLoShu, calcKua } from "@/lib/numerology-calc";
 import { PROFILES, KARMIC_DEBT, KARMIC_LESSONS, LO_SHU_GRID, PLANES, KUA_GROUP_INFO } from "@/lib/numerology-data";
 import { useBackStep } from "@/lib/useBackStep";
@@ -208,7 +209,8 @@ export default function NumerologyTool() {
           const uniqueDebts = [...new Set(karmicDebtNums)];
 
           return (
-            <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
+            <div ref={resultRef} className="print-area" style={{ scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Numerology" />
               {/* ── Section 1: Core Numbers ── */}
               <section className="num-section">
                 <h2 className="num-section-title">

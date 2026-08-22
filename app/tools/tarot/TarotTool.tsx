@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import { fetchTarot } from "@/lib/api/endpoints";
@@ -127,7 +128,8 @@ export default function TarotTool() {
         )}
 
         {result && !loading && (
-          <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Tarot-Reading" />
           <PatrikaFrame>
             {result.question && (
               <p style={{ fontStyle: "italic", color: "var(--muted)", marginBottom: "1rem", textAlign: "center" }}>

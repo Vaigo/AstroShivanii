@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import ResultCTA from "@/components/ResultCTA";
 import PlaceSearch, { Place } from "@/components/PlaceSearch";
 import { utcOffsetHoursAt, nowMinutesInZone, todayInZone } from "@/lib/timezone";
@@ -561,7 +562,8 @@ export default function PanchangTool() {
       )}
 
       {view === "day" && panchang && (
-        <div ref={resultRef} style={{ scrollMarginTop: "90px" }}>
+        <div ref={resultRef} className="print-area" style={{ scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Panchang" />
         <PatrikaFrame>
           <h2 style={{ fontSize: "1.2rem", marginBottom: "0.25rem", textAlign: "center" }}>
             {panchang.date} — {shownPlace}

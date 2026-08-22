@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import DobNameForm from "@/components/DobNameForm";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
@@ -100,7 +101,8 @@ export default function KarmicDebtTool() {
         )}
 
         {result && !loading && (
-          <div ref={resultRef} style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Karmic-Debt" />
             {/* ── Section A: Karmic Debt ── */}
             <PatrikaFrame style={{ marginBottom: "1.5rem" }}>
               <h2 style={{ fontSize: "1.2rem", marginBottom: "0.75rem" }}>{isHi ? "कार्मिक ऋण" : "Karmic Debt"}</h2>

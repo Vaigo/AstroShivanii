@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import BirthForm from "@/components/BirthForm";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import Link from "next/link";
@@ -349,7 +350,8 @@ export default function MatchingTool() {
         )}
 
         {result && !loading && (
-          <div ref={resultRef} style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Guna-Milan" />
             <PatrikaFrame>
               {/* Score header */}
               <div style={{ textAlign: "center", marginBottom: "2rem" }}>

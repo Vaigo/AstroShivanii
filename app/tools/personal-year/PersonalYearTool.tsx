@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import DobNameForm from "@/components/DobNameForm";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
@@ -87,7 +88,8 @@ export default function PersonalYearTool() {
         )}
 
         {result && !loading && (
-          <div ref={resultRef} style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Personal-Year" />
             <PatrikaFrame>
               <div className="num-core-grid" style={{ maxWidth: "260px", margin: "0 auto 1.5rem" }}>
                 <div className="num-core-card">

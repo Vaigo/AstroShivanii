@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import BirthForm from "@/components/BirthForm";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Link from "next/link";
 import Icon from "@/components/Icon";
@@ -103,7 +104,8 @@ export default function KundliTool() {
 
         {/* Result — always below the form */}
         {result && !loading && lastBirth && (
-          <div ref={resultRef} style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+          <div ref={resultRef} className="print-area" style={{ marginTop: "2rem", scrollMarginTop: "90px" }}>
+            <DownloadReportButton filename="AstroShivanii-Kundli" />
             <KundliResultView
               result={result}
               mahaList={mahaList}
