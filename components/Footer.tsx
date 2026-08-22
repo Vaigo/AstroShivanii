@@ -40,6 +40,17 @@ export default function Footer() {
           </ul>
         </nav>
 
+        <nav className="footer-links" aria-label="Paid services">
+          <h4>Paid Services</h4>
+          <ul>
+            <li><Link href="/tools/turant-uttar">तुरंत उत्तर — ₹149</Link></li>
+            <li><Link href="/tools/numerology-suite">Numerology Suite — ₹299</Link></li>
+            <li><Link href="/tools/palmistry">Palmistry (हस्त रेखा) — ₹299</Link></li>
+            <li><Link href="/tools/name-correction">Name Correction — ₹501</Link></li>
+            <li><Link href="/tools/varshphal-yearly">Yearly Horoscope — ₹1,499</Link></li>
+          </ul>
+        </nav>
+
         <nav className="footer-links" aria-label="Free tools">
           <h4>Free Tools</h4>
           <ul>
@@ -57,10 +68,6 @@ export default function Footer() {
             <li><Link href="/tools/favorable-alphabet">Favorable Alphabet</Link></li>
             <li><Link href="/tools/personal-year">Personal Year Number</Link></li>
             <li><Link href="/tools/karmic-debt">Karmic Debt & Missing Numbers</Link></li>
-            <li><Link href="/tools/name-correction">Name Correction</Link></li>
-            <li><Link href="/tools/turant-uttar">तुरंत उत्तर</Link></li>
-            <li><Link href="/tools/numerology-suite">Numerology Suite</Link></li>
-            <li><Link href="/tools/varshphal-yearly">Yearly Horoscope</Link></li>
             <li><Link href="/tools">All Free Tools →</Link></li>
           </ul>
         </nav>
