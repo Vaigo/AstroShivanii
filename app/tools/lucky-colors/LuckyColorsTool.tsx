@@ -164,9 +164,9 @@ export default function LuckyColorsTool() {
                 <div className="result-label">{isHi ? "आपके रंग ऐसे चुने गए" : "How your colors were found"}</div>
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
                   {isHi ? (
-                    <>जन्म के समय पूर्व दिशा में <strong>{SIGN_HI[result.lagna] ?? result.lagna}</strong> राशि उदय हो रही थी — यही आपकी <strong>लग्न</strong> है, आपकी कुंडली का चेहरा। इस राशि के स्वामी <strong>{PLANET_HI[result.lagna_lord] ?? result.lagna_lord}</strong> हैं, इसलिए उनके रंग आपके पूरे व्यक्तित्व को बल देते हैं। साथ ही, जन्म के समय चंद्रमा जिस नक्षत्र में था उसके स्वामी <strong>{PLANET_HI[result.nakshatra_lord] ?? result.nakshatra_lord}</strong> हैं — उनके रंग आपके मन और रोज़मर्रा के मूड को सहारा देते हैं।</>
+                    <>आसान भाषा में समझिए। जैसे सूरज रोज़ उगता है, वैसे ही आसमान की 12 राशियां भी बारी-बारी उगती हैं। आपके जन्म की घड़ी में <strong>{SIGN_HI[result.lagna] ?? result.lagna}</strong> राशि उग रही थी — इसी को <strong>लग्न</strong> कहते हैं। हर राशि का एक मालिक ग्रह होता है — आपकी लग्न के मालिक <strong>{PLANET_HI[result.lagna_lord] ?? result.lagna_lord}</strong> हैं। इन्हें अपनी कुंडली के घर का मुखिया समझिए — इनके रंग पहनने से आपका पूरा व्यक्तित्व निखरता है। दूसरे खास ग्रह हैं <strong>{PLANET_HI[result.nakshatra_lord] ?? result.nakshatra_lord}</strong> — ये आपके मन के साथी हैं (जन्म के समय चांद जिस तारे में था, उसके मालिक)। इनके रंग मन शांत और मूड अच्छा रखते हैं।</>
                   ) : (
-                    <>At the moment you were born, <strong>{result.lagna}</strong> was rising on the eastern horizon — that&apos;s your <strong>Ascendant (Lagna)</strong>, the face of your chart. Its ruling planet is <strong>{result.lagna_lord}</strong>, so that planet&apos;s colors strengthen your whole personality. Alongside it, the Moon at your birth sat in a nakshatra ruled by <strong>{result.nakshatra_lord}</strong> — that planet&apos;s colors support your mind and day-to-day mood.</>
+                    <>Here&apos;s the simple version. Just like the sun rises daily, all 12 zodiac signs take turns rising too. At the hour you were born, <strong>{result.lagna}</strong> was the one rising — that&apos;s called your <strong>Lagna</strong>. Every sign has an owner planet — yours is owned by <strong>{result.lagna_lord}</strong>. Think of it as the head of your chart&apos;s household — wearing its colors brings out your whole personality. Your second special planet is <strong>{result.nakshatra_lord}</strong> — the companion of your mind (it owns the star the Moon sat in when you were born). Its colors keep your mind calm and your mood steady.</>
                   )}
                 </p>
               </div>
@@ -207,33 +207,48 @@ export default function LuckyColorsTool() {
                     {info && (
                       <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
                         {isHi
-                          ? <>{PLANET_HI[planet] ?? planet} {info.governs_hi} के कारक हैं। {block.use_hi}। <strong>{info.day_hi}</strong> को ये रंग पहनना विशेष शुभ माना जाता है — वह {PLANET_HI[planet] ?? planet} का अपना दिन है।</>
-                          : <>{planet} governs {info.governs_en}. {block.use_en}. Wearing these on <strong>{info.day_en}</strong> is considered especially auspicious — that&apos;s {planet}&apos;s own day.</>}
+                          ? <>{PLANET_HI[planet] ?? planet} को {info.governs_hi} का ग्रह माना जाता है। {block.use_hi}। एक आसान याद रखने वाली बात — <strong>{info.day_hi}</strong> {PLANET_HI[planet] ?? planet} का अपना दिन है, उस दिन ये रंग पहनना सबसे शुभ माना जाता है।</>
+                          : <>{planet} is considered the planet of {info.governs_en}. {block.use_en}. An easy rule to remember — <strong>{info.day_en}</strong> is {planet}&apos;s own day, so wearing these colors that day is considered most auspicious.</>}
                       </p>
                     )}
                   </div>
                 );
               })}
 
-              {result.inauspicious_colors.length > 0 && (
-                <div className="result-box">
-                  <div className="result-label" style={{ marginBottom: "0.5rem" }}>
-                    {isHi ? "बड़े मौकों पर इनसे बचें" : "Skip These on Important Days"}
+              {(() => {
+                // The API's inauspicious list is "colors of the Lagna lord's
+                // enemy planets" — which can include the NAKSHATRA lord's own
+                // colors when those two planets are classical enemies. Showing
+                // the same color as both "good for your mind" and "avoid it"
+                // reads as a contradiction, so a color recommended by either
+                // of the visitor's OWN two planets wins and is dropped from
+                // the avoid list here.
+                const recommended = new Set([
+                  ...result.auspicious_colors_by_source.lagna_lord.colors,
+                  ...result.auspicious_colors_by_source.nakshatra_lord.colors,
+                ]);
+                const avoid = result.inauspicious_colors.filter((c) => !recommended.has(c));
+                if (avoid.length === 0) return null;
+                return (
+                  <div className="result-box">
+                    <div className="result-label" style={{ marginBottom: "0.5rem" }}>
+                      {isHi ? "बड़े मौकों पर इनसे बचें" : "Skip These on Important Days"}
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                      {avoid.map((c) => (
+                        <span key={c} className="trait-chip" style={{ background: "rgba(192,57,43,0.06)", borderColor: "rgba(192,57,43,0.25)", opacity: 0.85 }}>
+                          <ColorDot name={c} />{isHi ? colorHi(c) : c}
+                        </span>
+                      ))}
+                    </div>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
+                      {isHi
+                        ? "ये रंग उन ग्रहों के हैं जो आपके लग्न स्वामी से स्वाभाविक मेल नहीं रखते। घबराने की कोई बात नहीं — इन्हें अलमारी से निकालने की ज़रूरत नहीं है। बस इंटरव्यू, परीक्षा या किसी शुभ कार्य जैसे बड़े दिन पर इनके बजाय ऊपर वाले रंग चुनें।"
+                        : "These belong to planets that don't sit naturally with your Lagna lord. Nothing to worry about — no need to empty your wardrobe. Just reach for the colors above instead of these on a big day like an interview, exam, or auspicious ceremony."}
+                    </p>
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                    {result.inauspicious_colors.map((c) => (
-                      <span key={c} className="trait-chip" style={{ background: "rgba(192,57,43,0.06)", borderColor: "rgba(192,57,43,0.25)", opacity: 0.85 }}>
-                        <ColorDot name={c} />{isHi ? colorHi(c) : c}
-                      </span>
-                    ))}
-                  </div>
-                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
-                    {isHi
-                      ? "ये रंग उन ग्रहों के हैं जो आपके लग्न स्वामी से स्वाभाविक मेल नहीं रखते। घबराने की कोई बात नहीं — इन्हें अलमारी से निकालने की ज़रूरत नहीं है। बस इंटरव्यू, परीक्षा या किसी शुभ कार्य जैसे बड़े दिन पर इनके बजाय ऊपर वाले रंग चुनें।"
-                      : "These belong to planets that don't sit naturally with your Lagna lord. Nothing to worry about — no need to empty your wardrobe. Just reach for the colors above instead of these on a big day like an interview, exam, or auspicious ceremony."}
-                  </p>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Practical cheat-sheet — the "so what do I actually DO with
                   this" answer, in concrete everyday situations. */}

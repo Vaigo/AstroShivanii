@@ -427,32 +427,32 @@ export default function KundliResultView({
       {av && (() => {
         const entries: Array<{ term: string; value: string; hi: string; en: string }> = [
           { term: isHi ? "राशि" : "Rashi (Moon sign)", value: `${av.rashi} (स्वामी ${av.rashiLord})`,
-            hi: "जन्म के समय चंद्रमा जिस राशि में था — आपके मन और भावनाओं की मूल प्रकृति यहीं से पढ़ी जाती है।",
-            en: "The sign the Moon occupied at your birth — the root of your emotional nature; daily rashifal is read from this." },
+            hi: "जन्म के समय चांद जिस राशि में था। आपका गुस्सा, प्यार, मूड — सब इसी से पढ़े जाते हैं, और रोज़ का राशिफल भी इसी राशि का देखा जाता है।",
+            en: "The sign the Moon was in when you were born. Your temper, affection, moods — all are read from this, and your daily horoscope goes by this sign too." },
           { term: isHi ? "नक्षत्र–चरण" : "Nakshatra–Pada", value: `${av.nakshatraPada} (स्वामी ${av.nakshatraLord})`,
-            hi: "27 नक्षत्रों में से चंद्रमा का ठिकाना, चौथाई-भाग (चरण) तक — व्यक्तित्व की सबसे बारीक परत।",
-            en: "The Moon's exact station among the 27 lunar mansions, down to its quarter (pada) — the finest layer of personality." },
+            hi: "आसमान 27 तारा-समूहों में बंटा है — जन्म के समय चांद जिसमें था, वही आपका नक्षत्र। राशि से भी बारीक पहचान — जैसे शहर के बाद मोहल्ले का पता।",
+            en: "The sky is divided into 27 star-groups — your nakshatra is the one the Moon sat in at your birth. It's a finer address than the sign — like knowing the street, not just the city." },
           { term: isHi ? "वर्ण" : "Varna", value: av.varna,
-            hi: "स्वभाव की मूल प्रवृत्ति — चिंतनशील, नेतृत्वकारी, व्यवहारकुशल या परिश्रमी। विवाह-मिलान में 1 गुण इसी से मिलता है।",
-            en: "Your temperament's basic bent — contemplative, leading, enterprising, or hard-working. Worth 1 of the 36 matching points." },
+            hi: "आपके स्वभाव की मूल किस्म — सोच-विचार वाले, आगे बढ़कर अगुवाई करने वाले, व्यापार-बुद्धि वाले, या मेहनत से काम बनाने वाले। शादी की कुंडली मिलाते समय 36 में से 1 अंक इसका।",
+            en: "Your temperament's basic type — the thinker, the leader, the deal-maker, or the hard worker. When matching charts for marriage, 1 of the 36 points comes from this." },
           { term: isHi ? "वश्य" : "Vashya", value: av.vashya,
-            hi: "किस प्रकार के स्वभाव वाले लोगों से आपकी सहज बनती है और कौन आपको सहज प्रभावित कर पाता है — मिलान में 2 गुण।",
-            en: "Which temperaments you naturally get along with, and who can naturally influence you — worth 2 matching points." },
+            hi: "किस तरह के लोगों से आपकी झट से बन जाती है — और कौन आपको आसानी से मना लेता है। मिलान में 2 अंक।",
+            en: "Which kinds of people you instantly click with — and who can win you over easily. Worth 2 matching points." },
           { term: isHi ? "योनि" : "Yoni", value: av.yoni,
-            hi: "आपके नक्षत्र का प्रतीक-पशु — सहज स्वभाव और निकटता की अनुकूलता इसी से आंकी जाती है। मिलान में 4 गुण।",
-            en: "Your nakshatra's symbolic animal — instinctive nature and physical compatibility are judged from it. Worth 4 matching points." },
+            hi: "हर नक्षत्र का एक प्रतीक-जानवर है (घोड़ा, हाथी, सांप…)। दो लोगों के जानवर आपस में दोस्त हैं या दुश्मन — इसी से सहज तालमेल देखा जाता है। मिलान में 4 अंक।",
+            en: "Every nakshatra has a symbolic animal (horse, elephant, serpent…). Whether two people's animals are friends or foes shows their instinctive comfort together. Worth 4 matching points." },
           { term: isHi ? "गण" : "Gana", value: av.gana,
-            hi: "तीन जीवन-दृष्टियों में आपका स्थान: देव (सौम्य), मनुष्य (व्यावहारिक), राक्षस (तीव्र व निडर — नाम से घबराएं नहीं, यह बुरा नहीं है)। मिलान में 6 गुण।",
-            en: "Your place among three life-outlooks: Deva (gentle), Manushya (practical), Rakshasa (intense & fearless — despite the name, not bad). Worth 6 matching points." },
+            hi: "स्वभाव की तीन किस्में — सौम्य (देव), व्यावहारिक (मनुष्य), तेज़-तर्रार और निडर (राक्षस — नाम से न घबराएं, इसका मतलब बुरा इंसान बिल्कुल नहीं)। मिलान में 6 अंक।",
+            en: "Three temperament families — gentle (Deva), practical (Manushya), bold and fearless (Rakshasa — don't mind the name, it does NOT mean a bad person). Worth 6 matching points." },
           { term: isHi ? "नाड़ी" : "Nadi", value: av.nadi,
-            hi: "शारीरिक प्रकृति की धारा (आदि/मध्य/अन्त्य) — स्वास्थ्य व संतान की अनुकूलता इसी से देखी जाती है। मिलान में सबसे भारी, पूरे 8 गुण।",
-            en: "Your constitutional stream (Adi/Madhya/Antya) — health and progeny compatibility are read from it. The heaviest factor in matching: 8 full points." },
+            hi: "शरीर की मूल प्रकृति — जैसे आयुर्वेद में वात-पित्त-कफ। शादी में दोनों की नाड़ी अलग-अलग होनी चाहिए, इसीलिए मिलान में इसके सबसे ज़्यादा — पूरे 8 अंक।",
+            en: "Your body's basic constitution — like vata-pitta-kapha in Ayurveda. In marriage, the two nadis should differ, which is why this carries the most weight — a full 8 points." },
           { term: isHi ? "तत्व" : "Tatva", value: av.tatva,
-            hi: "आपकी राशि का मूल तत्व — अग्नि (जोश), पृथ्वी (स्थिरता), वायु (विचार) या जल (भावना)।",
-            en: "Your sign's element — Fire (drive), Earth (steadiness), Air (ideas), or Water (feeling)." },
+            hi: "आपकी राशि की ऊर्जा किस तरह की है — आग (जोश), मिट्टी (टिकाऊपन), हवा (विचार) या पानी (भावना)।",
+            en: "What kind of energy your sign runs on — fire (drive), earth (steadiness), air (ideas), or water (feeling)." },
           { term: isHi ? "नामाक्षर" : "Naming syllable", value: `"${av.nameSyllable}"`,
-            hi: "परंपरा में नाम इसी अक्षर से रखा जाता है — ताकि नाम हर उच्चारण पर आपके जन्म-नक्षत्र से जुड़ा रहे।",
-            en: "Tradition names a child starting with this syllable — so every utterance of the name stays tied to the birth nakshatra." },
+            hi: "परंपरा में बच्चे का नाम इसी अक्षर से रखा जाता है — ताकि हर बार नाम पुकारने पर वह अपने जन्म-तारे से जुड़ा रहे।",
+            en: "Tradition names a child starting with this syllable — so every time the name is called, it stays connected to their birth star." },
         ];
         return (
           <div className="result-box">
@@ -461,8 +461,8 @@ export default function KundliResultView({
             </div>
             <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "var(--ink-light)", lineHeight: 1.6, margin: "0 0 0.75rem" }}>
               {isHi
-                ? "पंडित जी विवाह-मिलान और नामकरण से पहले सबसे पहले यही तालिका बनाते हैं — आपकी कुंडली का 'पहचान-पत्र', जो केवल चंद्रमा की स्थिति से बनता है।"
-                : "This is the first table a traditional astrologer prepares before matching or naming — your chart's 'identity card', built entirely from the Moon's position."}
+                ? "इसे अपनी कुंडली का आधार-कार्ड समझिए — शादी की कुंडली मिलाने या बच्चे का नाम रखने से पहले पंडित जी सबसे पहले यही तालिका बनाते हैं। यह पूरी तरह जन्म के समय चांद की स्थिति से बनती है।"
+                : "Think of this as your chart's Aadhaar card — it's the first table a traditional astrologer prepares before matching charts for marriage or naming a child. It's built entirely from where the Moon was when you were born."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {entries.map((e) => (

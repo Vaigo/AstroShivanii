@@ -104,8 +104,8 @@ export default function FavorableAlphabetTool() {
               <div className="result-box" style={{ marginTop: 0, marginBottom: "1rem" }}>
                 <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: 0 }}>
                   {isHi
-                    ? <>अंक ज्योतिष में नाम का <strong>पहला अक्षर (कॉर्नरस्टोन)</strong> बताता है कि आप किसी नए काम या चुनौती की <strong>शुरुआत</strong> कैसे करते हैं, और <strong>अंतिम अक्षर (कैपस्टोन)</strong> बताता है कि आप उसे <strong>पूरा</strong> कैसे करते हैं। हर अक्षर का एक चाल्डियन अंक होता है, और हर अंक का एक स्वामी ग्रह — इसी से नीचे के फल निकले हैं।</>
-                    : <>In numerology, your name&apos;s <strong>first letter (Cornerstone)</strong> shows how you <strong>begin</strong> things — a new job, a challenge, a relationship — and the <strong>last letter (Capstone)</strong> shows how you <strong>finish</strong> them. Each letter carries a Chaldean number, and each number a ruling planet — that&apos;s where everything below comes from.</>}
+                    ? <>आसान भाषा में: आपके नाम का <strong>पहला अक्षर</strong> बताता है कि आप कोई भी काम — नई नौकरी, नया रिश्ता, नई चुनौती — <strong>शुरू कैसे</strong> करते हैं। और <strong>आखिरी अक्षर</strong> बताता है कि आप उसे <strong>पूरा कैसे</strong> करते हैं। हर अक्षर का एक अंक होता है और हर अंक का एक ग्रह — नीचे के सारे नतीजे इसी से निकले हैं।</>
+                    : <>The simple version: your name&apos;s <strong>first letter</strong> shows how you <strong>begin</strong> anything — a new job, a new relationship, a new challenge. And the <strong>last letter</strong> shows how you <strong>finish</strong> it. Every letter has a number, and every number has a planet — that&apos;s where all the results below come from.</>}
                 </p>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>

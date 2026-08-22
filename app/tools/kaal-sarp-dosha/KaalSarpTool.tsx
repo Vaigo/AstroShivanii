@@ -119,13 +119,13 @@ export default function KaalSarpTool() {
                     <div className="result-label">{isHi ? "इसका असल मतलब क्या है" : "What This Actually Means"}</div>
                     <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
                       {isHi
-                        ? "सबसे पहले — घबराइए नहीं। इसका अर्थ केवल इतना है कि आपके सातों ग्रह राहु-केतु की धुरी के एक ही ओर इकट्ठे हैं। शास्त्रों में इसे ऊर्जा का एक ही दिशा में सिमट जाना माना गया है — जिससे जीवन में कुछ क्षेत्रों में मेहनत का फल देर से मिलता है, काम बनते-बनते अटकते हैं, पर रुकते नहीं। यह मृत्यु या विनाश का सूचक बिल्कुल नहीं है — यह एक बहुत आम स्थिति है, और अनगिनत सफल लोगों की कुंडली में यह मौजूद है।"
-                        : "First things first — don't panic. All this means is that your seven classical planets are gathered on one side of the Rahu–Ketu axis. Classical texts read it as energy concentrated in one direction — so in some areas of life, effort pays off slower, and things stall just before completion, but they don't stop. It is absolutely not an omen of death or ruin — it's a very common pattern, present in the charts of countless successful people."}
+                        ? "सबसे पहले — घबराइए नहीं। आसान भाषा में समझिए: कुंडली को एक गोल घड़ी जैसा मान लीजिए, जिसमें सारे ग्रह बैठे हैं। आपकी कुंडली में सातों मुख्य ग्रह घड़ी के एक ही आधे हिस्से में इकट्ठे हैं — बस इसी स्थिति का नाम काल सर्प है। इसका असर इतना ही है कि कुछ कामों में मेहनत का फल थोड़ा देर से मिलता है — काम बनते-बनते अटकते ज़रूर हैं, पर रुकते नहीं। यह किसी अनहोनी या मृत्यु का संकेत बिल्कुल नहीं है। यह बहुत आम स्थिति है — अनगिनत सफल और सुखी लोगों की कुंडली में यही स्थिति मौजूद है।"
+                        : "First things first — don't panic. Here's the simple version: picture your birth chart as a round clock with all the planets sitting on it. In your chart, all seven main planets happen to be gathered in one half of that clock — that's all Kaal Sarp means. Its effect is just this: in some areas, hard work pays off a little late — things stall near the finish line, but they don't stop. It is absolutely not a sign of tragedy or death. It's a very common pattern — countless successful, happy people have exactly this in their charts."}
                     </p>
                     <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.6rem 0 0" }}>
                       {isHi
-                        ? "इसका प्रभाव पूरे जीवन एक-सा नहीं रहता — यह मुख्यतः राहु या केतु की दशा-अंतर्दशा में महसूस होता है, और कई कुंडलियों में भंग योग (cancellation) होने से यह लगभग निष्क्रिय भी हो जाता है।"
-                        : "Its effect isn't constant through life either — it's mainly felt during Rahu or Ketu's dasha periods, and in many charts a cancellation (Kaal Sarp Bhang) renders it nearly inactive."}
+                        ? "और एक राहत की बात — यह पूरी ज़िंदगी असर नहीं करता। ज़्यादातर समय यह सोया रहता है और कुछ खास वर्षों में ही महसूस होता है। कई कुंडलियों में तो कुछ शर्तें पूरी होने पर यह अपने-आप लगभग बेअसर (भंग) भी हो जाता है — यह आपकी पूरी कुंडली देखकर ही पता चलता है।"
+                        : "And here's the reassuring part — it doesn't act your whole life. Most of the time it stays dormant, felt only during certain specific years. In many charts, certain conditions even cancel it out almost entirely (called 'Bhang') — that can only be confirmed by looking at your full chart."}
                     </p>
                   </div>
                   <div className="result-box">
@@ -188,16 +188,16 @@ export default function KaalSarpTool() {
                     <div className="result-label">{isHi ? "आपकी जांच में क्या देखा गया" : "What We Checked"}</div>
                     <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
                       {isHi
-                        ? "काल सर्प दोष तभी बनता है जब सूर्य, चंद्र, मंगल, बुध, गुरु, शुक्र और शनि — सातों ग्रह — राहु-केतु की धुरी के एक ही ओर फंसे हों। आपकी कुंडली में ग्रह इस धुरी के दोनों ओर फैले हुए हैं, इसलिए यह स्थिति नहीं बनती। यदि कहीं और आपको यह दोष बताया गया है, तो यह जांच उसका सीधा उत्तर है — शर्त ही पूरी नहीं होती।"
-                        : "Kaal Sarp Dosha only forms when all seven planets — Sun, Moon, Mars, Mercury, Jupiter, Venus and Saturn — are hemmed on ONE side of the Rahu–Ketu axis. In your chart, the planets are spread across both sides of that axis, so the pattern simply doesn't form. If someone elsewhere told you that you have this dosha, this check is your direct answer — the defining condition isn't met."}
+                        ? "आसान भाषा में: कुंडली को एक गोल घड़ी जैसा मान लीजिए, जिसमें सारे ग्रह बैठे हैं। काल सर्प दोष तभी बनता है जब सातों मुख्य ग्रह घड़ी के एक ही आधे हिस्से में फंसे हों। आपकी कुंडली में ग्रह दोनों हिस्सों में अच्छी तरह फैले हुए हैं — यानी संतुलित। इसलिए यह दोष बनता ही नहीं। अगर किसी ने आपको यह दोष बताकर डराया है, तो यह जांच उसका सीधा जवाब है — शर्त ही पूरी नहीं होती।"
+                        : "In plain words: picture your chart as a round clock with all the planets sitting on it. Kaal Sarp Dosha only forms when all seven main planets are stuck in ONE half of that clock. In your chart, the planets are spread nicely across both halves — balanced. So the dosha simply doesn't form. If someone scared you by saying you have it, this check is your direct answer — the defining condition isn't even met."}
                     </p>
                   </div>
                   <div className="result-box">
                     <div className="result-label">{isHi ? "राहु-केतु फिर भी मायने रखते हैं" : "Rahu & Ketu Still Matter"}</div>
                     <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
                       {isHi
-                        ? "दोष न होने का अर्थ यह नहीं कि राहु-केतु आपकी कुंडली में निष्क्रिय हैं — हर कुंडली में यह धुरी इच्छाओं (राहु) और वैराग्य (केतु) की दिशा बताती है। ये किन भावों में बैठे हैं, यही तय करता है कि जीवन का कौन-सा क्षेत्र आपको सबसे ज़्यादा खींचता है और किससे मन स्वाभाविक रूप से हटता है। यह पूर्ण कुंडली विश्लेषण का विषय है।"
-                        : "Not having the dosha doesn't mean Rahu and Ketu are silent in your chart — in every chart, this axis marks the direction of your strongest cravings (Rahu) and your natural detachment (Ketu). Which houses they occupy decides which area of life pulls you hardest and which you effortlessly let go — that's a full-chart-reading conversation."}
+                        ? "राहु और केतु हर कुंडली में दो दिलचस्प बातें बताते हैं। राहु बताता है कि ज़िंदगी में कौन-सी चीज़ आपको सबसे ज़्यादा खींचती है — जिसकी भूख कभी पूरी नहीं होती (पैसा, नाम, प्यार…)। और केतु बताता है कि किस चीज़ से आपका मन अपने-आप उठ जाता है, चाहे सब उसके पीछे भागें। ये दोनों आपकी कुंडली के किस हिस्से में बैठे हैं — यही जानना असली मज़ेदार सवाल है, और वह पूरी कुंडली पढ़कर ही बताया जा सकता है।"
+                        : "Rahu and Ketu tell two fascinating things in every chart. Rahu shows what pulls you hardest in life — the hunger that never quite fills (money, fame, love…). Ketu shows what your heart effortlessly walks away from, even when everyone else chases it. WHERE these two sit in your chart is the genuinely interesting question — and that takes a full chart reading to answer."}
                     </p>
                   </div>
                   <div className="result-box">

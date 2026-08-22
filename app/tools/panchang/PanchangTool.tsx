@@ -449,42 +449,42 @@ export default function PanchangTool() {
             ? `${Math.round(panchang.tithi.completion * 100)}% बीती · समाप्ति ${panchang.tithi.end_time}`
             : `${Math.round(panchang.tithi.completion * 100)}% elapsed · ends ${panchang.tithi.end_time}`,
           meaning: isHi
-            ? "चांद्र दिन — हर व्रत और त्योहार (एकादशी, पूर्णिमा, अमावस्या…) इसी से तय होता है, अंग्रेज़ी तारीख से नहीं"
-            : "The lunar day — every fast and festival (Ekadashi, Purnima, Amavasya…) is fixed by this, not by the English date" },
+            ? "चांद के हिसाब से आज की तारीख — हर व्रत-त्योहार (एकादशी, पूर्णिमा, अमावस्या…) अंग्रेज़ी तारीख से नहीं, इसी से तय होता है"
+            : "Today's date by the Moon's calendar — every fast and festival (Ekadashi, Purnima, Amavasya…) is fixed by this, not by the English date" },
         { label: "वार / Day", value: isHi ? weekdayHi(panchang.vara.name) : panchang.vara.name,
           sub: isHi ? `स्वामी: ${PLANET_HI[panchang.vara.lord] ?? panchang.vara.lord}` : `Lord: ${panchang.vara.lord}`,
           meaning: isHi
-            ? "हर दिन का एक स्वामी ग्रह है — उस ग्रह से जुड़े काम (जैसे गुरुवार को शिक्षा/धन के) आज विशेष फलदायी माने जाते हैं"
-            : "Each weekday has a ruling planet — work linked to that planet (e.g. learning/wealth matters on Jupiter's Thursday) is considered extra fruitful today" },
+            ? "हर दिन का एक मालिक ग्रह होता है — जैसे गुरुवार गुरु का दिन है, इसलिए उस दिन पढ़ाई और धन के काम अच्छे माने जाते हैं"
+            : "Each day of the week has an owner planet — Thursday belongs to Jupiter, for example, so study and money matters go well that day" },
         { label: "नक्षत्र / Nakshatra", value: `${panchang.nakshatra.name}`,
           sub: isHi
             ? `${panchang.nakshatra.name_hi} · पाद ${panchang.nakshatra.pada} · स्वामी ${PLANET_HI[panchang.nakshatra.lord] ?? panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`
             : `${panchang.nakshatra.name_hi} · pada ${panchang.nakshatra.pada} · lord ${panchang.nakshatra.lord} · ends ${panchang.nakshatra.end_time}`,
           meaning: isHi
-            ? "27 तारों में से आज चंद्रमा का ठिकाना — मुहूर्त, नामकरण और यात्रा का समय चुनने का मुख्य आधार यही है"
-            : "The Moon's station among the 27 stars today — the main basis for choosing muhurta, naming ceremonies, and travel timing" },
+            ? "आसमान के 27 तारा-समूहों में से आज चांद जहां है — शुभ काम का समय (मुहूर्त) और बच्चों के नाम इसी से चुने जाते हैं"
+            : "Where the Moon sits today among the sky's 27 star-groups — auspicious timings (muhurta) and babies' names are chosen from this" },
         { label: "योग / Yoga", value: isHi ? yogaNameHi(panchang.yoga.name) : panchang.yoga.name,
           sub: isHi ? `समाप्ति ${panchang.yoga.end_time}` : `ends ${panchang.yoga.end_time}`,
           meaning: isHi
-            ? "सूर्य और चंद्र की संयुक्त चाल से बना 27 योगों में से एक — दिन का समग्र 'स्वभाव' बताता है (कुछ योग सौम्य, कुछ कठोर)"
-            : "One of 27 combinations formed by the Sun and Moon's joint motion — it sets the day's overall 'temperament' (some yogas gentle, some harsh)" },
+            ? "सूरज और चांद की जोड़ी से बनने वाला दिन का मिज़ाज — कुछ दिन नरम होते हैं, कुछ सख्त; बड़े काम से पहले यही देखा जाता है"
+            : "The day's mood, set by the Sun-Moon pairing — some days run gentle, some harsh; it's checked before big undertakings" },
         { label: "करण / Karana", value: isHi ? karanaNameHi(panchang.karana.name) : panchang.karana.name,
           sub: isHi ? `समाप्ति ${panchang.karana.end_time}` : `ends ${panchang.karana.end_time}`,
           meaning: isHi
-            ? "तिथि का आधा हिस्सा — छोटे-बड़े दैनिक कामों (लेन-देन, शुरुआत) की बारीक शुभता इसी से देखी जाती है"
-            : "Half of a tithi — the fine-grained auspiciousness of everyday actions (transactions, new starts) is read from it" },
+            ? "तिथि का आधा हिस्सा — रोज़मर्रा के छोटे कामों (लेन-देन, कोई नई शुरुआत) के लिए और बारीक जांच"
+            : "Half of a tithi — a finer check for small everyday actions like transactions or starting something new" },
         { label: "चंद्र कला / Moon Phase", value: isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase, sub: "",
           meaning: isHi
-            ? "चंद्रमा आज कितना भरा है — बढ़ता चांद (शुक्ल पक्ष) शुरुआतों के लिए, घटता (कृष्ण पक्ष) समापन व त्याग के लिए अनुकूल माना जाता है"
-            : "How full the Moon is today — a waxing moon (Shukla) is favored for beginnings, a waning one (Krishna) for finishing and letting go" },
+            ? "आज चांद कितना भरा है — बढ़ता चांद नई शुरुआत के लिए अच्छा माना जाता है, घटता चांद काम निपटाने और छोड़ने के लिए"
+            : "How full the Moon is today — a growing moon is considered good for new beginnings, a shrinking one for finishing and letting go" },
         { label: "सूर्योदय / Sunrise", value: panchang.sun_rise, sub: "",
           meaning: isHi
-            ? "पंचांग का दिन यहीं से शुरू होता है — आधी रात से नहीं; इसीलिए तिथि-वार सूर्योदय के समय से गिने जाते हैं"
-            : "The panchang day begins here — not at midnight; tithi and vara are counted from sunrise" },
+            ? "पंचांग का दिन रात 12 बजे से नहीं, सूर्योदय से शुरू होता है — इसीलिए सुबह-सुबह की तिथि पिछले दिन वाली भी हो सकती है"
+            : "The panchang day starts at sunrise, not midnight — which is why the early-morning tithi can still belong to the previous day" },
         { label: "सूर्यास्त / Sunset", value: panchang.sun_set, sub: "",
           meaning: isHi
-            ? "दिन-रात की सीमा — शुभ चौघड़िया और होरा इसी के अनुसार दिन व रात में बंटते हैं"
-            : "The day/night boundary — the choghadiya and hora periods below split into day and night sets at this moment" },
+            ? "यहां से दिन के शुभ-अशुभ समय (नीचे दिए चौघड़िया) रात वाले हिस्से में बदल जाते हैं"
+            : "From this moment, the day's good/bad time-slots (the choghadiya below) switch over to their night set" },
       ]
     : [];
 
