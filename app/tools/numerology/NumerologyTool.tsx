@@ -238,17 +238,72 @@ export default function NumerologyTool() {
                   )}
                 </div>
 
-                {/* Mulank profile description */}
-                <div className="num-profile-desc">
-                  <span className="num-profile-num">{r.mulank.value}</span>
-                  <div>
-                    <p><strong>{isHi ? mulankProfile.description.hi : mulankProfile.description.en}</strong></p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.5rem" }}>
-                      {(isHi ? mulankProfile.traits.hi : mulankProfile.traits.en).map(t => (
-                        <span key={t} className="trait-chip">{t}</span>
-                      ))}
-                    </div>
+                {/* The connected story — mulank/bhagyank/name explained as
+                    ONE narrative (driver / road / vehicle), each with "where
+                    is this number actually useful", instead of the earlier
+                    disconnected one-liner + chips. */}
+                <div className="result-box" style={{ marginTop: "1rem" }}>
+                  <div className="result-label">{isHi ? "आपके अंकों की कहानी" : "The Story Your Numbers Tell"}</div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                    {isHi
+                      ? <>आसान भाषा में समझिए — <strong>मूलांक ({r.mulank.value})</strong> आपका स्वभाव है, यानी गाड़ी का <strong>ड्राइवर</strong>। <strong>भाग्यांक ({r.bhagyank.value})</strong> आपकी ज़िंदगी की <strong>सड़क</strong> है — जिस दिशा में हालात बार-बार आपको ले जाते हैं।{r.nameNum.value > 0 && <> और <strong>नाम अंक ({r.nameNum.value})</strong> आपकी <strong>गाड़ी</strong> — जिस पहचान के साथ आप दुनिया में चलते हैं।</>} सफर तभी अच्छा होता है जब ड्राइवर, सड़क{r.nameNum.value > 0 ? " और गाड़ी" : ""} — तीनों को समझकर चला जाए।</>
+                      : <>Here&apos;s the simple picture — your <strong>Mulank ({r.mulank.value})</strong> is your nature: the <strong>driver</strong> of the car. Your <strong>Bhagyank ({r.bhagyank.value})</strong> is the <strong>road</strong> — the direction life keeps steering you toward.{r.nameNum.value > 0 && <> And your <strong>Name Number ({r.nameNum.value})</strong> is the <strong>car itself</strong> — the identity you travel through the world in.</>} The journey goes well when you understand all of them together.</>}
+                  </p>
+                </div>
+
+                <div className="result-box">
+                  <div className="result-label">{isHi ? `आपका व्यक्तित्व — मूलांक ${r.mulank.value}` : `Your Personality — Mulank ${r.mulank.value}`}</div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0.6rem" }}>
+                    {isHi
+                      ? <>मूलांक सिर्फ आपके जन्म के <strong>दिन</strong> से बनता है ({r.mulank.steps})। यह आपका रोज़ का, सहज स्वभाव है — पहली मुलाकात में लोग आपमें यही देखते हैं। {mulankProfile.description.hi}</>
+                      : <>Your Mulank comes from just the <strong>day</strong> you were born ({r.mulank.steps}). It&apos;s your everyday, instinctive nature — what people sense in you at first meeting. {mulankProfile.description.en}</>}
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                    {(isHi ? mulankProfile.traits.hi : mulankProfile.traits.en).map(t => (
+                      <span key={t} className="trait-chip">{t}</span>
+                    ))}
                   </div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
+                    {isHi
+                      ? <><strong>कहां काम आता है:</strong> रोज़ के फैसलों में — कौन-सा काम आपके स्वभाव को सूट करेगा, किन लोगों से आपकी सहज बनेगी, और कोई ज़रूरी काम किस तारीख को रखें (नीचे &lsquo;शुभ संकेत&rsquo; इसी अंक से निकले हैं)।</>
+                      : <><strong>Where it&apos;s useful:</strong> everyday decisions — which work suits your nature, which people you&apos;ll naturally click with, and which dates to schedule important things on (the &lsquo;Favorable&rsquo; section below comes from this number).</>}
+                  </p>
+                </div>
+
+                <div className="result-box">
+                  <div className="result-label">{isHi ? `आपकी जीवन-दिशा — भाग्यांक ${r.bhagyank.value}` : `Your Life Direction — Bhagyank ${r.bhagyank.value}`}</div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.88rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0.6rem" }}>
+                    {isHi
+                      ? <>भाग्यांक आपकी <strong>पूरी जन्मतिथि</strong> जोड़ने से बनता है ({r.bhagyank.steps})। जन्मतिथि कभी बदली नहीं जा सकती — इसीलिए इसे &lsquo;भाग्य&rsquo; का अंक कहते हैं। यह बताता है कि ज़िंदगी आपको बार-बार किस तरह के मौके, लोग और सबक देगी। {r.bhagyank.value !== r.mulank.value ? bhagyankProfile.description.hi : ""}</>
+                      : <>Your Bhagyank comes from adding your <strong>entire birth date</strong> ({r.bhagyank.steps}). A birth date can never change — which is why this is called the &lsquo;destiny&rsquo; number. It shows the kinds of opportunities, people, and lessons life will keep bringing you. {r.bhagyank.value !== r.mulank.value ? bhagyankProfile.description.en : ""}</>}
+                  </p>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.82rem", color: "var(--ink-light)", lineHeight: 1.65, margin: "0.6rem 0 0" }}>
+                    {isHi
+                      ? <><strong>कहां काम आता है:</strong> बड़े फैसलों में — करियर की लंबी दिशा, जीवनसाथी से अंक-तालमेल, बड़ा निवेश या नई शुरुआत। एक आसान नियम याद रखिए — <strong>रोज़ के कामों में मूलांक की सुनिए, ज़िंदगी के बड़े मोड़ों पर भाग्यांक की</strong>।</>
+                      : <><strong>Where it&apos;s useful:</strong> the big decisions — long-term career direction, number-compatibility with a partner, major investments or fresh starts. An easy rule to remember — <strong>follow your Mulank for daily matters, your Bhagyank at life&apos;s big turns</strong>.</>}
+                  </p>
+                </div>
+
+                {/* Dynamic relationship between the two numbers — derived
+                    honestly from each profile's classical friendly-numbers
+                    list, not invented per-pair prose. */}
+                <div className="result-box" style={{ background: "rgba(201,154,58,0.07)" }}>
+                  <div className="result-label">{isHi ? "दोनों अंकों का आपसी रिश्ता" : "How Your Two Numbers Get Along"}</div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.4rem 0 0" }}>
+                    {r.mulank.value === r.bhagyank.value ? (
+                      isHi
+                        ? <>खास बात — आपके मूलांक और भाग्यांक <strong>एक ही ({r.mulank.value})</strong> हैं! यानी ड्राइवर और सड़क एक ही दिशा में हैं — आपका स्वभाव और आपकी किस्मत एक-दूसरे का साथ देते हैं। जो आप भीतर से हैं, ज़िंदगी भी आपको वही बनने के मौके देती है। ऐसा कम लोगों में होता है।</>
+                        : <>Something special — your Mulank and Bhagyank are <strong>the same ({r.mulank.value})</strong>! The driver and the road point the same way — your nature and your destiny support each other. Who you are inside is exactly what life keeps inviting you to become. Few people have this.</>
+                    ) : mulankProfile.luckyNumbers.includes(r.bhagyank.value) || bhagyankProfile.luckyNumbers.includes(r.mulank.value) ? (
+                      isHi
+                        ? <>अच्छी खबर — {r.mulank.value} और {r.bhagyank.value} आपस में <strong>मित्र अंक</strong> हैं। यानी आपका स्वभाव ({mulankProfile.planet.hi}) और आपकी जीवन-दिशा ({bhagyankProfile.planet.hi}) एक-दूसरे का साथ देते हैं — मन जो चाहता है, हालात भी अक्सर उसी ओर खुलते हैं।</>
+                        : <>Good news — {r.mulank.value} and {r.bhagyank.value} are <strong>friendly numbers</strong>. Your nature ({mulankProfile.planet.en}) and your life direction ({bhagyankProfile.planet.en}) support each other — what your heart wants, circumstances tend to open up toward.</>
+                    ) : (
+                      isHi
+                        ? <>आपके {r.mulank.value} और {r.bhagyank.value} अलग मिज़ाज के अंक हैं — कभी-कभी मन कुछ चाहेगा ({mulankProfile.planet.hi} का स्वभाव) और हालात कुछ और मांगेंगे ({bhagyankProfile.planet.hi} की सड़क)। यह कोई कमी नहीं है — ऐसे लोग दोनों दुनिया समझते हैं और अक्सर ज़्यादा परिपक्व बनते हैं। बस दोनों की अलग-अलग भूमिका पहचानकर चलिए।</>
+                        : <>Your {r.mulank.value} and {r.bhagyank.value} have different temperaments — sometimes your heart will want one thing ({mulankProfile.planet.en}&apos;s nature) while circumstances ask another ({bhagyankProfile.planet.en}&apos;s road). That&apos;s not a flaw — such people understand both worlds and often grow more mature for it. Just know which number to listen to when.</>
+                    )}
+                  </p>
                 </div>
 
                 {/* Kua Number — Vaastu/Feng-Shui direction number */}
@@ -485,19 +540,6 @@ export default function NumerologyTool() {
                   ))}
                 </div>
 
-                {/* Bhagyank profile if different */}
-                {r.bhagyank.value !== r.mulank.value && (
-                  <div className="result-box" style={{ marginTop: "1.5rem" }}>
-                    <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "0.5rem" }}>
-                      {isHi
-                        ? `आपका भाग्यांक (${r.bhagyank.value} — ${bhagyankProfile.planet.hi}) आपके दीर्घकालिक जीवन-पथ को दर्शाता है:`
-                        : `Your Bhagyank (${r.bhagyank.value} — ${bhagyankProfile.planet.en}) governs your long-term life path:`}
-                    </p>
-                    <p style={{ fontSize: "0.875rem", color: "var(--ink-light)" }}>
-                      {isHi ? bhagyankProfile.description.hi : bhagyankProfile.description.en}
-                    </p>
-                  </div>
-                )}
               </section>
 
               {/* ── Section 5: Ask Shivanii ── */}
