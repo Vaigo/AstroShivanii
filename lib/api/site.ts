@@ -116,7 +116,7 @@ export function fetchTurantUttarAI(
 export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
 
 export function createPaymentOrder(body: {
-  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction" | "palmistry"; slug: string;
+  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction" | "palmistry" | "muhurta-personal"; slug: string;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
   // birth place — required for the birth-chart/kundli-report product so the
   // auto-generated PDF uses an accurate chart; harmless to omit elsewhere.
@@ -181,6 +181,61 @@ export function fetchNameCorrectionResult(body: {
   ref_code?: string; razorpay_order_id: string;
 }): Promise<NameCorrectionResult> {
   return siteFetch<NameCorrectionResult>("/v1/site/name-correction", {
+    body, headers: { "X-Site-Token": getSiteToken() ?? "" },
+  });
+}
+
+/* ── Personal Muhurta (शुभ मुहूर्त) ── */
+
+export type MuhurtaPurpose =
+  | "marriage" | "business" | "travel" | "education"
+  | "griha_pravesh" | "vehicle_purchase" | "property_purchase" | "naamkaran";
+
+export interface MuhurtaCaution { en: string; hi: string; }
+export interface MuhurtaProfile {
+  tob_given: boolean;
+  birth_nakshatra: string;
+  karaka: string;
+  karaka_condition: { dignity: string; combust: boolean; retrograde: boolean; house: number; sign: string };
+  fourth_lord: string;
+  fourth_lord_dignity: string;
+  sade_sati: boolean;
+  dhaiyya: boolean;
+  cautions: MuhurtaCaution[];
+  strict: boolean;
+}
+export interface MuhurtaDate {
+  date: string; weekday: string; nakshatra: string; tithi: string; paksha: string;
+  tara: string; tara_quality: string; chandrabala_good: boolean;
+  karaka_transit_ok: boolean; score: number; quality: "Excellent" | "Good";
+  auspicious_slots: Array<{ choghadiya: string; start: string; end: string }>;
+  notes: MuhurtaCaution[];
+}
+export interface MuhurtaPreviewResult {
+  purpose: MuhurtaPurpose; from_date: string; to_date: string;
+  profile: MuhurtaProfile; total_found: number;
+  best_date: MuhurtaDate | null; remaining_count: number;
+}
+export interface MuhurtaFullResult {
+  purpose: MuhurtaPurpose; from_date: string; to_date: string;
+  profile: MuhurtaProfile; dates: MuhurtaDate[]; total_found: number;
+}
+
+interface MuhurtaBirthBody {
+  dob: string; tob?: string; lat: number; lon: number; tz: number;
+  purpose: MuhurtaPurpose; ref_code?: string;
+}
+
+/** Free teaser: natal snapshot + the single best date + how many more sit
+ *  behind the ₹199 paywall. Deterministic compute — genuinely free. */
+export function fetchMuhurtaPreview(body: MuhurtaBirthBody): Promise<MuhurtaPreviewResult> {
+  return siteFetch<MuhurtaPreviewResult>("/v1/site/muhurta-personal/preview", { body });
+}
+
+/** Full 3-month best-dates list — hard-gated server-side on a verified
+ *  razorpay_order_id, same trust model as Numerology Suite. */
+export function fetchMuhurtaPersonal(body: MuhurtaBirthBody & { razorpay_order_id: string }): Promise<MuhurtaFullResult> {
+  return siteFetch<MuhurtaFullResult>("/v1/site/muhurta-personal", {
     body, headers: { "X-Site-Token": getSiteToken() ?? "" },
   });
 }

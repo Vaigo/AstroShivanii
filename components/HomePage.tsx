@@ -322,6 +322,25 @@ export default function HomePage() {
               </PatrikaFrame>
               <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
+                  <div className="service-card-icon tool-card-icon"><ToolIcon name="shubh-muhurta" size={36} /></div>
+                  <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
+                    ₹199 · शुभ मुहूर्त
+                  </span>
+                  <h2 style={{ fontSize: "1.15rem", margin: 0 }}>
+                    {isHi ? "गाड़ी, घर, नई शुरुआत — कब करें?" : "A vehicle, a home, a new start — when?"}
+                  </h2>
+                  <p className={isHi ? "devanagari" : undefined} style={{ color: "var(--muted)", fontSize: "0.88rem", margin: 0, flex: 1 }}>
+                    {isHi
+                      ? "आपकी कुंडली से जांचकर अगले 3 महीने की सबसे शुभ तारीखें — ताराबल, चंद्राष्टम व कारक ग्रह सहित"
+                      : "The best dates in the next 3 months, screened against your own chart — tarabala, chandrashtama and karaka strength included"}
+                  </p>
+                  <Link href="/tools/shubh-muhurta" className="btn btn-primary" style={{ width: "100%" }}>
+                    {isHi ? "शुरू करें →" : "Get Started →"}
+                  </Link>
+                </div>
+              </PatrikaFrame>
+              <PatrikaFrame style={{ border: "1.5px solid var(--gold)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
                   <div className="service-card-icon tool-card-icon"><ToolIcon name="palmistry" size={36} /></div>
                   <span style={{ display: "inline-block", background: "var(--gold)", color: "var(--maroon-deep)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "2px", width: "fit-content" }}>
                     ₹299 · हस्त रेखा विश्लेषण

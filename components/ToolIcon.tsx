@@ -32,7 +32,8 @@ export type ToolIconName =
   | "karmic-debt"
   | "varshphal"
   | "name-correction"
-  | "palmistry";
+  | "palmistry"
+  | "shubh-muhurta";
 
 const ART: Record<ToolIconName, ReactNode> = {
   // Almanac page with a sun at its center — Panchang is the sun/moon-position calendar
@@ -202,6 +203,16 @@ const ART: Record<ToolIconName, ReactNode> = {
     <>
       <path className="ti-write" pathLength={100} d="M5 21.5c2.7-1 4.6-8 6.5-8s1.8 6 3.7 6 2.8-10 4.6-10 1.9 8.5 3.7 8.5" />
       <path className="ti-twinkle" d="M24.5 6l0.8 2 2 0.8-2 0.8-0.8 2-0.8-2-2-0.8 2-0.8z" />
+    </>
+  ),
+  // A calendar with one date marked by a twinkling star — the auspicious day
+  "shubh-muhurta": (
+    <>
+      <rect x="5" y="7" width="22" height="20" rx="1.5" />
+      <line x1="11" y1="3.5" x2="11" y2="9.5" />
+      <line x1="21" y1="3.5" x2="21" y2="9.5" />
+      <line x1="5" y1="13" x2="27" y2="13" />
+      <path className="ti-twinkle" d="M16 15.5l1.2 3.2 3.2 1.2-3.2 1.2-1.2 3.2-1.2-3.2-3.2-1.2 3.2-1.2z" />
     </>
   ),
   // A simplified open palm, waving hello
