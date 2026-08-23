@@ -5,8 +5,9 @@ import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import { calcMulank, calcBhagyank } from "@/lib/numerology-calc";
-import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { NumerologySuiteResult } from "@/lib/api/types";
 
 declare global {
@@ -29,6 +30,7 @@ export default function NumerologySuiteTool() {
   const [error, setError] = useState("");
 
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<NumerologySuiteResult | null>(null);
@@ -104,7 +106,7 @@ export default function NumerologySuiteTool() {
     try {
       const order = await createPaymentOrder({
         kind: "numerology-suite", slug: "numerology-suite",
-        name: userName.trim(), ref_code: refCode,
+        name: userName.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone),
       });
       const rzp = new window.Razorpay({
         key: order.key_id,
@@ -113,7 +115,7 @@ export default function NumerologySuiteTool() {
         order_id: order.order_id,
         name: "Astrologer Shivanii",
         description: "अंक ज्योतिष संगतता सूट — Numerology Compatibility Suite",
-        prefill: { name: userName.trim() },
+        prefill: { name: userName.trim(), contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) },
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
@@ -284,9 +286,10 @@ export default function NumerologySuiteTool() {
                 <div className="tu-paywall-sub devanagari">
                   {isHi ? "प्रेम + करियर + व्यापार + विवाह — एक साथ" : "Love + Career + Business + Marriage — all in one"}
                 </div>
+                <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
-                  onClick={handlePayOnline} disabled={paying}
+                  onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
                 >
                   {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                 </button>

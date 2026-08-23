@@ -7,9 +7,10 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import LifeEventRows, { emptyEventRow, isValidRow, type EventRow } from "@/components/LifeEventRows";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import { EVENT_TYPES } from "@/lib/rectification-data";
 import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints";
-import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { BirthRequest, AscendantOptionsResult, AscendantWindow, EventScoreResult, KpRulingResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { PLANET_HI } from "@/lib/hindi-labels";
@@ -67,6 +68,7 @@ export default function TimeRectificationTool() {
   const [rows, setRows] = useState<EventRow[]>(() => Array.from({ length: 5 }, emptyEventRow));
 
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
 
   const [result, setResult] = useState<EventScoreResult | null>(null);
@@ -193,7 +195,7 @@ export default function TimeRectificationTool() {
     try {
       const order = await createPaymentOrder({
         kind: "time-rectification", slug: "time-rectification",
-        name: userName.trim(), ref_code: refCode,
+        name: userName.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone),
       });
       const rzp = new window.Razorpay({
         key: order.key_id,
@@ -202,7 +204,7 @@ export default function TimeRectificationTool() {
         order_id: order.order_id,
         name: "Astrologer Shivanii",
         description: "जन्म समय शुद्धिकरण — Time Rectification",
-        prefill: { name: userName.trim() },
+        prefill: { name: userName.trim(), contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) },
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
@@ -640,12 +642,13 @@ export default function TimeRectificationTool() {
                     ? `${validEventCount} घटनाओं के आधार पर पूर्ण दशा-विश्लेषण + KP सत्यापन`
                     : `Full dasha analysis + KP cross-check, based on ${validEventCount} events`}
                 </div>
+                <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button"
                   className="btn btn-primary"
                   style={{ width: "100%", marginBottom: "0.75rem" }}
                   onClick={handlePayOnline}
-                  disabled={paying}
+                  disabled={paying || !normalizePhone(payPhone)}
                 >
                   {paying
                     ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…")

@@ -5,9 +5,10 @@ import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import {
   createPaymentOrder, verifyPayment, fetchPalmistryResult, precheckPalmistryPhotos, SiteApiError,
-  type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict,
+  type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict, getStoredUser,
 } from "@/lib/api/site";
 
 declare global {
@@ -164,6 +165,7 @@ export default function PalmistryTool() {
   const [cameraFor, setCameraFor] = useState<"palm" | "other" | null>(null);
 
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<PalmistryResult | null>(null);
@@ -300,11 +302,11 @@ export default function PalmistryTool() {
   async function handlePayOnline() {
     setPaying(true); setPayError("");
     try {
-      const order = await createPaymentOrder({ kind: "palmistry", slug: "palmistry", name: userName.trim(), ref_code: refCode });
+      const order = await createPaymentOrder({ kind: "palmistry", slug: "palmistry", name: userName.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone) });
       const rzp = new window.Razorpay({
         key: order.key_id, amount: order.amount, currency: order.currency, order_id: order.order_id,
         name: "Astrologer Shivanii", description: "हस्त रेखा विश्लेषण — Palmistry Reading",
-        prefill: { name: userName.trim() }, theme: { color: "#6E1E2A" },
+        prefill: { name: userName.trim(), contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) }, theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           try {
@@ -580,9 +582,10 @@ export default function PalmistryTool() {
                 <div className="tu-paywall-sub">
                   {isHi ? "पूर्ण हस्त रेखा विश्लेषण — रेखाएं, पर्वत, बनावट, विशेष चिह्न" : "Full palmistry reading — lines, mounts, hand shape, special marks"}
                 </div>
+                <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
-                  onClick={handlePayOnline} disabled={paying}
+                  onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
                 >
                   {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                 </button>

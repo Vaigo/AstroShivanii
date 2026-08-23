@@ -7,9 +7,10 @@ import DownloadReportButton from "@/components/DownloadReportButton";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import {
   createPaymentOrder, verifyPayment, fetchMuhurtaPreview, fetchMuhurtaPersonal, SiteApiError,
-  type MuhurtaPurpose, type MuhurtaPreviewResult, type MuhurtaFullResult, type MuhurtaDate,
+  type MuhurtaPurpose, type MuhurtaPreviewResult, type MuhurtaFullResult, type MuhurtaDate, getStoredUser,
 } from "@/lib/api/site";
 import type { BirthRequest } from "@/lib/api/types";
 
@@ -64,6 +65,7 @@ export default function ShubhMuhurtaTool() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
   const [refCode, setRefCode] = useState(() => `MH-${Date.now().toString(36).toUpperCase()}`);
   const [orderId, setOrderId] = useState("");
@@ -200,9 +202,10 @@ export default function ShubhMuhurtaTool() {
   async function handlePayOnline() {
     setPaying(true); setPayError("");
     try {
-      const order = await createPaymentOrder({ kind: "muhurta-personal", slug: "muhurta-personal", ref_code: refCode });
+      const order = await createPaymentOrder({ kind: "muhurta-personal", slug: "muhurta-personal", ref_code: refCode, whatsapp: normalizePhone(payPhone) });
       const rzp = new window.Razorpay({
         key: order.key_id, amount: order.amount, currency: order.currency, order_id: order.order_id,
+        prefill: { contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) },
         name: "Astrologer Shivanii", description: "शुभ मुहूर्त — Personal Muhurta",
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
@@ -505,9 +508,10 @@ export default function ShubhMuhurtaTool() {
                           ? `${preview.remaining_count} और शुभ तारीखें मिली हैं — पूरी 3-महीने की सूची, हर तारीख के शुभ समय के साथ`
                           : `${preview.remaining_count} more auspicious dates found — the full 3-month list, with each day's good hours`}
                       </div>
+                      <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                       <button
                         type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
-                        onClick={handlePayOnline} disabled={paying}
+                        onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
                       >
                         {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                       </button>

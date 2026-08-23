@@ -5,7 +5,8 @@ import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
-import { createPaymentOrder, verifyPayment, fetchNameCorrectionResult, SiteApiError } from "@/lib/api/site";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
+import { createPaymentOrder, verifyPayment, fetchNameCorrectionResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { NameCorrectionResult } from "@/lib/api/types";
 
 declare global {
@@ -138,6 +139,7 @@ export default function NameCorrectionTool() {
   const [error, setError] = useState("");
 
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<NameCorrectionResult | null>(null);
@@ -214,7 +216,7 @@ export default function NameCorrectionTool() {
     try {
       const order = await createPaymentOrder({
         kind: "name-correction", slug: "name-correction",
-        name: name.trim(), ref_code: refCode,
+        name: name.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone),
       });
       const rzp = new window.Razorpay({
         key: order.key_id,
@@ -223,7 +225,7 @@ export default function NameCorrectionTool() {
         order_id: order.order_id,
         name: "Astrologer Shivanii",
         description: "नाम सुधार जांच — Name Correction",
-        prefill: { name: name.trim() },
+        prefill: { name: name.trim(), contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) },
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
@@ -435,12 +437,13 @@ export default function NameCorrectionTool() {
                     ? `"${name}" के लिए मूलांक-भाग्यांक मेल जांच + 10 तक सुधारित नाम सुझाव${category === "personal" && (fatherName.trim() || motherName.trim()) ? " + पारिवारिक तालमेल विश्लेषण" : ""}`
                     : `Mulank-Bhagyank match check + up to 10 corrected name suggestions for "${name}"${category === "personal" && (fatherName.trim() || motherName.trim()) ? " + family sync analysis" : ""}`}
                 </div>
+                <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button"
                   className="btn btn-primary"
                   style={{ width: "100%", marginBottom: "0.75rem" }}
                   onClick={handlePayOnline}
-                  disabled={paying}
+                  disabled={paying || !normalizePhone(payPhone)}
                 >
                   {paying
                     ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…")

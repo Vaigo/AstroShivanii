@@ -10,8 +10,9 @@ import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
 import ResultCTA from "@/components/ResultCTA";
 import KundliChart from "@/components/KundliChart";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import { fetchKundli } from "@/lib/api/endpoints";
-import { getSiteToken, createPaymentOrder, verifyPayment, fetchTurantUttarAI } from "@/lib/api/site";
+import { getSiteToken, createPaymentOrder, verifyPayment, fetchTurantUttarAI, getStoredUser } from "@/lib/api/site";
 
 declare global {
   interface Window {
@@ -230,6 +231,7 @@ function TurantUttarInner() {
   }, []);
 
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
 
   /** Primary path: real Razorpay payment (test keys until launch), then the
@@ -239,7 +241,7 @@ function TurantUttarInner() {
     try {
       const order = await createPaymentOrder({
         kind: "turant-uttar", slug: "turant-uttar",
-        name: userName.trim(), ref_code: refCode,
+        name: userName.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone),
       });
       const rzp = new window.Razorpay({
         key: order.key_id,
@@ -248,7 +250,7 @@ function TurantUttarInner() {
         order_id: order.order_id,
         name: "Astrologer Shivanii",
         description: "तुरंत उत्तर — Instant Answer",
-        prefill: { name: userName.trim() },
+        prefill: { name: userName.trim(), contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) },
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
@@ -585,12 +587,13 @@ function TurantUttarInner() {
                 </div>
                 {/* Primary: real Razorpay checkout (UPI/card/netbanking) —
                     the answer unlocks the moment payment verifies */}
+                <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button"
                   className="btn btn-primary"
                   style={{ width: "100%", marginBottom: "0.75rem" }}
                   onClick={handlePayOnline}
-                  disabled={paying}
+                  disabled={paying || !normalizePhone(payPhone)}
                 >
                   {paying
                     ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…")

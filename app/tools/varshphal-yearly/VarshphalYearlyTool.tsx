@@ -6,8 +6,9 @@ import BirthForm from "@/components/BirthForm";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
+import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import { fetchVarshphalYearLord } from "@/lib/api/endpoints";
-import { createPaymentOrder, verifyPayment, fetchVarshphalYearlyResult, SiteApiError } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, fetchVarshphalYearlyResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { BirthRequest, VarshphalYearLordResult, VarshphalYearlyResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { pickLang, PLANET_HI } from "@/lib/hindi-labels";
@@ -77,6 +78,7 @@ export default function VarshphalYearlyTool() {
   const [teaserLoading, setTeaserLoading] = useState(false);
 
   const [paying, setPaying] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<VarshphalYearlyResult | null>(null);
@@ -162,7 +164,7 @@ export default function VarshphalYearlyTool() {
       const order = await createPaymentOrder({
         kind: "varshphal-yearly", slug: "varshphal-yearly",
         name: userName.trim(), ref_code: refCode,
-        dob: birthDraft.dob, tob: birthDraft.tob, lat: birthDraft.lat, lon: birthDraft.lon, tz: birthDraft.tz,
+        dob: birthDraft.dob, tob: birthDraft.tob, lat: birthDraft.lat, lon: birthDraft.lon, tz: birthDraft.tz, whatsapp: normalizePhone(payPhone),
       });
       const rzp = new window.Razorpay({
         key: order.key_id,
@@ -171,7 +173,7 @@ export default function VarshphalYearlyTool() {
         order_id: order.order_id,
         name: "Astrologer Shivanii",
         description: `वार्षिक भविष्यफल ${year} — Yearly Horoscope`,
-        prefill: { name: userName.trim() },
+        prefill: { name: userName.trim(), contact: normalizePhone(payPhone), ...(getStoredUser()?.email ? { email: getStoredUser()!.email } : {}) },
         theme: { color: "#6E1E2A" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
@@ -384,9 +386,10 @@ export default function VarshphalYearlyTool() {
                 <div className="tu-paywall-sub devanagari">
                   {isHi ? `${year} का पूर्ण वर्षफल विश्लेषण` : `Full ${year} Varshphal analysis`}
                 </div>
+                <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
-                  onClick={handlePayOnline} disabled={paying}
+                  onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
                 >
                   {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                 </button>
