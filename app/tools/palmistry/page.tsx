@@ -48,7 +48,7 @@ const faqJsonLd = {
       name: "Is my photo stored?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No — your photo is processed for the analysis and then discarded. Only the resulting reading is kept in your order history.",
+        text: "Your photos are embedded only in your own downloadable PDF report — that is the one place they live. They are never stored anywhere else, never shared, and never used for anything but your reading.",
       },
     },
   ],

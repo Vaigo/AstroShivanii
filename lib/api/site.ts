@@ -297,6 +297,8 @@ export interface PalmistryResult {
   timing_cautions?: string[];
   dossier: { primary_hand: PalmistryHand; other_hand?: PalmistryHand };
   narrated_by: "haiku" | "template";
+  /** server-rendered PDF (photos embedded) — API path, null when render failed */
+  pdf_url?: string | null;
   powered_by: string;
 }
 

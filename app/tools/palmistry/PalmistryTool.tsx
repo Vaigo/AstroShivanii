@@ -683,7 +683,19 @@ export default function PalmistryTool() {
 
         {step === "result" && result && (
           <div ref={stepRef} className="print-area">
-            <DownloadReportButton filename="AstroShivanii-Palmistry-Reading" />
+            {result.pdf_url ? (
+              <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", marginBottom: "0.5rem" }}>
+                <a
+                  className="btn btn-ghost btn-sm"
+                  href={`${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}${result.pdf_url}`}
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  ⬇ {isHi ? "PDF रिपोर्ट डाउनलोड करें (तस्वीरों समेत)" : "Download PDF report (with photos)"}
+                </a>
+              </div>
+            ) : (
+              <DownloadReportButton filename="AstroShivanii-Palmistry-Reading" />
+            )}
             <PatrikaFrame className="tu-answer">
               {result.topic_insight && (
                 <div className="result-box" style={{ marginTop: 0, background: "rgba(201,154,58,0.07)" }}>
