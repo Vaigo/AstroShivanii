@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PatrikaFrame from "@/components/PatrikaFrame";
+import PasswordInput from "@/components/PasswordInput";
 import {
   adminOverview, adminUsers, adminOrders, adminBookings,
   adminReports, adminReportApprove, adminReportReject, adminPreviewReportUrl,
@@ -124,7 +125,7 @@ export default function AdminPage() {
             <form onSubmit={(e) => { e.preventDefault(); void loadAll(key); }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="adm-key">Admin key</label>
-                <input id="adm-key" className="form-input" type="password" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" />
+                <PasswordInput id="adm-key" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" />
               </div>
               {error && <p className="form-error" style={{ marginBottom: "0.75rem" }}>{error}</p>}
               <button type="submit" className="btn btn-primary" style={{ width: "100%" }} disabled={loading || !key}>

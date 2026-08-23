@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
+import PasswordInput from "@/components/PasswordInput";
 import Icon from "@/components/Icon";
 import { readingName } from "@/lib/readings";
 import {
@@ -136,7 +137,7 @@ export default function AccountPage() {
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="acc-pass">{isHi ? "पासवर्ड (कम से कम 6 अक्षर)" : "Password (min 6 characters)"}</label>
-                <input id="acc-pass" className="form-input" type="password" required minLength={6} value={password}
+                <PasswordInput id="acc-pass" required minLength={6} value={password}
                   onChange={(e) => setPassword(e.target.value)} />
               </div>
 
