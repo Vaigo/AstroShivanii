@@ -289,6 +289,8 @@ export interface PalmistryHand {
 export interface PalmistryResult {
   opening: string; topic_insight: string; narrative: string; timing_note: string;
   remedies: string[]; tips: string[];
+  /** आगे के संकेत — forward-looking classical readings, each naming its basis. */
+  future_signs?: string[];
   dossier: { primary_hand: PalmistryHand; other_hand?: PalmistryHand };
   narrated_by: "haiku" | "template";
   powered_by: string;

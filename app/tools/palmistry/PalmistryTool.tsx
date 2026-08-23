@@ -689,6 +689,22 @@ export default function PalmistryTool() {
                 )}
               </div>
 
+              {(result.future_signs ?? []).length > 0 && (
+                <div className="result-box" style={{ border: "1.5px solid var(--gold)", background: "rgba(201,154,58,0.08)" }}>
+                  <div className="result-label" style={{ marginBottom: "0.6rem" }}>
+                    ✦ {isHi ? "आगे के संकेत" : "Signs For The Road Ahead"}
+                  </div>
+                  <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
+                    {result.future_signs!.map((s, i) => <li key={i}>{boldText(s)}</li>)}
+                  </ol>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.74rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>
+                    {isHi
+                      ? "ये शास्त्रीय प्रवृत्ति-संकेत हैं — दिशा दिखाते हैं, तारीख़ या गारंटी नहीं।"
+                      : "These are classical tendency-signs — they show direction, not dates or guarantees."}
+                  </p>
+                </div>
+              )}
+
               {renderHand(result.dossier.primary_hand, isHi ? "आपकी हथेली से" : "From Your Palm")}
               {result.dossier.other_hand && renderHand(result.dossier.other_hand, isHi ? "दूसरे हाथ से" : "From Your Other Hand")}
 
