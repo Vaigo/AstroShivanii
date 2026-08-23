@@ -9,7 +9,7 @@
 
 export const LINE_MEANINGS: Record<string, { hi: string; en: string }> = {
   life: {
-    hi: "जीवन-शक्ति और दम-खम की रेखा — लंबाई जीवट दिखाती है, आयु नहीं",
+    hi: "जीवन-शक्ति और दम-खम की रेखा — लंबाई दम-खम दिखाती है, आयु नहीं",
     en: "vitality & stamina — its length shows life-force, not lifespan",
   },
   head: {
@@ -52,7 +52,7 @@ export const MOUNT_MEANINGS: Record<string, { name_hi: string; name_en: string; 
   saturn: { name_hi: "शनि पर्वत", name_en: "Saturn", hi: "गंभीरता व अनुशासन", en: "seriousness & discipline" },
   sun: { name_hi: "सूर्य पर्वत", name_en: "Sun", hi: "रचनात्मक पहचान की चाह", en: "desire for creative recognition" },
   mercury: { name_hi: "बुध पर्वत", name_en: "Mercury", hi: "व्यापार-बुद्धि व संवाद", en: "business sense & communication" },
-  venus: { name_hi: "शुक्र पर्वत", name_en: "Venus", hi: "प्रेम, गर्मजोशी, जीवन-रस", en: "love, warmth, vitality" },
+  venus: { name_hi: "शुक्र पर्वत", name_en: "Venus", hi: "प्रेम, गर्मजोशी, जीवन का उत्साह", en: "love, warmth, vitality" },
   moon: { name_hi: "चंद्र पर्वत", name_en: "Moon", hi: "कल्पना व यात्रा-प्रेम", en: "imagination & love of travel" },
   mars_upper: { name_hi: "मंगल (द्वितीय)", name_en: "Mars (upper)", hi: "मानसिक साहस", en: "mental courage" },
   mars_lower: { name_hi: "मंगल (प्रथम)", name_en: "Mars (lower)", hi: "शारीरिक साहस व पहल", en: "physical courage & initiative" },
@@ -67,7 +67,7 @@ export const PROMINENCE_LABEL: Record<string, { hi: string; en: string }> = {
 export const SHAPE_MEANINGS: Record<string, { hi: string; en: string }> = {
   nimna: { hi: "सीधा-सादा, आवेग में तेज़", en: "straightforward, impulsive energy" },
   vargakar: { hi: "व्यावहारिक, नियम-प्रिय, समय के पक्के — व्यापार/ज़मीनी कामों की समझ", en: "practical, orderly, punctual — a grounded, business-ready temperament" },
-  phaila: { hi: "सक्रिय, मेहनती, बेचैन ऊर्जा", en: "active, hardworking, restless energy" },
+  phaila: { hi: "सक्रिय, मेहनती, अथक ऊर्जा", en: "active, hardworking, restless energy" },
   darshanik: { hi: "गहरा, ठहर कर सोचने वाला मन", en: "a deep, deliberate thinker" },
   nukila: { hi: "कलात्मक स्वभाव", en: "an artistic temperament" },
   shantinishth: { hi: "शांत, कम भौतिक लालसा — दुर्लभ प्रकार", en: "calm, low material craving — a rare type" },

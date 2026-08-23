@@ -291,6 +291,8 @@ export interface PalmistryResult {
   remedies: string[]; tips: string[];
   /** आगे के संकेत — forward-looking classical readings, each naming its basis. */
   future_signs?: string[];
+  /** सावधानी-संकेत — calm accident/loss cautions from measured features (or one reassurance line). */
+  caution_signs?: string[];
   dossier: { primary_hand: PalmistryHand; other_hand?: PalmistryHand };
   narrated_by: "haiku" | "template";
   powered_by: string;

@@ -705,6 +705,22 @@ export default function PalmistryTool() {
                 </div>
               )}
 
+              {(result.caution_signs ?? []).length > 0 && (
+                <div className="result-box" style={{ border: "1px solid rgba(160,90,30,0.5)", background: "rgba(160,90,30,0.06)" }}>
+                  <div className="result-label" style={{ marginBottom: "0.6rem" }}>
+                    {isHi ? "सावधानी-संकेत (दुर्घटना/नुकसान)" : "Caution Signs (accident/loss)"}
+                  </div>
+                  <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
+                    {result.caution_signs!.map((s, i) => <li key={i}>{boldText(s)}</li>)}
+                  </ol>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.74rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>
+                    {isHi
+                      ? "ये तैयारी के संकेत हैं, घटना की घोषणा नहीं — डरने की कोई बात नहीं।"
+                      : "These are signs to prepare, never announcements of events — nothing to fear."}
+                  </p>
+                </div>
+              )}
+
               {renderHand(result.dossier.primary_hand, isHi ? "आपकी हथेली से" : "From Your Palm")}
               {result.dossier.other_hand && renderHand(result.dossier.other_hand, isHi ? "दूसरे हाथ से" : "From Your Other Hand")}
 
