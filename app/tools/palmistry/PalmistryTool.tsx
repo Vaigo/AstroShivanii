@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import PatrikaFrame from "@/components/PatrikaFrame";
+import DownloadReportButton from "@/components/DownloadReportButton";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
@@ -10,6 +11,9 @@ import {
   createPaymentOrder, verifyPayment, fetchPalmistryResult, precheckPalmistryPhotos, SiteApiError,
   type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict, getStoredUser,
 } from "@/lib/api/site";
+import {
+  LINE_MEANINGS, LINE_QUALITY_NOTES, MOUNT_MEANINGS, PROMINENCE_LABEL, SHAPE_MEANINGS, splitBold,
+} from "@/lib/palmistry-meanings";
 
 declare global {
   interface Window {
@@ -372,24 +376,43 @@ export default function PalmistryTool() {
     { n: 2, hi: `विश्लेषण पाएं (₹${PRICE})`, en: `Get analysis (₹${PRICE})` },
   ];
 
+  /** Render **bold** narration spans as real highlights. */
+  function boldText(text: string) {
+    return splitBold(text).map((seg, i) =>
+      seg.bold ? <strong key={i} className="hl">{seg.text}</strong> : <span key={i}>{seg.text}</span>);
+  }
+
   function renderHand(hand: PalmistryHand, title: string) {
     const shape = SHAPE_LABEL[hand.hand_shape];
+    const shapeMeaning = SHAPE_MEANINGS[hand.hand_shape];
     const presentLines = Object.entries(hand.lines).filter(([, v]) => v.present);
+    const notableMounts = Object.entries(hand.mounts ?? {}).filter(([, m]) => m.prominence !== "average");
     return (
       <div className="result-box" key={title}>
         <div className="result-label">{title}</div>
         <p className={isHi ? "devanagari" : undefined} style={{ margin: "0.4rem 0" }}>
           <strong style={{ color: "var(--muted)" }}>{isHi ? "हाथ की बनावट" : "Hand shape"}:</strong>{" "}
-          {shape ? (isHi ? shape.hi : shape.en) : hand.hand_shape}
+          <strong>{shape ? (isHi ? shape.hi : shape.en) : hand.hand_shape}</strong>
+          {shapeMeaning && <span style={{ color: "var(--ink-light)" }}> — {isHi ? shapeMeaning.hi : shapeMeaning.en}</span>}
         </p>
         {presentLines.length > 0 ? (
-          <ul className={isHi ? "devanagari" : undefined}>
-            {presentLines.map(([key, v]) => (
-              <li key={key}>
-                {LINE_LABEL[key] ? (isHi ? LINE_LABEL[key].hi : LINE_LABEL[key].en) : key}
-                {v.length && ` — ${v.length}`}{v.continuity && `, ${v.continuity}`}
-              </li>
-            ))}
+          <ul className={isHi ? "devanagari" : undefined} style={{ lineHeight: 1.75 }}>
+            {presentLines.map(([key, v]) => {
+              const meaning = LINE_MEANINGS[key];
+              const qual = [v.length && LINE_QUALITY_NOTES[v.length], v.continuity && LINE_QUALITY_NOTES[v.continuity]]
+                .filter(Boolean).map((q) => (isHi ? q!.hi : q!.en)).join(" · ");
+              return (
+                <li key={key} style={{ marginBottom: "0.35rem" }}>
+                  <strong>{LINE_LABEL[key] ? (isHi ? LINE_LABEL[key].hi : LINE_LABEL[key].en) : key}</strong>
+                  {qual && <span style={{ color: "var(--muted)", fontSize: "0.82rem" }}> ({qual})</span>}
+                  {meaning && (
+                    <span style={{ display: "block", fontSize: "0.82rem", color: "var(--ink-light)" }}>
+                      {isHi ? meaning.hi : meaning.en}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
@@ -397,6 +420,31 @@ export default function PalmistryTool() {
               ? "इस तस्वीर में कोई रेखा पूरे भरोसे के साथ नहीं पहचानी जा सकी — यह आम बात है।"
               : "No line could be confidently identified in this photo — that's common."}
           </p>
+        )}
+        {notableMounts.length > 0 && (
+          <div style={{ marginTop: "0.6rem" }}>
+            <p className={isHi ? "devanagari" : undefined} style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--maroon-deep)", margin: "0 0 0.25rem" }}>
+              {isHi ? "पर्वत (हथेली के उभार)" : "Mounts (the palm's raised pads)"}
+            </p>
+            <ul className={isHi ? "devanagari" : undefined} style={{ lineHeight: 1.7 }}>
+              {notableMounts.map(([key, m]) => {
+                const info = MOUNT_MEANINGS[key];
+                const prom = PROMINENCE_LABEL[m.prominence];
+                return (
+                  <li key={key} style={{ fontSize: "0.85rem" }}>
+                    <strong>{info ? (isHi ? info.name_hi : info.name_en) : key}</strong>
+                    {info && <> — {isHi ? info.hi : info.en}</>}
+                    {prom && <span style={{ color: "var(--muted)" }}> · {isHi ? prom.hi : prom.en}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+            <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.74rem", color: "var(--muted)", margin: "0.25rem 0 0" }}>
+              {isHi
+                ? "नोट: उभार 3D होता है — एक सपाट तस्वीर से यह अनुमान ही है, इसलिए इन्हें रेखाओं जितना पक्का न मानें।"
+                : "Note: a bulge is 3D — from one flat photo this is an estimate, so weigh mounts more lightly than lines."}
+            </p>
+          </div>
         )}
         {hand.marks.length > 0 && (
           <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem" }}>
@@ -617,17 +665,26 @@ export default function PalmistryTool() {
         )}
 
         {step === "result" && result && (
-          <div ref={stepRef}>
+          <div ref={stepRef} className="print-area">
+            <DownloadReportButton filename="AstroShivanii-Palmistry-Reading" />
             <PatrikaFrame className="tu-answer">
-              <div className="result-box" style={{ marginTop: 0 }}>
+              {result.topic_insight && (
+                <div className="result-box" style={{ marginTop: 0, background: "rgba(201,154,58,0.07)" }}>
+                  <div className="result-label">{isHi ? "यह पाठन कैसे पढ़ें" : "How To Read This"}</div>
+                  <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", lineHeight: 1.7, margin: "0.35rem 0 0" }}>
+                    {boldText(result.topic_insight)}
+                  </p>
+                </div>
+              )}
+              <div className="result-box" style={{ marginTop: result.topic_insight ? undefined : 0 }}>
                 <div className="result-label">{isHi ? "पूर्ण उत्तर" : "Full Reading"}</div>
                 <div className={`tu-answer-body${isHi ? " devanagari" : ""}`} style={{ marginTop: "0.5rem" }}>
-                  <p className="tu-answer-opening">{result.opening}</p>
-                  {result.narrative.split(/\n{2,}|\n/).filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
+                  <p className="tu-answer-opening">{boldText(result.opening)}</p>
+                  {result.narrative.split(/\n{2,}|\n/).filter(Boolean).map((para, i) => <p key={i}>{boldText(para)}</p>)}
                 </div>
                 {result.timing_note && (
                   <div className={`tu-timing${isHi ? " devanagari" : ""}`}>
-                    <strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "नोट: " : "Note: "}</strong>{result.timing_note}
+                    <strong style={{ color: "var(--maroon-deep)" }}>{isHi ? "नोट: " : "Note: "}</strong>{boldText(result.timing_note)}
                   </div>
                 )}
               </div>
@@ -635,11 +692,20 @@ export default function PalmistryTool() {
               {renderHand(result.dossier.primary_hand, isHi ? "आपकी हथेली से" : "From Your Palm")}
               {result.dossier.other_hand && renderHand(result.dossier.other_hand, isHi ? "दूसरे हाथ से" : "From Your Other Hand")}
 
+              {(result.remedies ?? []).length > 0 && (
+                <div className="result-box">
+                  <div className="result-label" style={{ marginBottom: "0.6rem" }}>{isHi ? "उपाय" : "Remedies"}</div>
+                  <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
+                    {result.remedies.map((r, i) => <li key={i}>{boldText(r)}</li>)}
+                  </ol>
+                </div>
+              )}
+
               {result.tips.length > 0 && (
                 <div className="result-box">
                   <div className="result-label" style={{ marginBottom: "0.6rem" }}>{isHi ? "व्यावहारिक सुझाव" : "Practical Tips"}</div>
                   <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
-                    {result.tips.map((tp, i) => <li key={i}>{tp}</li>)}
+                    {result.tips.map((tp, i) => <li key={i}>{boldText(tp)}</li>)}
                   </ol>
                 </div>
               )}
