@@ -293,6 +293,8 @@ export interface PalmistryResult {
   future_signs?: string[];
   /** सावधानी-संकेत — calm accident/loss cautions from measured features (or one reassurance line). */
   caution_signs?: string[];
+  /** दिनांकित सावधानी-अवधियां — only when optional birth details were given; method never named. */
+  timing_cautions?: string[];
   dossier: { primary_hand: PalmistryHand; other_hand?: PalmistryHand };
   narrated_by: "haiku" | "template";
   powered_by: string;
@@ -338,6 +340,8 @@ export function precheckPalmistryPhotos(args: { palmImage: File; otherHandImage?
 export function fetchPalmistryResult(args: {
   palmImage: File; otherHandImage: File;
   name?: string; gender?: "male" | "female"; ref_code?: string; razorpay_order_id: string; language: "en" | "hi";
+  /** optional — unlocks the dated caution windows in the report */
+  birth?: MuhurtaBirth | null;
 }): Promise<PalmistryResult> {
   const form = new FormData();
   form.append("palm_image", args.palmImage);
@@ -347,6 +351,13 @@ export function fetchPalmistryResult(args: {
   form.append("ref_code", args.ref_code ?? "");
   form.append("razorpay_order_id", args.razorpay_order_id);
   form.append("language", args.language);
+  if (args.birth) {
+    form.append("dob", args.birth.dob);
+    if (args.birth.tob) form.append("tob", args.birth.tob);
+    form.append("lat", String(args.birth.lat));
+    form.append("lon", String(args.birth.lon));
+    form.append("tz", String(args.birth.tz));
+  }
 
   return fetch(`${BASE}/v1/site/palmistry`, {
     method: "POST", body: form,

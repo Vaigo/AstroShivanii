@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import BirthForm from "@/components/BirthForm";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import DownloadReportButton from "@/components/DownloadReportButton";
 import Divider from "@/components/Divider";
@@ -9,7 +10,7 @@ import ResultCTA from "@/components/ResultCTA";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import {
   createPaymentOrder, verifyPayment, fetchPalmistryResult, precheckPalmistryPhotos, SiteApiError,
-  type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict, getStoredUser,
+  type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict, type MuhurtaBirth, getStoredUser,
 } from "@/lib/api/site";
 import {
   LINE_MEANINGS, LINE_QUALITY_NOTES, MOUNT_MEANINGS, PROMINENCE_LABEL, SHAPE_MEANINGS, splitBold,
@@ -161,6 +162,8 @@ export default function PalmistryTool() {
   const [palmCheck, setPalmCheck] = useState<PalmistryPrecheckVerdict | "checking" | null>(null);
   const [otherCheck, setOtherCheck] = useState<PalmistryPrecheckVerdict | "checking" | null>(null);
   const [userName, setUserName] = useState("");
+  // optional birth details — unlock the dated "कब विशेष ध्यान रखें" windows
+  const [palmBirth, setPalmBirth] = useState<MuhurtaBirth | null>(null);
   const [gender, setGender] = useState<"" | "male" | "female">("");
   const [error, setError] = useState("");
 
@@ -187,6 +190,7 @@ export default function PalmistryTool() {
         setUserName(s.userName ?? "");
         if (s.gender) setGender(s.gender);
         setOrderId(s.orderId ?? "");
+        setPalmBirth(s.palmBirth ?? null);
         if (s.refCode) setRefCode(s.refCode);
         if (s.result) {
           setResult(s.result);
@@ -204,9 +208,9 @@ export default function PalmistryTool() {
   useEffect(() => {
     if (!result && !userName && !gender && !orderId) return;
     try {
-      window.sessionStorage.setItem("palmistry-state", JSON.stringify({ userName, gender, result, refCode, orderId }));
+      window.sessionStorage.setItem("palmistry-state", JSON.stringify({ userName, gender, palmBirth, result, refCode, orderId }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [userName, gender, result, refCode, orderId]);
+  }, [userName, gender, palmBirth, result, refCode, orderId]);
 
   // Browser BACK steps back one screen instead of leaving the tool; the
   // paywall is only a valid target while the photos still exist in memory.
@@ -359,6 +363,7 @@ export default function PalmistryTool() {
         palmImage: palmFile, otherHandImage: otherHandFile,
         name: userName.trim() || undefined, gender: gender || undefined, ref_code: refCode,
         razorpay_order_id: razorpayOrderId, language: lang as "en" | "hi",
+        birth: palmBirth,
       });
       setResult(res);
       setStep("result");
@@ -608,6 +613,18 @@ export default function PalmistryTool() {
                 </span>
               </div>
 
+              <div className="form-group" style={{ border: "1px dashed rgba(201,154,58,0.55)", borderRadius: "4px", padding: "0.8rem 0.9rem", background: "rgba(201,154,58,0.05)" }}>
+                <label className="form-label" style={{ marginBottom: "0.2rem" }}>
+                  {isHi ? "जन्म-विवरण (वैकल्पिक)" : "Birth details (optional)"}
+                </label>
+                <span className={`form-hint${isHi ? " devanagari" : ""}`} style={{ display: "block", marginBottom: "0.6rem" }}>
+                  {isHi
+                    ? "अधिक सटीकता के लिए जन्म-विवरण जोड़ें — रिपोर्ट में 'कब विशेष ध्यान रखें' की तारीख़-सहित अवधियां भी मिलेंगी।"
+                    : "Add birth details for more accuracy — your report will also include dated 'when to be extra careful' periods."}
+                </span>
+                <BirthForm embedded onChange={setPalmBirth} />
+              </div>
+
               <button
                 type="button" className="btn btn-primary" style={{ width: "100%" }}
                 disabled={!palmFile || !otherHandFile || !gender || palmBlocksContinue || otherBlocksContinue}
@@ -705,7 +722,7 @@ export default function PalmistryTool() {
                 </div>
               )}
 
-              {(result.caution_signs ?? []).length > 0 && (
+              {((result.caution_signs ?? []).length > 0 || (result.timing_cautions ?? []).length > 0) && (
                 <div className="result-box" style={{ border: "1px solid rgba(160,90,30,0.5)", background: "rgba(160,90,30,0.06)" }}>
                   <div className="result-label" style={{ marginBottom: "0.6rem" }}>
                     {isHi ? "सावधानी-संकेत (दुर्घटना/नुकसान)" : "Caution Signs (accident/loss)"}
@@ -713,6 +730,16 @@ export default function PalmistryTool() {
                   <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
                     {result.caution_signs!.map((s, i) => <li key={i}>{boldText(s)}</li>)}
                   </ol>
+                  {(result.timing_cautions ?? []).length > 0 && (
+                    <div style={{ marginTop: "0.7rem" }}>
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--maroon-deep)", margin: "0 0 0.35rem" }}>
+                        {isHi ? "कब विशेष ध्यान रखें" : "When to take extra care"}
+                      </p>
+                      <ol className={`tu-tips-list${isHi ? " devanagari" : ""}`}>
+                        {result.timing_cautions!.map((s, i) => <li key={`tc${i}`}>{boldText(s)}</li>)}
+                      </ol>
+                    </div>
+                  )}
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.74rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>
                     {isHi
                       ? "ये तैयारी के संकेत हैं, घटना की घोषणा नहीं — डरने की कोई बात नहीं।"
