@@ -28,7 +28,7 @@ type Step = "intake" | "paywall" | "computing" | "result";
 
 const LINE_LABEL: Record<string, { hi: string; en: string }> = {
   life: { hi: "जीवन रेखा", en: "Life line" },
-  head: { hi: "शीर्ष रेखा", en: "Head line" },
+  head: { hi: "मस्तिष्क रेखा", en: "Head line" },
   heart: { hi: "हृदय रेखा", en: "Heart line" },
   fate: { hi: "भाग्य रेखा", en: "Fate line" },
   sun: { hi: "सूर्य रेखा", en: "Sun line" },
