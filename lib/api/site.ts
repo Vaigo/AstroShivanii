@@ -116,7 +116,7 @@ export function fetchTurantUttarAI(
 export interface CreatedOrder { order_id: string; amount: number; currency: string; key_id: string; }
 
 export function createPaymentOrder(body: {
-  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction" | "palmistry" | "muhurta-personal"; slug: string;
+  kind: "booking" | "turant-uttar" | "time-rectification" | "numerology-suite" | "varshphal-yearly" | "name-correction" | "palmistry" | "palmistry-plus" | "muhurta-personal"; slug: string;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; notes?: string; ref_code?: string;
   // birth place — required for the birth-chart/kundli-report product so the
   // auto-generated PDF uses an accurate chart; harmless to omit elsewhere.

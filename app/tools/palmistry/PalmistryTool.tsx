@@ -23,6 +23,7 @@ declare global {
 }
 
 const PRICE = 299;
+const TIMING_ADDON_PRICE = 51;
 
 type Step = "intake" | "paywall" | "computing" | "result";
 
@@ -163,6 +164,8 @@ export default function PalmistryTool() {
   const [otherCheck, setOtherCheck] = useState<PalmistryPrecheckVerdict | "checking" | null>(null);
   const [userName, setUserName] = useState("");
   // optional birth details — unlock the dated "कब विशेष ध्यान रखें" windows
+  // ₹51 paid add-on: dated "कब विशेष ध्यान रखें" windows (needs birth details)
+  const [timingAddon, setTimingAddon] = useState(false);
   const [palmBirth, setPalmBirth] = useState<MuhurtaBirth | null>(null);
   const [gender, setGender] = useState<"" | "male" | "female">("");
   const [error, setError] = useState("");
@@ -191,6 +194,7 @@ export default function PalmistryTool() {
         if (s.gender) setGender(s.gender);
         setOrderId(s.orderId ?? "");
         setPalmBirth(s.palmBirth ?? null);
+        setTimingAddon(!!s.timingAddon);
         if (s.refCode) setRefCode(s.refCode);
         if (s.result) {
           setResult(s.result);
@@ -208,9 +212,9 @@ export default function PalmistryTool() {
   useEffect(() => {
     if (!result && !userName && !gender && !orderId) return;
     try {
-      window.sessionStorage.setItem("palmistry-state", JSON.stringify({ userName, gender, palmBirth, result, refCode, orderId }));
+      window.sessionStorage.setItem("palmistry-state", JSON.stringify({ userName, gender, timingAddon, palmBirth, result, refCode, orderId }));
     } catch { /* storage full/unavailable — degrade gracefully */ }
-  }, [userName, gender, palmBirth, result, refCode, orderId]);
+  }, [userName, gender, timingAddon, palmBirth, result, refCode, orderId]);
 
   // Browser BACK steps back one screen instead of leaving the tool; the
   // paywall is only a valid target while the photos still exist in memory.
@@ -281,6 +285,12 @@ export default function PalmistryTool() {
 
   function handleContinueFromIntake() {
     if (!palmFile || !otherHandFile || !gender || palmBlocksContinue || otherBlocksContinue) return;
+    if (timingAddon && !palmBirth) {
+      setError(isHi
+        ? "₹51 वाले 'कब विशेष ध्यान रखें' के लिए जन्म-विवरण भरें — या ऊपर का checkbox हटा दें"
+        : "The ₹51 'when to take extra care' add-on needs birth details — or untick the box above");
+      return;
+    }
     setError("");
     setStep("paywall");
   }
@@ -310,7 +320,11 @@ export default function PalmistryTool() {
   async function handlePayOnline() {
     setPaying(true); setPayError("");
     try {
-      const order = await createPaymentOrder({ kind: "palmistry", slug: "palmistry", name: userName.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone) });
+      const addon = timingAddon && !!palmBirth;
+      const order = await createPaymentOrder({
+        kind: addon ? "palmistry-plus" : "palmistry", slug: addon ? "palmistry-plus" : "palmistry",
+        name: userName.trim(), ref_code: refCode, whatsapp: normalizePhone(payPhone),
+      });
       const rzp = new window.Razorpay({
         key: order.key_id, amount: order.amount, currency: order.currency, order_id: order.order_id,
         name: "Astrologer Shivanii", description: "हस्त रेखा विश्लेषण — Palmistry Reading",
@@ -363,7 +377,7 @@ export default function PalmistryTool() {
         palmImage: palmFile, otherHandImage: otherHandFile,
         name: userName.trim() || undefined, gender: gender || undefined, ref_code: refCode,
         razorpay_order_id: razorpayOrderId, language: lang as "en" | "hi",
-        birth: palmBirth,
+        birth: timingAddon ? palmBirth : null,
       });
       setResult(res);
       setStep("result");
@@ -614,15 +628,28 @@ export default function PalmistryTool() {
               </div>
 
               <div className="form-group" style={{ border: "1px dashed rgba(201,154,58,0.55)", borderRadius: "4px", padding: "0.8rem 0.9rem", background: "rgba(201,154,58,0.05)" }}>
-                <label className="form-label" style={{ marginBottom: "0.2rem" }}>
-                  {isHi ? "जन्म-विवरण (वैकल्पिक)" : "Birth details (optional)"}
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "0.55rem", cursor: "pointer" }}>
+                  <input
+                    type="checkbox" checked={timingAddon}
+                    onChange={(e) => { setTimingAddon(e.target.checked); if (!e.target.checked) setPalmBirth(null); }}
+                    style={{ marginTop: "0.25rem", width: "16px", height: "16px", accentColor: "var(--maroon)" }}
+                  />
+                  <span>
+                    <span className={`form-label${isHi ? " devanagari" : ""}`} style={{ display: "block", marginBottom: "0.15rem" }}>
+                      {isHi ? `₹${TIMING_ADDON_PRICE} में जोड़ें — कब विशेष ध्यान रखें` : `Add for ₹${TIMING_ADDON_PRICE} — When to take extra care`}
+                    </span>
+                    <span className={`form-hint${isHi ? " devanagari" : ""}`} style={{ display: "block" }}>
+                      {isHi
+                        ? "अधिक सटीकता के लिए जन्म-विवरण जोड़ें — रिपोर्ट में तारीख़-सहित सावधानी-अवधियां भी मिलेंगी (किन दिनों/दौरों में वाहन-यात्रा आदि में विशेष सतर्कता)।"
+                        : "Add birth details for more accuracy — your report also gets dated caution periods (when to be extra careful with driving, journeys and risks)."}
+                    </span>
+                  </span>
                 </label>
-                <span className={`form-hint${isHi ? " devanagari" : ""}`} style={{ display: "block", marginBottom: "0.6rem" }}>
-                  {isHi
-                    ? "अधिक सटीकता के लिए जन्म-विवरण जोड़ें — रिपोर्ट में 'कब विशेष ध्यान रखें' की तारीख़-सहित अवधियां भी मिलेंगी।"
-                    : "Add birth details for more accuracy — your report will also include dated 'when to be extra careful' periods."}
-                </span>
-                <BirthForm embedded onChange={setPalmBirth} />
+                {timingAddon && (
+                  <div style={{ marginTop: "0.7rem" }}>
+                    <BirthForm embedded onChange={setPalmBirth} />
+                  </div>
+                )}
               </div>
 
               <button
@@ -643,16 +670,21 @@ export default function PalmistryTool() {
           <div ref={stepRef}>
             <PatrikaFrame>
               <div className="tu-paywall">
-                <div className="tu-paywall-price">₹{PRICE}</div>
+                <div className="tu-paywall-price">₹{PRICE + (timingAddon && palmBirth ? TIMING_ADDON_PRICE : 0)}</div>
                 <div className="tu-paywall-sub">
                   {isHi ? "पूर्ण हस्त रेखा विश्लेषण — रेखाएं, पर्वत, बनावट, विशेष चिह्न" : "Full palmistry reading — lines, mounts, hand shape, special marks"}
+                  {timingAddon && palmBirth && (
+                    <span style={{ display: "block", marginTop: "0.3rem" }}>
+                      {isHi ? `₹${PRICE} विश्लेषण + ₹${TIMING_ADDON_PRICE} कब विशेष ध्यान रखें` : `₹${PRICE} reading + ₹${TIMING_ADDON_PRICE} extra-care periods`}
+                    </span>
+                  )}
                 </div>
                 <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
                 <button
                   type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
                   onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
                 >
-                  {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
+                  {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE + (timingAddon && palmBirth ? TIMING_ADDON_PRICE : 0)} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE + (timingAddon && palmBirth ? TIMING_ADDON_PRICE : 0)} — UPI / Card`)}
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
                 {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{resultError}</p>}
