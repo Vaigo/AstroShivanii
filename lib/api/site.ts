@@ -224,10 +224,10 @@ export interface MuhurtaDate {
   combined_score?: number;
 }
 export interface MuhurtaPreviewResult {
+  // Counts-only teaser (2026-08-24): NOTHING computed is free — no dates, no
+  // natal profile, no cautions/windows. tob_given is an input-quality flag.
   purpose: MuhurtaPurpose; from_date: string; to_date: string;
-  profile: MuhurtaProfile; profile2?: MuhurtaProfile; total_found: number;
-  relaxation_applied: MuhurtaCaution[];
-  best_date: MuhurtaDate | null; remaining_count: number;
+  total_found: number; excellent_count: number; tob_given: boolean;
 }
 export interface MuhurtaFullResult {
   purpose: MuhurtaPurpose; from_date: string; to_date: string;
@@ -248,8 +248,8 @@ interface MuhurtaBirthBody {
   birth2?: MuhurtaBirth;
 }
 
-/** Free teaser: natal snapshot + the single best date + how many more sit
- *  behind the ₹51 paywall. Deterministic compute — genuinely free. */
+/** Free teaser: counts only — how many dates cleared the screening. Every
+ *  computed detail (dates, profile, cautions, windows) is behind the ₹51. */
 export function fetchMuhurtaPreview(body: MuhurtaBirthBody): Promise<MuhurtaPreviewResult> {
   return siteFetch<MuhurtaPreviewResult>("/v1/site/muhurta-personal/preview", { body });
 }

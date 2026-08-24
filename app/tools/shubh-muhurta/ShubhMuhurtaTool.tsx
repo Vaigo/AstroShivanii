@@ -266,7 +266,7 @@ export default function ShubhMuhurtaTool() {
 
   const purposeLabel = purpose ? PURPOSES.find((p) => p.key === purpose) : null;
 
-  function renderRelaxation(relaxation: MuhurtaPreviewResult["relaxation_applied"]) {
+  function renderRelaxation(relaxation: MuhurtaFullResult["relaxation_applied"]) {
     if (!relaxation || relaxation.length === 0) return null;
     return (
       <div className="result-box" style={{ border: "1px solid rgba(201,120,58,0.55)", background: "rgba(201,120,58,0.07)" }}>
@@ -282,7 +282,7 @@ export default function ShubhMuhurtaTool() {
     );
   }
 
-  function renderProfile(profile: MuhurtaPreviewResult["profile"], heading?: string) {
+  function renderProfile(profile: MuhurtaFullResult["profile"], heading?: string) {
     return (
       <div className="result-box" key={heading ?? "p1"}>
         <div className="result-label">{heading ?? (isHi ? "आपकी कुंडली में क्या देखा गया" : "What We Checked In Your Chart")}</div>
@@ -481,10 +481,9 @@ export default function ShubhMuhurtaTool() {
                 </p>
               </div>
 
-              {renderProfile(preview.profile, preview.profile2 ? (isHi ? "वर की कुंडली में क्या देखा गया" : "Checked In The Groom's Chart") : undefined)}
-              {preview.profile2 && renderProfile(preview.profile2, isHi ? "वधू की कुंडली में क्या देखा गया" : "Checked In The Bride's Chart")}
-              {renderRelaxation(preview.relaxation_applied)}
-
+              {/* Counts-only teaser (2026-08-24): nothing computed is shown
+                  free — no dates, no chart profile, no cautions/windows.
+                  All of it unlocks together behind the ₹51. */}
               {preview.total_found === 0 ? (
                 <div className="result-box">
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.87rem", color: "var(--ink-light)", lineHeight: 1.7 }}>
@@ -495,30 +494,43 @@ export default function ShubhMuhurtaTool() {
                 </div>
               ) : (
                 <>
-                  <div className="result-label" style={{ margin: "1rem 0 0.25rem" }}>
-                    {isHi ? "आपकी सबसे शुभ तारीख (निःशुल्क झलक)" : "Your Best Date (free preview)"}
-                  </div>
-                  {preview.best_date && renderDate(preview.best_date, true)}
-
-                  {preview.remaining_count > 0 && (
-                    <div className="tu-paywall" style={{ marginTop: "1.25rem" }}>
-                      <div className="tu-paywall-price">₹{PRICE}</div>
-                      <div className={`tu-paywall-sub${isHi ? " devanagari" : ""}`}>
+                  <div className="result-box" style={{ border: "1.5px solid var(--gold)", background: "rgba(201,154,58,0.07)", textAlign: "center" }}>
+                    <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "1rem", fontWeight: 700, color: "var(--maroon-deep)", margin: 0 }}>
+                      ✓ {isHi
+                        ? `जांच पूरी — आपकी कुंडली${preview.purpose === "marriage" ? " (वर-वधू दोनों)" : ""} और पंचांग से ${preview.total_found} शुभ ${preview.total_found === 1 ? "तारीख मिली" : "तारीखें मिलीं"}`
+                        : `Screening complete — ${preview.total_found} auspicious ${preview.total_found === 1 ? "date" : "dates"} found from your chart${preview.purpose === "marriage" ? " (both charts)" : ""} and the panchang`}
+                    </p>
+                    {preview.excellent_count > 0 && (
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.85rem", color: "var(--ink-light)", margin: "0.4rem 0 0" }}>
+                        {isHi ? `इनमें ${preview.excellent_count} उत्तम श्रेणी की ${preview.excellent_count === 1 ? "है" : "हैं"}` : `${preview.excellent_count} of them ${preview.excellent_count === 1 ? "is" : "are"} Excellent grade`}
+                      </p>
+                    )}
+                    {!preview.tob_given && (
+                      <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>
                         {isHi
-                          ? `${preview.remaining_count} और शुभ तारीखें मिली हैं — पूरी 3-महीने की सूची, हर तारीख के शुभ समय के साथ`
-                          : `${preview.remaining_count} more auspicious dates found — the full 3-month list, with each day's good hours`}
-                      </div>
-                      <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
-                      <button
-                        type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
-                        onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
-                      >
-                        {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
-                      </button>
-                      {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
-                      <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
+                          ? "⚠ जन्म समय नहीं दिया गया — कुंडली-जांच सूर्योदय-कुंडली से हुई है (तारीखों की पंचांग-जांच पर असर नहीं)।"
+                          : "⚠ No birth time given — the chart checks used a sunrise chart (the panchang checks on dates are unaffected)."}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="tu-paywall" style={{ marginTop: "1.25rem" }}>
+                    <div className="tu-paywall-price">₹{PRICE}</div>
+                    <div className={`tu-paywall-sub${isHi ? " devanagari" : ""}`}>
+                      {isHi
+                        ? "पूरी तारीख-सूची, हर तारीख के शुभ समय के साथ + आपकी कुंडली की पूरी जांच-रिपोर्ट — कारक ग्रह की स्थिति, सावधानी-संकेत और कौन-सी अवधियां क्यों हटाई गईं"
+                        : "The full date list with each day's good hours + your complete chart screening report — karaka condition, caution signals, and which periods were excluded and why"}
                     </div>
-                  )}
+                    <PayPhoneField isHi={isHi} value={payPhone} onChange={setPayPhone} />
+                    <button
+                      type="button" className="btn btn-primary" style={{ width: "100%", marginBottom: "0.75rem" }}
+                      onClick={handlePayOnline} disabled={paying || !normalizePhone(payPhone)}
+                    >
+                      {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
+                    </button>
+                    {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
+                    <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
+                  </div>
                 </>
               )}
             </PatrikaFrame>
