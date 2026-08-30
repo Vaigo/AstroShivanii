@@ -18,6 +18,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Rebuild on the 1st and 15th: year-dated SEO pages (muhurta dates, festival
+  # lists) are computed at build time and must not go stale between pushes.
+  schedule:
+    - cron: "30 3 1,15 * *"
 
 permissions:
   contents: read
@@ -72,3 +76,16 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Tell Bing/Yandex/etc. (IndexNow) about every URL after each deploy — new
+  # domains get crawled in days instead of weeks. Non-fatal for the deploy
+  # itself (it already succeeded), but visible if the ping starts failing.
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/indexnow-ping.mjs
