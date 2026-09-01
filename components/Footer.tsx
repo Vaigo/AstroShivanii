@@ -93,6 +93,21 @@ export default function Footer() {
           </ul>
         </nav>
 
+        <nav className="footer-links" aria-label="Daily panchang">
+          {/* Site-wide crawl paths into the daily/seasonal SEO page families —
+              these routes live outside /tools and would otherwise be reachable
+              only via sitemap. */}
+          <h4 className="devanagari">{isHi ? "आज का समय" : "रोज़ देखें"}</h4>
+          <ul>
+            <li><Link href="/rahu-kaal" className="devanagari">आज का राहु काल</Link></li>
+            <li><Link href="/choghadiya" className="devanagari">आज का चौघड़िया</Link></li>
+            <li><Link href="/rashifal" className="devanagari">आज का राशिफल</Link></li>
+            <li><Link href="/muhurta" className="devanagari">शुभ मुहूर्त 2026</Link></li>
+            <li><Link href="/festivals/diwali-2026" className="devanagari">दिवाली 2026 कब है</Link></li>
+            <li><Link href="/festivals-2026" className="devanagari">व्रत-त्यौहार 2026</Link></li>
+          </ul>
+        </nav>
+
         <nav className="footer-links" aria-label="Guides">
           <h4 className={isHi ? "devanagari" : undefined}>{isHi ? "सीखें" : "Learn"}</h4>
           <ul>
@@ -101,7 +116,6 @@ export default function Footer() {
             <li><Link href="/guides/sade-sati-meaning">Sade Sati Meaning</Link></li>
             <li><Link href="/nakshatra">27 Nakshatras</Link></li>
             <li><Link href="/rashi">12 Rashis</Link></li>
-            <li><Link href="/festivals-2026">व्रत-त्यौहार 2026</Link></li>
             <li><Link href="/guides">All Guides →</Link></li>
           </ul>
         </nav>
