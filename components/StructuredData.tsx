@@ -28,7 +28,8 @@ export default function StructuredData() {
     "@type": "Person",
     "@id": `${SITE_URL}/#shivanii`,
     name: "Shivanii",
-    alternateName: ["ज्योतिषाचार्य शिवानी", "Astro Shivanii", "Astrologer Shivanii"],
+    // includes the single-i spelling people actually type into search
+    alternateName: ["ज्योतिषाचार्य शिवानी", "Astro Shivanii", "Astrologer Shivanii", "Astrologer Shivani", "Shivani"],
     jobTitle: "Vedic Astrologer",
     url: `${SITE_URL}/about/`,
     knowsLanguage: ["Hindi", "English"],

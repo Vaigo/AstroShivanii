@@ -5,6 +5,19 @@ export interface FaqItem {
 
 export const FAQS: FaqItem[] = [
   {
+    // Brand FAQ: carries the single-i spelling ("Shivani", "Astro Shivani")
+    // people actually type into Google — the site otherwise only used the
+    // double-i brand spelling, so name searches had nothing to match.
+    q: {
+      en: "Is it Astrologer Shivani or Shivanii — which spelling is correct?",
+      hi: "Astrologer Shivani या Shivanii — सही spelling क्या है?",
+    },
+    a: {
+      en: "Both reach the same person. Astrologer Shivanii (double i) is the official spelling used on this site, but many people search for 'astrologer Shivani' or 'astro Shivani' with a single i — that's fine, you're in the right place: astroshivanii.com is her only official website.",
+      hi: "दोनों एक ही व्यक्ति तक पहुंचती हैं। आधिकारिक spelling 'Shivanii' (double i) है, पर बहुत से लोग 'astrologer Shivani' या 'astro Shivani' (single i) खोजते हैं — कोई बात नहीं, आप सही जगह हैं: astroshivanii.com ही उनकी एकमात्र आधिकारिक website है।",
+    },
+  },
+  {
     q: {
       en: "Does Shivanii really read every chart personally?",
       hi: "क्या शिवानी सच में हर कुंडली स्वयं पढ़ती हैं?",

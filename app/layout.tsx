@@ -49,6 +49,8 @@ export const metadata: Metadata = {
   keywords: [
     "AstroShivanii",
     "Astro Shivanii",
+    "astrologer shivani",
+    "shivani astrologer",
     "vedic astrology",
     "kundli",
     "birth chart reading",
