@@ -5,6 +5,7 @@ import { NAKSHATRAS } from "@/lib/nakshatras";
 import { RASHIS } from "@/lib/rashis";
 import { SEO_CITIES } from "@/lib/seo-cities";
 import { MUHURTA_PAGES } from "@/lib/muhurta-pages";
+import { FESTIVAL_PAGES } from "@/lib/festival-pages";
 
 /**
  * Programmatic sitemap — replaces the old hand-edited public/sitemap.xml,
@@ -34,6 +35,8 @@ const STATIC_ROUTES = [
   "/festivals-2026",
   "/rahu-kaal",
   "/muhurta",
+  "/choghadiya",
+  "/rashifal",
 ];
 
 const TOOLS = [
@@ -79,6 +82,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...NAKSHATRAS.map((n) => url(`/nakshatra/${n.slug}`, 0.6, "monthly")),
     ...RASHIS.map((r) => url(`/rashi/${r.slug}`, 0.6, "monthly")),
     ...SEO_CITIES.map((c) => url(`/rahu-kaal/${c.slug}`, 0.8, "daily")),
+    ...SEO_CITIES.map((c) => url(`/choghadiya/${c.slug}`, 0.8, "daily")),
+    ...RASHIS.map((r) => url(`/rashifal/${r.slug}`, 0.8, "daily")),
     ...MUHURTA_PAGES.map((p) => url(`/muhurta/${p.slug}`, 0.9, "weekly")),
+    ...FESTIVAL_PAGES.map((f) => url(`/festivals/${f.slug}`, 0.9, "weekly")),
   ];
 }

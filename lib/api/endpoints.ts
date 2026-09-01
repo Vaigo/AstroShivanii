@@ -12,6 +12,7 @@ import type {
   PanchangFullResult,
   RahuKaalResult,
   MuhurtaResult,
+  ChoghadiyaDayResult,
   MangalDoshaResult,
   FestivalsResult,
   MahadashaListResult,
@@ -101,6 +102,13 @@ export function fetchMuhurta(
   date: string, lat: number, lon: number, tz: number
 ): Promise<MuhurtaResult> {
   return post("/v1/panchang/muhurta", panchangBody(date, lat, lon, tz));
+}
+
+/** Full choghadiya day report: 16 periods (8 day + 8 night) + Abhijit. */
+export function fetchChoghadiyaDay(
+  date: string, lat: number, lon: number, tz: number
+): Promise<ChoghadiyaDayResult> {
+  return post("/v1/muhurta/full", { date, lat, lon, tz });
 }
 
 export function fetchMangalDosha(req: MilanRequest): Promise<MangalDoshaResult> {

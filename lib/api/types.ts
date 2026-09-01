@@ -279,6 +279,27 @@ export interface MuhurtaResult {
   muhurta: MuhurtaSlot[];
 }
 
+/* ── Choghadiya day report (/v1/muhurta/full) ───────────────────────────── */
+
+export interface ChoghadiyaPeriod {
+  period: number;
+  type: "day" | "night";
+  name: string;                          // Amrit / Shubh / Labh / Char / Kaal / Rog / Udveg
+  quality: "Excellent" | "Good" | "Neutral" | "Bad";
+  lord: string;
+  start: string;                         // "HH:MM" local
+  end: string;
+}
+
+export interface ChoghadiyaDayResult {
+  date: string;
+  vara: string;
+  sunrise: string;
+  sunset: string;
+  choghadiya: ChoghadiyaPeriod[];        // 16 periods: 8 day + 8 night
+  abhijit: { start: string; end: string; quality: string };
+}
+
 export interface FestivalItem {
   date: string;          // YYYY-MM-DD
   name: string;          // "Raksha Bandhan" / "Shukla Ekadashi (एकादशी)"
