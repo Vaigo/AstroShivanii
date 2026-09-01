@@ -45,8 +45,10 @@ export const metadata: Metadata = {
     template: "%s | Shivanii",
   },
   description:
-    "Personal Vedic astrology readings by Astrologer Shivanii. Birth chart, marriage matching, Prashna, annual forecast and more. Hindi & English. Flat pricing, no per-minute meters.",
+    "AstroShivanii — personal Vedic astrology readings by Astrologer Shivanii. Birth chart, marriage matching, Prashna, annual forecast and more. Hindi & English. Flat pricing, no per-minute meters.",
   keywords: [
+    "AstroShivanii",
+    "Astro Shivanii",
     "vedic astrology",
     "kundli",
     "birth chart reading",
@@ -61,7 +63,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     alternateLocale: "hi_IN",
-    siteName: "Astrologer Shivanii",
+    siteName: "AstroShivanii",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Astrologer Shivanii — Personal Vedic Astrology Readings" }],
   },
   twitter: { card: "summary_large_image", images: ["/og-image.png"] },

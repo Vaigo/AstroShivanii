@@ -12,7 +12,12 @@ export default function StructuredData() {
     "@type": "WebSite",
     "@id": `${SITE_URL}/#website`,
     url: SITE_URL,
-    name: "Astrologer Shivanii",
+    // "AstroShivanii" (matching the domain) is the primary site name Google
+    // shows as the SERP site-name label; the double-i spelling is what
+    // distinguishes us from astroshivani.com. Without this exact token the
+    // brand query "astro shivanii" had zero text evidence pointing here.
+    name: "AstroShivanii",
+    alternateName: ["Astro Shivanii", "Astrologer Shivanii", "एस्ट्रो शिवानी", "ज्योतिषाचार्य शिवानी"],
     description:
       "Personal Vedic astrology readings in Hindi & English — birth chart, marriage matching, Prashna, annual forecast and more.",
     inLanguage: ["en-IN", "hi-IN"],
@@ -23,7 +28,7 @@ export default function StructuredData() {
     "@type": "Person",
     "@id": `${SITE_URL}/#shivanii`,
     name: "Shivanii",
-    alternateName: "ज्योतिषाचार्य शिवानी",
+    alternateName: ["ज्योतिषाचार्य शिवानी", "Astro Shivanii", "Astrologer Shivanii"],
     jobTitle: "Vedic Astrologer",
     url: `${SITE_URL}/about/`,
     knowsLanguage: ["Hindi", "English"],
@@ -44,7 +49,7 @@ export default function StructuredData() {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     "@id": `${SITE_URL}/#service`,
-    name: "Astrologer Shivanii — Vedic Astrology Readings",
+    name: "AstroShivanii — Vedic Astrology Readings by Astrologer Shivanii",
     url: SITE_URL,
     description:
       "Personal Vedic astrology consultations by Astrologer Shivanii. Every chart read personally — no templates. Hindi & English.",
