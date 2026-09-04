@@ -191,7 +191,7 @@ export default function ToolsPage() {
               <Link href={`/tools/${tool.slug}`} style={{ textDecoration: "none", display: "block", height: "100%" }}>
                 <div className="service-card" style={{ cursor: "pointer", height: "100%", display: "flex", flexDirection: "column" }}>
                   <div className="service-card-icon tool-card-icon">
-                    <ToolIcon name={tool.slug} size={36} />
+                    <ToolIcon name={tool.slug} size={tool.slug === "kaal-sarp-dosha" ? 60 : 36} />
                   </div>
                   <div className="service-card-title">{tool.name}</div>
                   <div className="service-card-title-hi devanagari">{tool.nameHi}</div>
