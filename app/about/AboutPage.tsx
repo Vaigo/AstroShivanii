@@ -33,6 +33,9 @@ export default function AboutPage() {
             />
             <div style={{ flex: 1, minWidth: "220px" }}>
               <h2 style={{ marginBottom: "0.3rem", fontSize: "1.6rem" }}>Shivanii</h2>
+            <p className="devanagari" style={{ margin: "0 0 0.6rem", fontSize: "0.85rem", color: "var(--muted)" }}>
+              Astrologer Shivanii · ज्योतिषाचार्य शिवानी · (also written &ldquo;Astrologer Shivani&rdquo;)
+            </p>
               <p className="devanagari" style={{ color: "var(--muted)", marginBottom: "1rem" }}>ज्योतिषाचार्य शिवानी</p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>

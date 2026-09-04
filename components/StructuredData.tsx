@@ -31,6 +31,8 @@ export default function StructuredData() {
     // includes the single-i spelling people actually type into search
     alternateName: ["ज्योतिषाचार्य शिवानी", "Astro Shivanii", "Astrologer Shivanii", "Astrologer Shivani", "Shivani"],
     jobTitle: "Vedic Astrologer",
+    // same-entity pages elsewhere on the web (social profiles get added here as they are created)
+    sameAs: ["https://grahaapi.com/about"],
     url: `${SITE_URL}/about/`,
     knowsLanguage: ["Hindi", "English"],
     knowsAbout: [
