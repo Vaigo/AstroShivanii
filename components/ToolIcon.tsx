@@ -130,39 +130,38 @@ const ART: Record<ToolIconName, ReactNode> = {
       <circle className="ti-pulse" style={{ animationDelay: "2s" }} cx="16.5" cy="20.5" r="5" fill="#E0A93A" stroke="none" />
     </>
   ),
-  // A KING COBRA — कुंडली मारे बैठा, फन उठाए। Rendered as a SOLID silhouette
-  // (like every recognisable cobra pictogram): four line-art attempts (side
-  // view, 3/4 view, outlined frontal hood) all collapsed into a worm, a bird,
-  // a heart or a face at 32px. The filled hood + small head + light-colored
-  // eyes/tongue/crossbands (धारियां) is the one that reads instantly at 30px.
-  // Light details use --gold-pale, the same tint Lal Kitab's icon lines use.
+  // KAAL SARP — the serpent wrapped AROUND the circle, hooded head chasing its
+  // own tapering tail (Rahu = head, Ketu = tail, everything caught between:
+  // literally the dosha's definition), slowly rotating. Vaibhav's ask after
+  // rejecting five upright-cobra attempts (2026-09-04): "can the snake rotate
+  // around the circle". Body = one arc at r=11.6 with a 3-step tail taper,
+  // faint crossbands (धारियां), solid hood + head. The invisible r=13.6 circle
+  // keeps the fill-box rotation origin at the true centre despite the gap.
   "kaal-sarp-dosha": (
-    <>
-      {/* कुंडली — two thick coil loops + tail tip escaping right */}
-      <ellipse cx="16" cy="25.4" rx="7" ry="1.9" strokeWidth="2.6" />
-      <path d="M9.2 27.4 C 11 29.4, 21 29.4, 22.8 27.4" strokeWidth="2.6" />
-      <path d="M22.8 27.4 C 24.7 27.9, 26.6 27.2, 27.2 25.6" strokeWidth="2" />
-      {/* body rising from the coils into the hood */}
-      <path d="M16 21 C 16.7 22.1, 15.3 22.7, 15.1 23.6" strokeWidth="2.6" />
-      <g className="ti-sway">
-        {/* raised hood — solid */}
-        <path
-          d="M16 21.2 C 12.6 20.3, 7.2 17.4, 6.6 12.6 C 6.1 8.6, 10.6 6.6, 16 6.6 C 21.4 6.6, 25.9 8.6, 25.4 12.6 C 24.8 17.4, 19.4 20.3, 16 21.2 Z"
-          fill="currentColor" stroke="none"
-        />
-        {/* head */}
-        <ellipse cx="16" cy="5.2" rx="3.7" ry="3" fill="currentColor" stroke="none" />
-        <circle cx="14.6" cy="4.7" r="0.6" fill="#f5e0a0" stroke="none" />
-        <circle cx="17.4" cy="4.7" r="0.6" fill="#f5e0a0" stroke="none" />
-        {/* forked tongue — quick flicks */}
+    <g className="ti-spin" style={{ animationDuration: "14s" }}>
+      <circle cx="16" cy="16" r="13.6" fill="none" stroke="none" />
+      {/* tail — tapering in three steps */}
+      <path d="M23.14 6.86 A11.6 11.6 0 0 1 25.38 9.18" strokeWidth="1.1" />
+      <path d="M25.38 9.18 A11.6 11.6 0 0 1 27.03 12.42" strokeWidth="2" />
+      {/* body — round the circle to the neck */}
+      <path d="M27.03 12.42 A11.6 11.6 0 1 1 8.24 7.38" strokeWidth="2.9" />
+      {/* धारियां */}
+      <path d="M26.2 19.71 L27.61 20.22" stroke="#f5e0a0" strokeWidth="0.7" />
+      <path d="M21.09 25.58 L21.8 26.9" stroke="#f5e0a0" strokeWidth="0.7" />
+      <path d="M13.38 26.53 L13.01 27.98" stroke="#f5e0a0" strokeWidth="0.7" />
+      <path d="M7 22.07 L5.76 22.91" stroke="#f5e0a0" strokeWidth="0.7" />
+      <path d="M5.26 14.49 L3.77 14.28" stroke="#f5e0a0" strokeWidth="0.7" />
+      {/* hood + head, pointing along the direction of travel toward the tail */}
+      <g transform="rotate(-42 8.24 7.38)">
+        <ellipse cx="10.84" cy="7.38" rx="3.6" ry="2.7" fill="currentColor" stroke="none" />
+        <ellipse cx="14.44" cy="7.38" rx="2.3" ry="1.8" fill="currentColor" stroke="none" />
+        <circle cx="15.04" cy="6.73" r="0.5" fill="#f5e0a0" stroke="none" />
+        <path d="M9.84 5.68 L9.84 9.08" stroke="#f5e0a0" strokeWidth="0.8" />
         <g className="ti-flick">
-          <path d="M16 8.3 L16 10.7 M16 10.7 L15.1 11.7 M16 10.7 L16.9 11.7" stroke="#f5e0a0" strokeWidth="0.9" />
+          <path d="M16.74 7.38 L18.54 7.38 M18.54 7.38 L19.34 6.63 M18.54 7.38 L19.34 8.13" stroke="#f5e0a0" strokeWidth="0.85" />
         </g>
-        {/* धारियां — the king cobra's crossbands over the hood */}
-        <path d="M8.8 13.8 C 12 15.3, 20 15.3, 23.2 13.8" stroke="#f5e0a0" strokeWidth="1" />
-        <path d="M10.4 17 C 13 18.4, 19 18.4, 21.6 17" stroke="#f5e0a0" strokeWidth="1" />
       </g>
-    </>
+    </g>
   ),
   // A capital letter with a sparkle marking it as the auspicious one
   "favorable-alphabet": (
