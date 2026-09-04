@@ -130,35 +130,37 @@ const ART: Record<ToolIconName, ReactNode> = {
       <circle className="ti-pulse" style={{ animationDelay: "2s" }} cx="16.5" cy="20.5" r="5" fill="#E0A93A" stroke="none" />
     </>
   ),
-  // A KING COBRA in the classic Nag pose — कुंडली मारे बैठा (sitting on its
-  // own stacked coils, tail tip curling out), hood raised in SIDE VIEW (the
-  // one silhouette that reliably reads as a snake at 32px — every front-view
-  // attempt collapsed into a face, an egg, or a spinning top), with the
-  // king cobra's धारियां (crossbands) over the raised body.
+  // A KING COBRA — कुंडली मारे बैठा, फन उठाए। Rendered as a SOLID silhouette
+  // (like every recognisable cobra pictogram): four line-art attempts (side
+  // view, 3/4 view, outlined frontal hood) all collapsed into a worm, a bird,
+  // a heart or a face at 32px. The filled hood + small head + light-colored
+  // eyes/tongue/crossbands (धारियां) is the one that reads instantly at 30px.
+  // Light details use --gold-pale, the same tint Lal Kitab's icon lines use.
   "kaal-sarp-dosha": (
     <>
-      {/* कुंडली — two stacked coil loops + tail tip escaping right */}
-      <ellipse cx="16" cy="27.2" rx="8.4" ry="2.2" />
-      <path d="M8.2 25.6c1.6-1.5 4.4-2.1 7.4-2.1 3.2 0 6.2.7 7.7 2.3" />
-      <path d="M24.6 27.2c1.8.5 3.2 0 3.8-1.3" strokeWidth="1.3" />
-      {/* body sinking from the raised hood into the top coil loop */}
-      <path d="M14.7 21.3c-.15 1.3-.2 2.4-.15 3.4M19.8 21.5c.2 1.2.3 2.2.25 3.1" />
+      {/* कुंडली — two thick coil loops + tail tip escaping right */}
+      <ellipse cx="16" cy="25.4" rx="7" ry="1.9" strokeWidth="2.6" />
+      <path d="M9.2 27.4 C 11 29.4, 21 29.4, 22.8 27.4" strokeWidth="2.6" />
+      <path d="M22.8 27.4 C 24.7 27.9, 26.6 27.2, 27.2 25.6" strokeWidth="2" />
+      {/* body rising from the coils into the hood */}
+      <path d="M16 21 C 16.7 22.1, 15.3 22.7, 15.1 23.6" strokeWidth="2.6" />
       <g className="ti-sway">
-        {/* raised body in SIDE VIEW (the silhouette that actually reads as
-            a snake at 32px — front views kept collapsing into a face/top):
-            convex hood back sweeping up and over into the forward-jutting
-            head, concave throat line below the jaw */}
-        <path d="M19.8 21.5 C 25.6 18.1, 25.8 7.9, 20.6 4.1 C 17.8 2.1, 13.4 2.5, 11.8 4.9 C 10.9 6.3, 11.3 7.8, 12.6 8.4" />
-        <path d="M12.6 8.4 C 15.2 10.9, 15.4 16.1, 14.7 21.3" />
-        {/* धारियां — the king cobra's crossbands over the raised body */}
-        <path d="M14.2 9.9 C 17.5 11, 21.5 10.6, 23.9 8.9" strokeWidth="1.2" />
-        <path d="M15 13.4 C 18 14.5, 22 14.2, 24.9 12.5" strokeWidth="1.2" />
-        <path d="M15.2 17 C 18 18, 21.5 17.8, 24.2 16.2" strokeWidth="1.2" />
-        <circle cx="14.6" cy="5.5" r="0.65" fill="currentColor" stroke="none" />
-        {/* tongue darting out ahead — quick flicks */}
+        {/* raised hood — solid */}
+        <path
+          d="M16 21.2 C 12.6 20.3, 7.2 17.4, 6.6 12.6 C 6.1 8.6, 10.6 6.6, 16 6.6 C 21.4 6.6, 25.9 8.6, 25.4 12.6 C 24.8 17.4, 19.4 20.3, 16 21.2 Z"
+          fill="currentColor" stroke="none"
+        />
+        {/* head */}
+        <ellipse cx="16" cy="5.2" rx="3.7" ry="3" fill="currentColor" stroke="none" />
+        <circle cx="14.6" cy="4.7" r="0.6" fill="#f5e0a0" stroke="none" />
+        <circle cx="17.4" cy="4.7" r="0.6" fill="#f5e0a0" stroke="none" />
+        {/* forked tongue — quick flicks */}
         <g className="ti-flick">
-          <path d="M11.2 6.8l-2.9.6M8.3 7.4l-1.5-.9M8.3 7.4l-1.2 1.2" strokeWidth="1.2" />
+          <path d="M16 8.3 L16 10.7 M16 10.7 L15.1 11.7 M16 10.7 L16.9 11.7" stroke="#f5e0a0" strokeWidth="0.9" />
         </g>
+        {/* धारियां — the king cobra's crossbands over the hood */}
+        <path d="M8.8 13.8 C 12 15.3, 20 15.3, 23.2 13.8" stroke="#f5e0a0" strokeWidth="1" />
+        <path d="M10.4 17 C 13 18.4, 19 18.4, 21.6 17" stroke="#f5e0a0" strokeWidth="1" />
       </g>
     </>
   ),
