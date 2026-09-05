@@ -139,7 +139,7 @@ const ART: Record<ToolIconName, ReactNode> = {
   // the ring clears the 68px card circle at the 60px render size. The
   // invisible r=15.4 circle keeps the fill-box rotation origin at the true
   // centre despite the head/tail gap. Tail tapers over five short arcs.
-  // Hood + head are near-black so the फन stands out from the gold body (Vaibhav, 2026-09-05).
+  // Tongue is brown and always visible (no flick) — Vaibhav's actual ask (2026-09-05); hood/head stay body-gold.
   "kaal-sarp-dosha": (
     <g className="ti-spin" style={{ animationDuration: "14s" }}>
       <circle cx="16" cy="16" r="15.4" fill="none" stroke="none" />
@@ -154,13 +154,11 @@ const ART: Record<ToolIconName, ReactNode> = {
       <path d="M16.00 26.85 L16.00 28.75" stroke="#f5e0a0" strokeWidth="0.8"/>
       <path d="M9.03 24.31 L7.80 25.77" stroke="#f5e0a0" strokeWidth="0.8"/>
       <path d="M5.31 17.88 L3.44 18.21" stroke="#f5e0a0" strokeWidth="0.8"/>
-      <ellipse cx="7.51" cy="7.80" rx="3.6" ry="3.5" transform="rotate(314 7.51 7.80)" fill="#161616" stroke="none"/>
+      <ellipse cx="7.51" cy="7.80" rx="3.6" ry="3.5" transform="rotate(314 7.51 7.80)" fill="currentColor" stroke="none"/>
       <path d="M9.31 9.54 L5.71 6.07" stroke="#f5e0a0" strokeWidth="0.85"/>
-      <ellipse cx="11.39" cy="5.14" rx="2.5" ry="2.1" transform="rotate(337 11.39 5.14)" fill="#161616" stroke="none"/>
+      <ellipse cx="11.39" cy="5.14" rx="2.5" ry="2.1" transform="rotate(337 11.39 5.14)" fill="currentColor" stroke="none"/>
       <circle cx="11.64" cy="4.02" r="0.52" fill="#f5e0a0" stroke="none"/>
-      <g className="ti-flick">
-      <path d="M13.75 4.42 A11.8 11.8 0 0 1 15.38 4.22 M15.38 4.22 L16.22 3.35 M15.38 4.22 L16.19 5.05" stroke="#f5e0a0" strokeWidth="0.9"/>
-      </g>
+      <path d="M13.75 4.42 A11.8 11.8 0 0 1 15.38 4.22 M15.38 4.22 L16.22 3.35 M15.38 4.22 L16.19 5.05" stroke="#6b3a1e" strokeWidth="1.05"/>
     </g>
   ),
   // A capital letter with a sparkle marking it as the auspicious one
