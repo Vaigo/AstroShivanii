@@ -734,6 +734,9 @@ a:hover { color: var(--saffron); }
 @keyframes tiWave    { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
 @keyframes tiFlick   { 0%, 74%, 100% { opacity: 0; } 78%, 94% { opacity: 1; } }
 @keyframes tiSpin    { to { transform: rotate(360deg); } }
+/* Tongue: out ~60% of the cycle, retracts into the mouth and darts back out —
+   scaled along its own axis from the mouth end, not faded */
+@keyframes tiTongue  { 0%, 48% { transform: scaleX(1); } 56%, 78% { transform: scaleX(0.06); } 86%, 100% { transform: scaleX(1); } }
 @keyframes tiOrbit   { to { stroke-dashoffset: -14; } }
 @keyframes tiWrite   { 0% { stroke-dashoffset: 100; } 55%, 100% { stroke-dashoffset: 0; } }
 
@@ -746,6 +749,7 @@ a:hover { color: var(--saffron); }
 .ti-wave    { transform-box: fill-box; transform-origin: 55% 100%; animation: tiWave 2.6s ease-in-out infinite; }
 .ti-flick   { animation: tiFlick 2.6s linear infinite; }
 .ti-spin    { transform-box: fill-box; transform-origin: 50% 50%; animation: tiSpin 24s linear infinite; }
+.ti-tongue  { transform-box: fill-box; transform-origin: 0% 50%; animation: tiTongue 3.2s ease-in-out infinite; }
 .ti-orbit   { animation: tiOrbit 2.8s linear infinite; }
 .ti-write   { stroke-dasharray: 100; animation: tiWrite 4.5s ease-in-out infinite; }
 
