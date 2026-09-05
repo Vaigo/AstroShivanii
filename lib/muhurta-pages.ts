@@ -7,11 +7,21 @@
  * (nakshatra + tithi + choghadiya for Delhi sunrise) and say so, with the
  * ₹51 personal tool as the "checked against YOUR chart" upgrade. The deploy
  * workflow rebuilds on the 1st and 15th so the lists never go stale.
+ *
+ * Each page is scoped to one calendar year (`year`), not a rolling window —
+ * fetchMuhurtaDates(purpose, year) bounds its query to [today, Dec 31 of
+ * `year`] (or the full Jan 1 – Dec 31 span for a future year). This is what
+ * keeps a "2026" page and a "2027" page from ever showing the same rows:
+ * their date windows never overlap. Added 2026-09-05 (8 more "-2027" pages,
+ * ahead of the October search-demand shift) — when 2026 fully lapses,
+ * rename/redirect the "-2026" slugs forward a year, the same convention
+ * already planned for /festivals (see LAUNCH.md §3S).
  */
 
 export interface MuhurtaPageDef {
   slug: string;
   purpose: string; // API purpose value
+  year: number; // calendar year this page's date window is scoped to
   hiTitle: string; // H1
   enTitle: string; // <title>
   hiHook: string; // one-line hook under the H1
@@ -23,6 +33,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
   {
     slug: "vahan-muhurat-2026",
     purpose: "vehicle_purchase",
+    year: 2026,
     hiTitle: "वाहन खरीदने का शुभ मुहूर्त 2026",
     enTitle: "Vehicle Purchase Muhurat 2026 — Shubh Dates for Car & Bike",
     hiHook: "गाड़ी या बाइक की डिलीवरी के लिए नक्षत्र-तिथि से जांचे हुए शुभ दिन, हर दिन के शुभ चौघड़िया समय के साथ।",
@@ -46,6 +57,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
   {
     slug: "griha-pravesh-muhurat-2026",
     purpose: "griha_pravesh",
+    year: 2026,
     hiTitle: "गृह प्रवेश मुहूर्त 2026",
     enTitle: "Griha Pravesh Muhurat 2026 — Auspicious Dates for Housewarming",
     hiHook: "नए घर में प्रवेश के लिए नक्षत्र-तिथि से जांचे शुभ दिन — हर दिन के शुभ समय सहित।",
@@ -69,6 +81,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
   {
     slug: "vivah-muhurat-2026",
     purpose: "marriage",
+    year: 2026,
     hiTitle: "विवाह मुहूर्त 2026",
     enTitle: "Vivah (Marriage) Muhurat 2026 — Shubh Wedding Dates",
     hiHook: "शादी की तारीख तय करने से पहले — नक्षत्र-तिथि से जांचे हुए शुभ विवाह-दिन।",
@@ -92,6 +105,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
   {
     slug: "property-muhurat-2026",
     purpose: "property_purchase",
+    year: 2026,
     hiTitle: "संपत्ति व भूमि खरीदने का शुभ मुहूर्त 2026",
     enTitle: "Property Purchase Muhurat 2026 — Shubh Dates for Land & Home",
     hiHook: "प्लॉट, फ्लैट या ज़मीन की रजिस्ट्री के लिए जांचे हुए शुभ दिन।",
@@ -115,6 +129,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
   {
     slug: "business-muhurat-2026",
     purpose: "business",
+    year: 2026,
     hiTitle: "व्यापार आरंभ का शुभ मुहूर्त 2026",
     enTitle: "Business Opening Muhurat 2026 — Shubh Dates for New Ventures",
     hiHook: "दुकान, कंपनी या नए काम की शुरुआत के लिए जांचे हुए शुभ दिन।",
@@ -138,6 +153,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
   {
     slug: "naamkaran-muhurat-2026",
     purpose: "naamkaran",
+    year: 2026,
     hiTitle: "नामकरण संस्कार मुहूर्त 2026",
     enTitle: "Naamkaran Muhurat 2026 — Auspicious Naming Ceremony Dates",
     hiHook: "शिशु के नामकरण संस्कार के लिए नक्षत्र-तिथि से जांचे शुभ दिन।",
@@ -164,6 +180,7 @@ MUHURTA_PAGES.push(
   {
     slug: "yatra-muhurat-2026",
     purpose: "travel",
+    year: 2026,
     hiTitle: "यात्रा का शुभ मुहूर्त 2026",
     enTitle: "Yatra (Travel) Muhurat 2026 — Auspicious Journey Dates",
     hiHook: "लंबी यात्रा, विदेश-प्रस्थान या तीर्थ के लिए नक्षत्र-तिथि से जांचे शुभ दिन।",
@@ -187,6 +204,7 @@ MUHURTA_PAGES.push(
   {
     slug: "vidyarambh-muhurat-2026",
     purpose: "education",
+    year: 2026,
     hiTitle: "विद्यारंभ मुहूर्त 2026",
     enTitle: "Vidyarambh Muhurat 2026 — Auspicious Dates to Begin Education",
     hiHook: "बच्चे की पढ़ाई की शुरुआत, अक्षर-आरंभ या नए course के लिए जांचे शुभ दिन।",
@@ -196,6 +214,207 @@ MUHURTA_PAGES.push(
       {
         q: "विद्यारंभ के लिए कौन-से नक्षत्र श्रेष्ठ हैं?",
         a: "बुध और गुरु से जुड़े नक्षत्र — अश्विनी, पुनर्वसु, पुष्य, हस्त, चित्रा, स्वाति, अनुराधा, श्रवण, रेवती — विद्यारंभ के लिए श्रेष्ठ माने जाते हैं। बसंत पंचमी परम्परा में सर्वोत्तम दिन है, पर पूरे वर्ष शुभ दिन मिलते हैं — सूची नीचे है।",
+      },
+      {
+        q: "विद्यारंभ किस उम्र और किस समय करें?",
+        a: "परम्परा में अक्षर-आरंभ प्रायः 3-5 वर्ष की आयु में होता है। दिन के शुभ चौघड़िया (अमृत/शुभ/लाभ) में, सरस्वती वंदना के साथ शुरुआत उत्तम मानी जाती है — हर तारीख के शुभ समय साथ दिए हैं।",
+      },
+      {
+        q: "क्या बड़ों के नए course/परीक्षा-तैयारी के लिए भी यही तारीखें चलेंगी?",
+        a: "हां — विद्यारंभ का नियम किसी भी विद्या की शुरुआत पर लागू होता है: नया course, coaching, संगीत-वाद्य, यहां तक कि नई skill भी। व्यक्तिगत (कुंडली-आधारित) तारीख के लिए शुभ मुहूर्त टूल में शिक्षा विकल्प चुनें।",
+      },
+    ],
+  },
+);
+
+// 2027 — the full calendar year, added ahead of the October search-demand
+// shift (couples/families planning a 2027 wedding or griha pravesh start
+// searching months in advance). Same eight purposes, same FAQ substance
+// (the classical rules don't change year to year) — only the year and the
+// framing change; the date TABLE is what's actually different, since its
+// window (Jan 1 – Dec 31, 2027) never overlaps the "-2026" pages' window.
+MUHURTA_PAGES.push(
+  {
+    slug: "vahan-muhurat-2027",
+    purpose: "vehicle_purchase",
+    year: 2027,
+    hiTitle: "वाहन खरीदने का शुभ मुहूर्त 2027",
+    enTitle: "Vehicle Purchase Muhurat 2027 — Shubh Dates for Car & Bike",
+    hiHook: "2027 में गाड़ी या बाइक की डिलीवरी के लिए नक्षत्र-तिथि से जांचे हुए शुभ दिन, हर दिन के शुभ चौघड़िया समय के साथ।",
+    description:
+      "Shubh muhurat 2027 for buying a car or bike: full-year computed auspicious dates (nakshatra + tithi checked) with each day's good choghadiya hours. Updated twice a month.",
+    faqs: [
+      {
+        q: "वाहन खरीदने के लिए कौन से नक्षत्र शुभ माने जाते हैं?",
+        a: "परम्परा में चर संज्ञक और लघु नक्षत्र — जैसे अश्विनी, पुष्य, हस्त, चित्रा, स्वाति, श्रवण, धनिष्ठा, रेवती — वाहन के लिए शुभ माने जाते हैं। 2027 की हर तारीख इसी नक्षत्र-जांच से निकली है।",
+      },
+      {
+        q: "क्या डिलीवरी राहु काल में ले सकते हैं?",
+        a: "परम्परा के अनुसार नहीं — शुभ तारीख पर भी राहु काल टालें। इसीलिए हर तारीख के साथ उस दिन के शुभ चौघड़िया समय दिए गए हैं — डिलीवरी उन्हीं में लेना सर्वोत्तम है।",
+      },
+      {
+        q: "क्या ये तारीखें मेरी कुंडली के अनुसार भी शुभ होंगी?",
+        a: "ये तारीखें सामान्य पंचांग-नियमों (नक्षत्र, तिथि, चौघड़िया) से हैं — सबके लिए एक जैसी। आपकी अपनी कुंडली से ताराबल, चंद्राष्टम और दशा की जांच के लिए शुभ मुहूर्त टूल इस्तेमाल करें।",
+      },
+    ],
+  },
+  {
+    slug: "griha-pravesh-muhurat-2027",
+    purpose: "griha_pravesh",
+    year: 2027,
+    hiTitle: "गृह प्रवेश मुहूर्त 2027",
+    enTitle: "Griha Pravesh Muhurat 2027 — Auspicious Dates for Housewarming",
+    hiHook: "2027 में नए घर में प्रवेश के लिए नक्षत्र-तिथि से जांचे शुभ दिन — साल भर की सूची, हर दिन के शुभ समय सहित।",
+    description:
+      "Griha Pravesh muhurat 2027: full-year computed auspicious housewarming dates (nakshatra + tithi screened) with each day's good hours. Astronomical calculation, updated twice a month.",
+    faqs: [
+      {
+        q: "गृह प्रवेश के लिए कौन से महीने सर्वोत्तम माने जाते हैं?",
+        a: "माघ, फाल्गुन, वैशाख और ज्येष्ठ परम्परागत रूप से सर्वोत्तम माने जाते हैं; चातुर्मास (देवशयनी से देवउठनी एकादशी) प्रायः टाला जाता है। नीचे 2027 के हर महीने की जांची हुई तारीखें हैं।",
+      },
+      {
+        q: "गृह प्रवेश के दिन क्या करना चाहिए?",
+        a: "शुभ समय (नीचे दिए चौघड़िया) में कलश और मंगल-प्रतीकों के साथ प्रवेश, गणेश पूजन, नवग्रह शांति और वास्तु पूजन की परम्परा है। पहली रात घर में रहना शुभ माना जाता है।",
+      },
+      {
+        q: "क्या ये तारीखें मेरे परिवार की कुंडली से भी मेल खाएंगी?",
+        a: "यह सूची सामान्य पंचांग-जांच से है। गृह-स्वामी की कुंडली से ताराबल-चंद्राष्टम जांच कर व्यक्तिगत तारीख निकालने के लिए शुभ मुहूर्त टूल देखें।",
+      },
+    ],
+  },
+  {
+    slug: "vivah-muhurat-2027",
+    purpose: "marriage",
+    year: 2027,
+    hiTitle: "विवाह मुहूर्त 2027",
+    enTitle: "Vivah (Marriage) Muhurat 2027 — Shubh Wedding Dates",
+    hiHook: "2027 की शादी की तारीख तय करने से पहले — नक्षत्र-तिथि से जांचे हुए साल भर के शुभ विवाह-दिन।",
+    description:
+      "Vivah muhurat 2027: full-year computed shubh wedding dates (nakshatra + tithi screened, Lahiri ayanamsa) with each day's good hours. Updated twice a month.",
+    faqs: [
+      {
+        q: "विवाह के लिए कौन से महीने शुभ माने जाते हैं?",
+        a: "मार्गशीर्ष, माघ, फाल्गुन, वैशाख और ज्येष्ठ श्रेष्ठ माने जाते हैं; आषाढ़ देवशयनी एकादशी तक ही। चातुर्मास, पौष और अधिक मास प्रायः टाले जाते हैं — 2027 में भी यही नियम लागू है।",
+      },
+      {
+        q: "क्या सिर्फ तारीख देखना काफी है?",
+        a: "नहीं — विवाह में वर-वधू दोनों की कुंडली से ताराबल, चंद्रबल और दशा की जांच भी होती है। यह सूची पंचांग-स्तर की है; दोनों कुंडलियों से common शुभ तारीखें निकालने के लिए शुभ मुहूर्त टूल में विवाह विकल्प चुनें।",
+      },
+      {
+        q: "क्या इतनी जल्दी 2027 की तारीखें निकल सकती हैं?",
+        a: "हां — पंचांग गणना खगोलीय है (लाहिरी अयनांश), किसी छपे कैलेंडर पर निर्भर नहीं। इसलिए 2027 की पूरी साल की तारीखें अभी से उतनी ही सटीक हैं जितनी नज़दीकी महीने की।",
+      },
+    ],
+  },
+  {
+    slug: "property-muhurat-2027",
+    purpose: "property_purchase",
+    year: 2027,
+    hiTitle: "संपत्ति व भूमि खरीदने का शुभ मुहूर्त 2027",
+    enTitle: "Property Purchase Muhurat 2027 — Shubh Dates for Land & Home",
+    hiHook: "2027 में प्लॉट, फ्लैट या ज़मीन की रजिस्ट्री के लिए जांचे हुए साल भर के शुभ दिन।",
+    description:
+      "Property and land purchase muhurat 2027: full-year computed auspicious registry dates (nakshatra + tithi screened) with good hours for each day. Updated twice a month.",
+    faqs: [
+      {
+        q: "रजिस्ट्री और गृह प्रवेश का मुहूर्त अलग-अलग क्यों?",
+        a: "संपत्ति खरीद (रजिस्ट्री/बयाना) का कारक मंगल-सम्बन्धी परम्परा से देखा जाता है, जबकि गृह प्रवेश का मुहूर्त अलग नियमों से। दोनों के लिए अलग सूचियां हैं — गृह प्रवेश की तारीखें उसके अपने पेज पर देखें।",
+      },
+      {
+        q: "क्या बयाना (token) भी शुभ दिन पर देना चाहिए?",
+        a: "परम्परा में हां — पहला लेन-देन ही आरंभ माना जाता है। बयाना, एग्रीमेंट और रजिस्ट्री — जो भी पहला ठोस कदम हो, उसे नीचे दिए शुभ दिनों के शुभ समय में करना उत्तम है।",
+      },
+      {
+        q: "क्या ये तारीखें मेरी कुंडली से जांची गई हैं?",
+        a: "नहीं — यह सामान्य पंचांग-सूची है। अपनी कुंडली (चौथा भाव, ताराबल, दशा) से जांची व्यक्तिगत तारीखों के लिए शुभ मुहूर्त टूल इस्तेमाल करें।",
+      },
+    ],
+  },
+  {
+    slug: "business-muhurat-2027",
+    purpose: "business",
+    year: 2027,
+    hiTitle: "व्यापार आरंभ का शुभ मुहूर्त 2027",
+    enTitle: "Business Opening Muhurat 2027 — Shubh Dates for New Ventures",
+    hiHook: "2027 में दुकान, कंपनी या नए काम की शुरुआत के लिए जांचे हुए साल भर के शुभ दिन।",
+    description:
+      "Business opening muhurat 2027: full-year computed auspicious dates for launching a shop, company or venture — nakshatra + tithi screened, with each day's good hours.",
+    faqs: [
+      {
+        q: "व्यापार आरंभ के लिए कौन से नक्षत्र शुभ हैं?",
+        a: "अश्विनी, रोहिणी, पुष्य, हस्त, चित्रा, स्वाति, अनुराधा, श्रवण, रेवती जैसे नक्षत्र व्यापार के लिए श्रेष्ठ माने जाते हैं — पुष्य को विशेष स्थान प्राप्त है। नीचे 2027 की तारीखें इसी जांच से हैं।",
+      },
+      {
+        q: "उद्घाटन किस समय करें?",
+        a: "शुभ तारीख पर भी समय मायने रखता है — हर तारीख के साथ उस दिन के शुभ/अमृत चौघड़िया दिए गए हैं; उद्घाटन, पहली बिक्री या खाता-पूजन उन्हीं में करें। राहु काल हमेशा टालें।",
+      },
+      {
+        q: "क्या पार्टनरशिप में दोनों की कुंडली देखनी चाहिए?",
+        a: "उत्तम यही है। यह सूची सामान्य पंचांग-जांच से है; अपनी कुंडली से (और साझेदार की भी) जांची तारीखों के लिए शुभ मुहूर्त टूल देखें।",
+      },
+    ],
+  },
+  {
+    slug: "naamkaran-muhurat-2027",
+    purpose: "naamkaran",
+    year: 2027,
+    hiTitle: "नामकरण संस्कार मुहूर्त 2027",
+    enTitle: "Naamkaran Muhurat 2027 — Auspicious Naming Ceremony Dates",
+    hiHook: "2027 में शिशु के नामकरण संस्कार के लिए नक्षत्र-तिथि से जांचे साल भर के शुभ दिन।",
+    description:
+      "Naamkaran (naming ceremony) muhurat 2027: full-year computed auspicious dates with each day's good hours — nakshatra and tithi screened astronomically.",
+    faqs: [
+      {
+        q: "नामकरण कब किया जाता है?",
+        a: "परम्परा में जन्म के 11वें या 12वें दिन, अन्यथा किसी भी शुभ दिन। नीचे की सूची से अपनी सुविधा का शुभ दिन चुनें — उस दिन के शुभ समय साथ दिए हैं।",
+      },
+      {
+        q: "नाम का पहला अक्षर कैसे चुनें?",
+        a: "शिशु के जन्म-नक्षत्र के चरण से शुभ अक्षर निकलता है। हमारा निःशुल्क शुभ-अक्षर टूल जन्म-विवरण से सटीक अक्षर बताता है — नीचे लिंक दिया है।",
+      },
+      {
+        q: "क्या ये तारीखें सभी शिशुओं के लिए एक जैसी हैं?",
+        a: "हां — यह सामान्य पंचांग-सूची है। शिशु की अपनी कुंडली (जन्म-नक्षत्र, ताराबल) से जांची तारीख के लिए शुभ मुहूर्त टूल में नामकरण विकल्प चुनें।",
+      },
+    ],
+  },
+  {
+    slug: "yatra-muhurat-2027",
+    purpose: "travel",
+    year: 2027,
+    hiTitle: "यात्रा का शुभ मुहूर्त 2027",
+    enTitle: "Yatra (Travel) Muhurat 2027 — Auspicious Journey Dates",
+    hiHook: "2027 में लंबी यात्रा, विदेश-प्रस्थान या तीर्थ के लिए नक्षत्र-तिथि से जांचे साल भर के शुभ दिन।",
+    description:
+      "Yatra muhurat 2027: full-year computed auspicious travel and journey dates (nakshatra + tithi screened) with each day's good hours. Updated twice a month.",
+    faqs: [
+      {
+        q: "यात्रा के लिए कौन-से नक्षत्र शुभ माने जाते हैं?",
+        a: "चर संज्ञक नक्षत्र — स्वाति, पुनर्वसु, श्रवण, धनिष्ठा, शतभिषा — यात्रा के लिए श्रेष्ठ माने जाते हैं; साथ में अश्विनी, मृगशिरा, पुष्य, हस्त, अनुराधा, रेवती भी शुभ। नीचे 2027 की हर तारीख इसी जांच से निकली है।",
+      },
+      {
+        q: "क्या दिशा-शूल भी देखना चाहिए?",
+        a: "हां — परम्परा में वार के अनुसार कुछ दिशाओं की यात्रा टाली जाती है (जैसे सोमवार-शनिवार को पूर्व, रविवार-शुक्रवार को पश्चिम)। यह सूची तारीख-स्तर की है; निकलने का समय उस दिन के शुभ चौघड़िया में रखें और राहु काल हमेशा टालें।",
+      },
+      {
+        q: "क्या ये तारीखें मेरी कुंडली से जांची गई हैं?",
+        a: "नहीं — यह सामान्य पंचांग-सूची है, सबके लिए एक जैसी। अपनी कुंडली से ताराबल-चंद्राष्टम जांचकर व्यक्तिगत यात्रा-तारीख के लिए शुभ मुहूर्त टूल में यात्रा विकल्प चुनें।",
+      },
+    ],
+  },
+  {
+    slug: "vidyarambh-muhurat-2027",
+    purpose: "education",
+    year: 2027,
+    hiTitle: "विद्यारंभ मुहूर्त 2027",
+    enTitle: "Vidyarambh Muhurat 2027 — Auspicious Dates to Begin Education",
+    hiHook: "2027 में बच्चे की पढ़ाई की शुरुआत, अक्षर-आरंभ या नए course के लिए जांचे साल भर के शुभ दिन।",
+    description:
+      "Vidyarambh muhurat 2027: full-year computed auspicious dates for beginning education, akshar-arambh or a new course — nakshatra and tithi screened astronomically.",
+    faqs: [
+      {
+        q: "विद्यारंभ के लिए कौन-से नक्षत्र श्रेष्ठ हैं?",
+        a: "बुध और गुरु से जुड़े नक्षत्र — अश्विनी, पुनर्वसु, पुष्य, हस्त, चित्रा, स्वाति, अनुराधा, श्रवण, रेवती — विद्यारंभ के लिए श्रेष्ठ माने जाते हैं। बसंत पंचमी परम्परा में सर्वोत्तम दिन है, पर 2027 में भी पूरे वर्ष शुभ दिन मिलते हैं — सूची नीचे है।",
       },
       {
         q: "विद्यारंभ किस उम्र और किस समय करें?",
@@ -231,25 +450,45 @@ const KEY = process.env.NEXT_PUBLIC_API_KEY ?? process.env.NEXT_PUBLIC_API_TEST_
 // personal tool for city/chart-specific screening.
 const REF = { lat: 28.6139, lon: 77.209, tz: 5.5 };
 
-function isoPlus(base: Date, days: number): string {
+function addDays(base: Date, days: number): Date {
   const d = new Date(base);
   d.setDate(d.getDate() + days);
+  return d;
+}
+
+function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Scan from tomorrow (build date) ~6 months ahead in ≤60-day chunks (the
- *  finder's range cap). Returns [] if the API is unreachable — the page then
- *  renders its explainer with an honest "list temporarily unavailable" note
- *  rather than failing the whole build. */
-export async function fetchMuhurtaDates(purpose: string): Promise<FinderDate[]> {
+/** Split [start, end] into ≤60-day windows (the finder's per-call range cap). */
+function chunkRange(start: Date, end: Date): [string, string][] {
+  const chunks: [string, string][] = [];
+  let cur = start;
+  while (cur <= end) {
+    const chunkEnd = addDays(cur, 59) < end ? addDays(cur, 59) : end;
+    chunks.push([isoDate(cur), isoDate(chunkEnd)]);
+    cur = addDays(chunkEnd, 1);
+  }
+  return chunks;
+}
+
+/** Scan ONE calendar year for auspicious dates — [max(tomorrow, Jan 1 of
+ *  `year`), Dec 31 of `year`], chunked in ≤60-day windows. Bounding to the
+ *  named year (not a rolling "next N months" window) is what keeps the
+ *  "-2026" and "-2027" pages honest and non-overlapping: a "2026" page never
+ *  shows a 2027 date, and vice versa. Returns [] once `year` has fully
+ *  lapsed, or if the API is unreachable — the page then renders its
+ *  explainer with an honest "list temporarily unavailable" note rather than
+ *  failing the whole build. */
+export async function fetchMuhurtaDates(purpose: string, year: number): Promise<FinderDate[]> {
   const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  const chunks: [string, string][] = [
-    [isoPlus(today, 1), isoPlus(today, 60)],
-    [isoPlus(today, 61), isoPlus(today, 120)],
-    [isoPlus(today, 121), isoPlus(today, 180)],
-  ];
+  const jan1 = new Date(year, 0, 1);
+  const dec31 = new Date(year, 11, 31);
+  const tomorrow = addDays(today, 1);
+  const start = tomorrow > jan1 ? tomorrow : jan1;
+  if (start > dec31) return [];
   const all: FinderDate[] = [];
-  for (const [from_date, to_date] of chunks) {
+  for (const [from_date, to_date] of chunkRange(start, dec31)) {
     try {
       const res = await fetch(`${BASE}/v1/muhurta/find`, {
         method: "POST",

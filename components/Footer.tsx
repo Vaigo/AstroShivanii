@@ -102,7 +102,7 @@ export default function Footer() {
             <li><Link href="/rahu-kaal" className="devanagari">आज का राहु काल</Link></li>
             <li><Link href="/choghadiya" className="devanagari">आज का चौघड़िया</Link></li>
             <li><Link href="/rashifal" className="devanagari">आज का राशिफल</Link></li>
-            <li><Link href="/muhurta" className="devanagari">शुभ मुहूर्त 2026</Link></li>
+            <li><Link href="/muhurta" className="devanagari">शुभ मुहूर्त 2026-27</Link></li>
             <li><Link href="/festivals/diwali-2026" className="devanagari">दिवाली 2026 कब है</Link></li>
             <li><Link href="/festivals-2026" className="devanagari">व्रत-त्यौहार 2026</Link></li>
           </ul>

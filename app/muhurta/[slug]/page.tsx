@@ -45,7 +45,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const def = muhurtaPageBySlug(slug);
   if (!def) notFound();
 
-  const dates = await fetchMuhurtaDates(def.purpose);
+  const dates = await fetchMuhurtaDates(def.purpose, def.year);
   const byMonth = new Map<string, FinderDate[]>();
   for (const d of dates) {
     const k = monthKey(d.date);
@@ -67,7 +67,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     <section className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="container" style={{ maxWidth: "860px" }}>
-        <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "Muhurat 2026", href: "/muhurta" }, { name: def.hiTitle }]} />
+        <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: `Muhurat ${def.year}`, href: "/muhurta" }, { name: def.hiTitle }]} />
         <h1 className="section-heading">{def.hiTitle}</h1>
         <p className="section-heading-hi devanagari">{def.hiHook}</p>
 
@@ -147,9 +147,19 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             ))}
           </div>
 
-          <h2 className="guide-h2 devanagari">अन्य मुहूर्त 2026</h2>
+          <h2 className="guide-h2 devanagari">इसी विषय के अन्य वर्ष</h2>
           <p className="guide-p devanagari" style={{ lineHeight: 2 }}>
-            {MUHURTA_PAGES.filter((p) => p.slug !== def.slug).map((p, i) => (
+            {MUHURTA_PAGES.filter((p) => p.purpose === def.purpose && p.slug !== def.slug).map((p, i) => (
+              <span key={p.slug}>
+                {i > 0 && " · "}
+                <Link href={`/muhurta/${p.slug}/`}>{p.hiTitle}</Link>
+              </span>
+            ))}
+          </p>
+
+          <h2 className="guide-h2 devanagari">अन्य मुहूर्त</h2>
+          <p className="guide-p devanagari" style={{ lineHeight: 2 }}>
+            {MUHURTA_PAGES.filter((p) => p.purpose !== def.purpose).map((p, i) => (
               <span key={p.slug}>
                 {i > 0 && " · "}
                 <Link href={`/muhurta/${p.slug}/`}>{p.hiTitle}</Link>

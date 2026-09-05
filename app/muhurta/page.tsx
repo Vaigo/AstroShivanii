@@ -4,18 +4,21 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { MUHURTA_PAGES } from "@/lib/muhurta-pages";
 
 export const metadata: Metadata = {
-  title: "शुभ मुहूर्त 2026 — Muhurat Dates for Every Occasion",
+  title: "शुभ मुहूर्त 2026-27 — Muhurat Dates for Every Occasion",
   description:
-    "Shubh muhurat 2026 for vehicle purchase, griha pravesh, vivah (marriage), property, business opening and naamkaran — real computed dates with each day's good hours, updated twice a month.",
+    "Shubh muhurat 2026 & 2027 for vehicle purchase, griha pravesh, vivah (marriage), property, business opening and naamkaran — real computed dates with each day's good hours, updated twice a month.",
   alternates: { canonical: "/muhurta/" },
 };
 
 export default function Page() {
+  const y2026 = MUHURTA_PAGES.filter((p) => p.year === 2026);
+  const y2027 = MUHURTA_PAGES.filter((p) => p.year === 2027);
+
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "860px" }}>
-        <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "Muhurat 2026" }]} />
-        <h1 className="section-heading">शुभ मुहूर्त 2026</h1>
+        <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "Muhurat 2026-27" }]} />
+        <h1 className="section-heading">शुभ मुहूर्त 2026-27</h1>
         <p className="section-heading-hi devanagari">
           हर काम के लिए खगोलीय गणना से जांचे हुए शुभ दिन — अनुमान नहीं, गणना
         </p>
@@ -30,8 +33,19 @@ export default function Page() {
           </p>
         </div>
 
+        <h2 className="guide-h2 devanagari">2026 में बचे महीनों के मुहूर्त</h2>
+        <div className="guide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+          {y2026.map((p) => (
+            <Link key={p.slug} href={`/muhurta/${p.slug}/`} className="guide-card" style={{ padding: "1.1rem 1.2rem" }}>
+              <strong className="devanagari" style={{ display: "block", marginBottom: "0.3rem" }}>{p.hiTitle}</strong>
+              <span className="devanagari" style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{p.hiHook}</span>
+            </Link>
+          ))}
+        </div>
+
+        <h2 className="guide-h2 devanagari">2027 के शुभ मुहूर्त — अभी देखें</h2>
         <div className="guide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1rem" }}>
-          {MUHURTA_PAGES.map((p) => (
+          {y2027.map((p) => (
             <Link key={p.slug} href={`/muhurta/${p.slug}/`} className="guide-card" style={{ padding: "1.1rem 1.2rem" }}>
               <strong className="devanagari" style={{ display: "block", marginBottom: "0.3rem" }}>{p.hiTitle}</strong>
               <span className="devanagari" style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{p.hiHook}</span>
