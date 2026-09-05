@@ -132,32 +132,34 @@ const ART: Record<ToolIconName, ReactNode> = {
   ),
   // KAAL SARP — the serpent wrapped AROUND the icon circle, hooded head
   // chasing its own tapering tail (Rahu = head, Ketu = tail, everything caught
-  // between: literally the dosha's definition), slowly rotating. Vaibhav's ask
-  // after rejecting five upright-cobra attempts (2026-09-04): "can the snake
-  // rotate around the circle". Body hugs r=13.2 so at the 60px render size the
-  // ring sits just inside the 68px card circle; 3-step tail taper, faint
-  // crossbands (धारियां), solid hood + head. The invisible r=15.5 circle keeps
-  // the fill-box rotation origin at the true centre despite the head/tail gap.
+  // between: literally the dosha's definition), slowly rotating. Geometry
+  // rules learned the hard way (2026-09-05): every part — hood, head, tongue —
+  // sits ON the r=11.8 ring (tangent-oriented ellipses), so nothing pokes past
+  // the viewBox (the earlier head got clipped at y<0 and looked hoodless) and
+  // the ring clears the 68px card circle at the 60px render size. The
+  // invisible r=15.4 circle keeps the fill-box rotation origin at the true
+  // centre despite the head/tail gap. Tail tapers over five short arcs.
   "kaal-sarp-dosha": (
     <g className="ti-spin" style={{ animationDuration: "14s" }}>
-      <circle cx="16" cy="16" r="15.5" fill="none" stroke="none" />
-        <path d="M24.48 5.89 A13.2 13.2 0 0 1 26.94 8.62" strokeWidth="1.3"/>
-        <path d="M26.94 8.62 A13.2 13.2 0 0 1 28.69 12.36" strokeWidth="2.3"/>
-        <path d="M28.69 12.36 A13.2 13.2 0 1 1 6.83 6.50" strokeWidth="3.3"/>
-        <path d="M27.28 21.02 L28.84 21.71" stroke="#f5e0a0" strokeWidth="0.8"/>
-        <path d="M21.02 27.28 L21.71 28.84" stroke="#f5e0a0" strokeWidth="0.8"/>
-        <path d="M12.18 27.75 L11.66 29.36" stroke="#f5e0a0" strokeWidth="0.8"/>
-        <path d="M5.30 22.17 L3.83 23.02" stroke="#f5e0a0" strokeWidth="0.8"/>
-        <path d="M3.92 13.43 L2.26 13.08" stroke="#f5e0a0" strokeWidth="0.8"/>
-        <g transform="rotate(-44 6.83 6.50)">
-        <ellipse cx="9.63" cy="6.50" rx="3.9" ry="3" fill="currentColor" stroke="none"/>
-        <ellipse cx="13.53" cy="6.50" rx="2.5" ry="2" fill="currentColor" stroke="none"/>
-        <circle cx="14.13" cy="5.75" r="0.55" fill="#f5e0a0" stroke="none"/>
-        <g className="ti-flick">
-        <path d="M16.03 6.50 L17.93 6.50 M17.93 6.50 L18.83 5.70 M17.93 6.50 L18.83 7.30" stroke="#f5e0a0" strokeWidth="0.9"/>
-        </g>
-        <path d="M8.53 4.60 L8.53 8.40" stroke="#f5e0a0" strokeWidth="0.85"/>
-        </g>
+      <circle cx="16" cy="16" r="15.4" fill="none" stroke="none" />
+      <path d="M21.54 5.58 A11.8 11.8 0 0 1 22.77 6.33" strokeWidth="0.9"/>
+      <path d="M22.77 6.33 A11.8 11.8 0 0 1 23.90 7.23" strokeWidth="1.4"/>
+      <path d="M23.90 7.23 A11.8 11.8 0 0 1 24.91 8.26" strokeWidth="1.9"/>
+      <path d="M24.91 8.26 A11.8 11.8 0 0 1 25.78 9.40" strokeWidth="2.4"/>
+      <path d="M25.78 9.40 A11.8 11.8 0 0 1 26.51 10.64" strokeWidth="2.85"/>
+      <path d="M26.51 10.64 A11.8 11.8 0 1 1 5.78 10.10" strokeWidth="3.2"/>
+      <path d="M26.69 17.88 L28.56 18.21" stroke="#f5e0a0" strokeWidth="0.8"/>
+      <path d="M22.97 24.31 L24.20 25.77" stroke="#f5e0a0" strokeWidth="0.8"/>
+      <path d="M16.00 26.85 L16.00 28.75" stroke="#f5e0a0" strokeWidth="0.8"/>
+      <path d="M9.03 24.31 L7.80 25.77" stroke="#f5e0a0" strokeWidth="0.8"/>
+      <path d="M5.31 17.88 L3.44 18.21" stroke="#f5e0a0" strokeWidth="0.8"/>
+      <ellipse cx="7.51" cy="7.80" rx="3.6" ry="3.5" transform="rotate(314 7.51 7.80)" fill="currentColor" stroke="none"/>
+      <path d="M9.31 9.54 L5.71 6.07" stroke="#f5e0a0" strokeWidth="0.85"/>
+      <ellipse cx="11.39" cy="5.14" rx="2.5" ry="2.1" transform="rotate(337 11.39 5.14)" fill="currentColor" stroke="none"/>
+      <circle cx="11.64" cy="4.02" r="0.52" fill="#f5e0a0" stroke="none"/>
+      <g className="ti-flick">
+      <path d="M13.75 4.42 A11.8 11.8 0 0 1 15.38 4.22 M15.38 4.22 L16.22 3.35 M15.38 4.22 L16.19 5.05" stroke="#f5e0a0" strokeWidth="0.9"/>
+      </g>
     </g>
   ),
   // A capital letter with a sparkle marking it as the auspicious one
