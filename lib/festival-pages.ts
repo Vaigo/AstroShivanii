@@ -62,7 +62,10 @@ export const FESTIVAL_PAGES: FestivalPageDef[] = [
   },
   {
     slug: "dussehra-2026",
-    match: "Dussehra",
+    // NOT "Dussehra": the API also names "Ganga Dussehra" (Jyeshtha, May/June) and
+    // the first-hit matcher below picked that, so this page showed 25 May for
+    // months. "Vijayadashami" only appears in the October entry.
+    match: "Vijayadashami",
     hi: "दशहरा (विजयादशमी)",
     en: "Dussehra / Vijayadashami 2026",
     intro:
@@ -215,8 +218,20 @@ async function festivalCalendar(): Promise<{ date: string; name: string }[]> {
 
 export async function computeFestival(def: FestivalPageDef): Promise<FestivalComputed> {
   const cal = await festivalCalendar();
-  const hit = cal.find((f) => f.name.includes(def.match));
+  const matches = cal.filter((f) => f.name.includes(def.match));
+  const hit = matches[0];
   if (!hit) return { date: null, weekday: null, shubhSlots: [], abhijit: null };
+  // Guard against the Ganga-Dussehra class of bug: if one match string hits
+  // festivals on different dates, the first (earliest) one wins silently and the
+  // page can show the wrong day. Make that loud in the build log.
+  const distinctDates = [...new Set(matches.map((m) => m.date))];
+  if (distinctDates.length > 1) {
+    console.warn(
+      `[festival-pages] AMBIGUOUS match "${def.match}" for ${def.slug}: ${matches
+        .map((m) => `${m.date} ${m.name}`)
+        .join(" | ")} — using ${hit.date}. Tighten the match string.`,
+    );
+  }
 
   const day = await apiPost("/v1/muhurta/full", { date: hit.date, ...REF });
   const chog = (day?.choghadiya as { type: string; name: string; quality: string; start: string; end: string }[] | undefined) ?? [];
