@@ -81,7 +81,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           startDate: c.date,
           eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
           eventStatus: "https://schema.org/EventScheduled",
-          location: { "@type": "Country", name: "India" },
+          // Google's Event wants a Place with an address (a bare Country raised "missing address").
+          // Country-level only: the festival is observed nationwide, so no street address is invented.
+          location: {
+            "@type": "Place",
+            name: "India",
+            address: { "@type": "PostalAddress", addressCountry: "IN" },
+          },
+          image: ["https://astroshivanii.com/og-image.png"],
+          // organizer / performer / offers deliberately omitted: we don't organise these festivals,
+          // there is no performer and nothing is sold, so adding them would be false markup.
           description: def.intro,
         }]
       : []),
