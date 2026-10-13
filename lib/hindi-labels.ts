@@ -2,15 +2,59 @@
  *  Sign/nakshatra Hindi comes from the API itself (sign_hi, name_hi) —
  *  these maps cover planets, dignities and lagna one-liners. */
 
-/** Several endpoints (Milan, Numerology, Varshphal verdicts/themes/predictions)
- *  return a single field as "हिंदी / English" instead of two separate fields.
- *  Splits on that convention and returns the half matching isHi; falls back
- *  to the whole string unchanged if it isn't in that shape. */
+const DEVANAGARI = /[ऀ-ॿ]/;
+
+/** Several endpoints (Numerology, Varshphal themes/predictions, and Milan /
+ *  Tarot on older API versions) return a single field as "हिंदी / English"
+ *  instead of two separate fields — and a few put English first
+ *  ("Air / वायु"). Splits on " / " and returns the half matching isHi: the
+ *  half written in Devanagari is the Hindi one, whichever side it is on. If
+ *  the script doesn't settle it (both or neither half Devanagari) the Hindi-
+ *  first convention applies. Strings not in "X / Y" shape come back unchanged. */
 export function pickLang(text: string | undefined | null, isHi: boolean): string {
   if (!text) return "";
   const parts = text.split(" / ");
   if (parts.length !== 2) return text;
-  return isHi ? parts[0] : parts[1];
+  const [first, second] = parts;
+  const englishFirst = !DEVANAGARI.test(first) && DEVANAGARI.test(second);
+  const [hi, en] = englishFirst ? [second, first] : [first, second];
+  return isHi ? hi : en;
+}
+
+/** One text field that the API sends either split — `key` (English) plus
+ *  `key_hi` (Hindi), the current shape — or, on older API versions, as one
+ *  combined "हिंदी / English" string in `key`. Prefers the split shape and
+ *  falls back to pickLang on the combined string, so the site works against
+ *  both. If the requested language is missing, the other one is shown. */
+export function pickField<T extends object>(
+  obj: T | null | undefined,
+  key: keyof T & string,
+  isHi: boolean,
+): string {
+  if (!obj) return "";
+  const rec = obj as Record<string, unknown>;
+  const en = typeof rec[key] === "string" ? (rec[key] as string) : "";
+  const hi = rec[`${key}_hi`];
+  if (typeof hi === "string") return (isHi ? hi || en : en || hi);
+  return pickLang(en, isHi);
+}
+
+/** pickField for a list of strings: `key` (English) + `key_hi` (Hindi) when
+ *  split, else each combined "हिंदी / English" item of `key` run through
+ *  pickLang. */
+export function pickList<T extends object>(
+  obj: T | null | undefined,
+  key: keyof T & string,
+  isHi: boolean,
+): string[] {
+  if (!obj) return [];
+  const rec = obj as Record<string, unknown>;
+  const strings = (v: unknown) =>
+    Array.isArray(v) ? v.filter((s): s is string => typeof s === "string") : [];
+  const en = strings(rec[key]);
+  const hi = rec[`${key}_hi`];
+  if (Array.isArray(hi)) return isHi ? strings(hi) : en;
+  return en.map((s) => pickLang(s, isHi));
 }
 
 export const PLANET_HI: Record<string, string> = {

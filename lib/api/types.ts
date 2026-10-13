@@ -155,12 +155,17 @@ export interface AshtakootResult {
     boy_moon_sign_lord?: string; girl_moon_sign_lord?: string;
   };
   gana: { score: number; max: number; boy_gana: string; girl_gana: string };
-  bhakoot: { score: number; max: number; difference?: number; note?: string };
+  /** note is English + note_hi Hindi; older API versions send one combined
+   *  "हिंदी / English" note and no note_hi — read it with pickField. */
+  bhakoot: { score: number; max: number; difference?: number; note?: string; note_hi?: string };
   nadi: { score: number; max: number; boy_nadi?: string; girl_nadi?: string; nadi_dosha: boolean };
   total: number;        // can be fractional (e.g. 20.0, tara gives halves)
   max: number;          // 36
   percentage: number;
-  verdict: string;      // bilingual, e.g. "सामान्य / Average"
+  /** "Average" + verdict_hi "सामान्य"; older API versions send one combined
+   *  "सामान्य / Average" here and no verdict_hi — read it with pickField. */
+  verdict: string;
+  verdict_hi?: string;
   person1?: {
     nakshatra: string; nakshatra_lord: string;
     moon_sign: string; moon_sign_hi: string; moon_dms?: string;
@@ -214,10 +219,15 @@ export interface TarotCard {
   name_hi: string;
   suit: string;
   value: string;
-  element: string;                       // e.g. "Air / वायु"
-  domain: string;
+  /** Suit cards only (majors have neither). element is "Air" + element_hi
+   *  "वायु"; older API versions send one combined "Air / वायु" (English
+   *  first) and no element_hi — read it with pickField. domain is English. */
+  element?: string;
+  element_hi?: string;
+  domain?: string;
   keywords: string[];
   position: string;                      // "card_1"…
+  position_hi?: string;                  // "कार्ड 1"… (newer API versions)
   reversed: boolean;
   interpretation_hi: string;
   interpretation_en: string;
@@ -229,8 +239,14 @@ export interface TarotResult {
   deck: string;
   cards_drawn: number;
   cards: TarotCard[];
+  /** The asked question, echoed (question_hi too); with none asked it is
+   *  "General guidance" + question_hi "सामान्य मार्गदर्शन". Older API versions
+   *  send that label combined ("सामान्य मार्गदर्शन / General guidance") and no
+   *  question_hi / note_hi — read both with pickField. */
   question: string | null;
+  question_hi?: string;
   note: string;
+  note_hi?: string;
 }
 
 /* ── Panchang (/v1/panchang/full, /v1/panchang/rahu-kaal, /v1/panchang/muhurta) ── */
@@ -380,7 +396,10 @@ export interface MangalDoshaPerson {
   manglik_from_moon: boolean;
   mars_house: number;
   mars_house_from_moon: number;
+  /** English items + cancellations_hi Hindi; older API versions send
+   *  combined "हिंदी / English" items and no cancellations_hi — read with pickList. */
   cancellations: string[];
+  cancellations_hi?: string[];
   severity: string;      // none | low | high...
   mars_sign: string;
   mars_sign_hi: string;
@@ -392,7 +411,10 @@ export interface MangalDoshaResult {
   person1: MangalDoshaPerson;
   person2: MangalDoshaPerson;
   mutual_cancellation: boolean;
+  /** English + note_hi Hindi; combined "हिंदी / English" on older API
+   *  versions — read it with pickField. */
   note: string;
+  note_hi?: string;
 }
 
 /* ── Sade Sati (/v1/transits/sade-sati) ─────────────────────────────────── */

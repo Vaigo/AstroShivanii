@@ -10,6 +10,16 @@ import { fetchTarot } from "@/lib/api/endpoints";
 import type { TarotResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { pickField } from "@/lib/hindi-labels";
+
+/** Hindi for the Rider-Waite suit domains — the API sends domain in English
+ *  only (same wording as GrahaAPI's own Hindi for /tarot/interpretation). */
+const DOMAIN_HI: Record<string, string> = {
+  "career, passion, energy": "करियर, जुनून, ऊर्जा",
+  "emotions, relationships, intuition": "भावनाएं, रिश्ते, अंतर्ज्ञान",
+  "thoughts, conflict, communication": "विचार, संघर्ष, संवाद",
+  "material, work, finances": "भौतिक जीवन, काम, धन",
+};
 
 export default function TarotTool() {
   const { t, lang } = useI18n();
@@ -46,6 +56,8 @@ export default function TarotTool() {
   }
 
   const positions = isHi ? ["अतीत", "वर्तमान", "भविष्य"] : ["Past", "Present", "Future"];
+  // The asked question, or the API's "General guidance" label when none was asked.
+  const asked = pickField(result, "question", isHi);
   const positionMeaning = isHi
     ? ["जो ऊर्जा इस स्थिति को यहाँ तक लाई", "अभी आपके इर्द-गिर्द क्या सक्रिय है", "यही रुख रहा तो संभावित दिशा"]
     : ["The energy that brought this here", "What is active around you now", "The likely direction if this course holds"];
@@ -131,9 +143,9 @@ export default function TarotTool() {
           <div ref={resultRef} className="print-area" style={{ scrollMarginTop: "90px" }}>
             <DownloadReportButton filename="AstroShivanii-Tarot-Reading" />
           <PatrikaFrame>
-            {result.question && (
-              <p style={{ fontStyle: "italic", color: "var(--muted)", marginBottom: "1rem", textAlign: "center" }}>
-                "{result.question}"
+            {asked && (
+              <p className={isHi ? "devanagari" : undefined} style={{ fontStyle: "italic", color: "var(--muted)", marginBottom: "1rem", textAlign: "center" }}>
+                "{asked}"
               </p>
             )}
 
@@ -193,6 +205,8 @@ export default function TarotTool() {
             {result.cards.map((card, i) => {
               const text = isHi ? card.interpretation_hi : card.interpretation_en;
               if (!text) return null;
+              const domain = card.domain && isHi ? DOMAIN_HI[card.domain] ?? card.domain : card.domain;
+              const elementLine = [pickField(card, "element", isHi), domain].filter(Boolean).join(" · ");
               return (
                 <div key={`interp-${i}`} className="result-box" style={{ marginTop: "0.75rem" }}>
                   <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
@@ -222,9 +236,9 @@ export default function TarotTool() {
                           ))}
                         </div>
                       )}
-                      {(card.element || card.domain) && (
-                        <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem" }}>
-                          {[card.element, card.domain].filter(Boolean).join(" · ")}
+                      {elementLine && (
+                        <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem" }}>
+                          {elementLine}
                         </p>
                       )}
                     </div>
@@ -261,7 +275,7 @@ export default function TarotTool() {
                 en: "Cards show the moment's energy. Your birth chart shows the decade's direction — and Prashna gives one precise answer to one question.",
                 hi: "कार्ड क्षण की ऊर्जा दिखाते हैं। जन्म कुंडली दशक की दिशा — और प्रश्न ज्योतिष एक सवाल का सटीक उत्तर देता है।",
               }}
-              waText={`Namaste Shivanii ji! I drew a tarot spread on your website${result.question ? ` about: "${result.question}"` : ""}. I would like a proper Prashna reading for my question.`}
+              waText={`Namaste Shivanii ji! I drew a tarot spread on your website${result.question ? ` about: "${pickField(result, "question", false)}"` : ""}. I would like a proper Prashna reading for my question.`}
               reading={{ href: "/readings/ask-one-question", labelEn: "Ask Shivanii Directly ₹499", labelHi: "शिवानी जी से सीधे पूछें ₹499" }}
             />
           </PatrikaFrame>
