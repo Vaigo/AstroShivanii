@@ -5,7 +5,7 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import PasswordInput from "@/components/PasswordInput";
 import {
   adminOverview, adminUsers, adminOrders, adminBookings,
-  adminReports, adminReportApprove, adminReportReject, adminPreviewReportUrl,
+  adminReports, adminReportApprove, adminReportReject, adminPreviewReportUrl, ADMIN_LIST_CAP,
   type AdminOverview, type AdminUserRow, type TuOrder, type SiteBooking, type ReportJob,
 } from "@/lib/api/site";
 
@@ -17,6 +17,84 @@ function fmt(unix: number): string {
 
 function fmtUsd(n: number | null | undefined): string {
   return n == null ? "—" : `$${n.toFixed(4)}`;
+}
+
+/* ── date filter ── all in the browser's local time, the same clock fmt() prints rows in */
+
+/** Local YYYY-MM-DD (toISOString() would shift the day for UTC+5:30). */
+function ymd(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function addDays(d: Date, n: number): Date {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+/** Quick ranges, both ends inclusive. "All time" is the empty range. */
+function datePresets(): Array<{ label: string; from: string; to: string }> {
+  const now = new Date();
+  const today = ymd(now);
+  const yesterday = ymd(addDays(now, -1));
+  return [
+    { label: "Today", from: today, to: today },
+    { label: "Yesterday", from: yesterday, to: yesterday },
+    { label: "Last 7 days", from: ymd(addDays(now, -6)), to: today },
+    { label: "Last 30 days", from: ymd(addDays(now, -29)), to: today },
+    { label: "This month", from: ymd(new Date(now.getFullYear(), now.getMonth(), 1)), to: today },
+    { label: "All time", from: "", to: "" },
+  ];
+}
+
+/** Is this unix-seconds timestamp inside [from, to] (whole days, inclusive)? An empty end is open. */
+function inRange(unix: number, from: string, to: string): boolean {
+  const t = unix * 1000;
+  if (from && t < new Date(`${from}T00:00:00`).getTime()) return false;
+  if (to && t >= addDays(new Date(`${to}T00:00:00`), 1).getTime()) return false;
+  return true;
+}
+
+/** Same rule as the Overview revenue card: only answered/paid orders count as revenue. */
+const isRevenueStatus = (s: string) => s === "answered" || s === "paid";
+
+function DateFilterBar({ from, to, onChange, summary, note }: {
+  from: string; to: string; onChange: (from: string, to: string) => void; summary: string; note?: string;
+}) {
+  const presets = datePresets();
+  const label: React.CSSProperties = {
+    display: "flex", flexDirection: "column", gap: "0.25rem",
+    fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--gold-deep)",
+  };
+  const dateField: React.CSSProperties = { width: 150, padding: "0.45rem 0.6rem", fontSize: "0.85rem" };
+  return (
+    <div style={{ marginBottom: "1rem" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem 0.9rem", alignItems: "flex-end" }}>
+        <label style={label}>From
+          <input type="date" className="form-input" style={dateField} value={from}
+            onChange={(e) => { const v = e.target.value; onChange(v, v && to && v > to ? v : to); }} />
+        </label>
+        <label style={label}>To
+          <input type="date" className="form-input" style={dateField} value={to}
+            onChange={(e) => { const v = e.target.value; onChange(v && from && v < from ? v : from, v); }} />
+        </label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+          {presets.map((p) => (
+            <button key={p.label} type="button"
+              className={`btn btn-sm ${p.from === from && p.to === to ? "btn-secondary" : "btn-ghost"}`}
+              style={{ padding: "0.4rem 0.8rem", fontSize: "0.78rem" }}
+              onClick={() => onChange(p.from, p.to)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginTop: "0.6rem", fontSize: "0.85rem" }}>
+        <strong style={{ color: "var(--maroon-deep)" }}>{summary}</strong>
+        {note && <div style={{ color: "#b3423a", fontSize: "0.78rem", marginTop: 2 }}>{note}</div>}
+      </div>
+    </div>
+  );
 }
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
@@ -54,6 +132,9 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<Tab>("overview");
+  // Date filter shared by the Users / Orders / Bookings / Reports tabs ("" = open end).
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
   const [ov, setOv] = useState<AdminOverview | null>(null);
   const [users, setUsers] = useState<AdminUserRow[]>([]);
@@ -145,6 +226,46 @@ export default function AdminPage() {
   const th: React.CSSProperties = { textAlign: "left", padding: "0.45rem 0.6rem", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--gold-deep)", borderBottom: "1.5px solid var(--gold)" };
   const td: React.CSSProperties = { padding: "0.5rem 0.6rem", fontSize: "0.82rem", borderBottom: "1px solid rgba(201,154,58,0.18)", verticalAlign: "top" };
 
+  // ── date-filtered views (the API already returns newest first) ──
+  const rangeActive = from !== "" || to !== "";
+  const fUsers = users.filter((u) => inRange(u.created_at, from, to));
+  const fOrders = orders.filter((o) => inRange(o.created_at, from, to));
+  const fBookings = bookings.filter((b) => inRange(b.created_at, from, to));
+  const fReports = reports.filter((r) => inRange(r.created_at, from, to));
+
+  const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString("en-IN")} ${n === 1 ? one : many}`;
+  const rupees = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+
+  const orderRevenue = fOrders.reduce((s, o) => s + (isRevenueStatus(o.status) ? o.amount_inr : 0), 0);
+  const orderAiCost = fOrders.reduce((s, o) => s + (o.ai_cost_usd ?? 0), 0);
+  const paidBookings = fBookings.filter((b) => b.status === "paid");
+  const bookingRevenue = paidBookings.reduce((s, b) => s + (b.amount_inr ?? 0), 0);
+
+  // Orders per calendar day inside the range, newest day first.
+  const ordersByDay = (() => {
+    const m = new Map<string, { n: number; rev: number }>();
+    for (const o of fOrders) {
+      const d = ymd(new Date(o.created_at * 1000));
+      const e = m.get(d) ?? { n: 0, rev: 0 };
+      e.n += 1;
+      if (isRevenueStatus(o.status)) e.rev += o.amount_inr;
+      m.set(d, e);
+    }
+    return [...m.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  })();
+
+  const filterSummary =
+    tab === "orders" ? `${plural(fOrders.length, "order")} · ${rupees(orderRevenue)} revenue · AI ${fmtUsd(orderAiCost)}`
+    : tab === "bookings" ? `${plural(fBookings.length, "booking")} · ${paidBookings.length} paid · ${rupees(bookingRevenue)}`
+    : tab === "reports" ? `${plural(fReports.length, "report request")} · ${fReports.filter((r) => r.status === "pending_review").length} pending review`
+    : `${plural(fUsers.length, "user")} joined`;
+  const capNote =
+    tab === "orders" && orders.length >= ADMIN_LIST_CAP.orders ? `Only the latest ${ADMIN_LIST_CAP.orders} orders are loaded — older ones are not included.`
+    : tab === "bookings" && bookings.length >= ADMIN_LIST_CAP.bookings ? `Only the latest ${ADMIN_LIST_CAP.bookings} bookings are loaded — older ones are not included.`
+    : tab === "reports" && reports.length >= ADMIN_LIST_CAP.reports ? `Only the latest ${ADMIN_LIST_CAP.reports} reports are loaded — older ones are not included.`
+    : tab === "users" && users.length >= ADMIN_LIST_CAP.users ? `Only the latest ${ADMIN_LIST_CAP.users} users are loaded — older ones are not included.`
+    : undefined;
+
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: 1080 }}>
@@ -159,9 +280,9 @@ export default function AdminPage() {
           {(["overview", "users", "orders", "bookings", "reports"] as const).map((tb) => (
             <button key={tb} className={`btn btn-sm ${tab === tb ? "btn-secondary" : "btn-ghost"}`} onClick={() => setTab(tb)}>
               {tb[0].toUpperCase() + tb.slice(1)}
-              {tb === "users" && ` (${users.length})`}
-              {tb === "orders" && ` (${orders.length})`}
-              {tb === "bookings" && ` (${bookings.length})`}
+              {tb === "users" && ` (${rangeActive ? `${fUsers.length} of ${users.length}` : users.length})`}
+              {tb === "orders" && ` (${rangeActive ? `${fOrders.length} of ${orders.length}` : orders.length})`}
+              {tb === "bookings" && ` (${rangeActive ? `${fBookings.length} of ${bookings.length}` : bookings.length})`}
               {tb === "reports" && reports.filter((r) => r.status === "pending_review").length > 0
                 ? ` (${reports.filter((r) => r.status === "pending_review").length} pending)`
                 : tb === "reports" ? ` (${reports.length})` : ""}
@@ -169,6 +290,27 @@ export default function AdminPage() {
           ))}
           <button className="btn btn-ghost btn-sm" onClick={() => loadAll(key)} disabled={loading}>⟳ Refresh</button>
         </div>
+
+        {tab !== "overview" && (
+          <DateFilterBar from={from} to={to} summary={filterSummary} note={capNote}
+            onChange={(f, t) => { setFrom(f); setTo(t); }} />
+        )}
+
+        {tab === "orders" && ordersByDay.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "1rem", maxHeight: 130, overflowY: "auto" }}
+            aria-label="Orders per day">
+            {ordersByDay.slice(0, 62).map(([d, e]) => (
+              <div key={d} style={{ border: "1px solid rgba(201,154,58,0.45)", borderRadius: 2, padding: "0.3rem 0.6rem", fontSize: "0.76rem", background: "var(--panel)", fontVariantNumeric: "tabular-nums" }}>
+                <span style={{ color: "var(--muted)" }}>
+                  {new Date(`${d}T00:00:00`).toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short" })}
+                </span>
+                {" · "}<strong style={{ color: "var(--maroon-deep)" }}>{plural(e.n, "order")}</strong>
+                {e.rev > 0 && <span style={{ color: "var(--ink-light)" }}> · {rupees(e.rev)}</span>}
+              </div>
+            ))}
+            {ordersByDay.length > 62 && <span style={{ fontSize: "0.76rem", color: "var(--muted)", alignSelf: "center" }}>+{ordersByDay.length - 62} earlier days</span>}
+          </div>
+        )}
 
         {tab === "overview" && ov && (
           <>
@@ -229,7 +371,7 @@ export default function AdminPage() {
                   </th>
                 </tr></thead>
                 <tbody>
-                  {users.map((u) => (
+                  {fUsers.map((u) => (
                     <tr key={u.id}>
                       <td style={td}>{u.email}</td>
                       <td style={td}>{u.name || "—"}</td>
@@ -239,7 +381,7 @@ export default function AdminPage() {
                       <td style={{ ...td, fontWeight: 700 }}>₹{u.spent_inr}</td>
                     </tr>
                   ))}
-                  {users.length === 0 && <tr><td style={td} colSpan={6}>No users yet</td></tr>}
+                  {fUsers.length === 0 && <tr><td style={td} colSpan={6}>{users.length === 0 ? "No users yet" : "No users joined in this date range"}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -256,7 +398,7 @@ export default function AdminPage() {
                   <th style={th}>AI Cost</th><th style={th}>₹</th>
                 </tr></thead>
                 <tbody>
-                  {orders.map((o) => (
+                  {fOrders.map((o) => (
                     <tr key={o.id}>
                       <td style={{ ...td, whiteSpace: "nowrap" }}>{fmt(o.created_at)}</td>
                       <td style={{ ...td, maxWidth: 260 }} className="devanagari">{o.question}</td>
@@ -268,7 +410,7 @@ export default function AdminPage() {
                       <td style={{ ...td, fontWeight: 700 }}>{o.amount_inr}</td>
                     </tr>
                   ))}
-                  {orders.length === 0 && <tr><td style={td} colSpan={8}>No orders yet</td></tr>}
+                  {fOrders.length === 0 && <tr><td style={td} colSpan={8}>{orders.length === 0 ? "No orders yet" : "No orders in this date range"}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -284,7 +426,7 @@ export default function AdminPage() {
                   <th style={th}>WhatsApp</th><th style={th}>Birth</th><th style={th}>Status</th><th style={th}>₹</th>
                 </tr></thead>
                 <tbody>
-                  {bookings.map((b) => (
+                  {fBookings.map((b) => (
                     <tr key={b.id}>
                       <td style={{ ...td, whiteSpace: "nowrap" }}>{fmt(b.created_at)}</td>
                       <td style={td}>{b.reading_slug}</td>
@@ -295,7 +437,7 @@ export default function AdminPage() {
                       <td style={{ ...td, fontWeight: 700 }}>{b.amount_inr ?? "—"}</td>
                     </tr>
                   ))}
-                  {bookings.length === 0 && <tr><td style={td} colSpan={7}>No bookings yet</td></tr>}
+                  {fBookings.length === 0 && <tr><td style={td} colSpan={7}>{bookings.length === 0 ? "No bookings yet" : "No bookings in this date range"}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -311,7 +453,7 @@ export default function AdminPage() {
                   <th style={th}>Status</th><th style={th}>AI Cost</th><th style={th}>₹</th><th style={th}>Actions</th>
                 </tr></thead>
                 <tbody>
-                  {reports.map((r) => (
+                  {fReports.map((r) => (
                     <tr key={r.id}>
                       <td style={{ ...td, whiteSpace: "nowrap" }}>{fmt(r.created_at)}</td>
                       <td style={td}>{r.name || "—"}<br /><span style={{ color: "var(--muted)", fontSize: "0.72rem" }}>{r.email || r.whatsapp}</span></td>
@@ -344,7 +486,7 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
-                  {reports.length === 0 && <tr><td style={td} colSpan={7}>No reports yet</td></tr>}
+                  {fReports.length === 0 && <tr><td style={td} colSpan={7}>{reports.length === 0 ? "No reports yet" : "No reports in this date range"}</td></tr>}
                 </tbody>
               </table>
             </div>

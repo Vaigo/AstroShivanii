@@ -395,10 +395,16 @@ export interface AdminUserRow extends SiteUser {
 }
 
 const adminHeaders = (key: string) => ({ "X-Admin-Key": key });
+
+/** Row caps the backend enforces per admin list (min(limit, cap)). The admin date
+ *  filter runs client-side, so it asks for the maximum — the default (200-300 rows)
+ *  would silently hide older days. */
+export const ADMIN_LIST_CAP = { users: 1000, orders: 2000, bookings: 2000, reports: 1000 } as const;
+
 export const adminOverview = (key: string) => siteFetch<AdminOverview>("/v1/site/admin/overview", { headers: adminHeaders(key) });
-export const adminUsers = (key: string) => siteFetch<{ users: AdminUserRow[] }>("/v1/site/admin/users", { headers: adminHeaders(key) });
-export const adminOrders = (key: string) => siteFetch<{ orders: TuOrder[] }>("/v1/site/admin/orders", { headers: adminHeaders(key) });
-export const adminBookings = (key: string) => siteFetch<{ bookings: SiteBooking[] }>("/v1/site/admin/bookings", { headers: adminHeaders(key) });
+export const adminUsers = (key: string) => siteFetch<{ users: AdminUserRow[] }>(`/v1/site/admin/users?limit=${ADMIN_LIST_CAP.users}`, { headers: adminHeaders(key) });
+export const adminOrders = (key: string) => siteFetch<{ orders: TuOrder[] }>(`/v1/site/admin/orders?limit=${ADMIN_LIST_CAP.orders}`, { headers: adminHeaders(key) });
+export const adminBookings = (key: string) => siteFetch<{ bookings: SiteBooking[] }>(`/v1/site/admin/bookings?limit=${ADMIN_LIST_CAP.bookings}`, { headers: adminHeaders(key) });
 
 /* ── kundli deluxe PDF reports ── */
 export interface ReportJob {
@@ -410,7 +416,7 @@ export interface ReportJob {
   ai_cost_usd?: number | null;
 }
 
-export const adminReports = (key: string) => siteFetch<{ reports: ReportJob[] }>("/v1/site/admin/reports", { headers: adminHeaders(key) });
+export const adminReports = (key: string) => siteFetch<{ reports: ReportJob[] }>(`/v1/site/admin/reports?limit=${ADMIN_LIST_CAP.reports}`, { headers: adminHeaders(key) });
 export const adminReportApprove = (key: string, jobId: number) =>
   siteFetch<{ status: string }>(`/v1/site/admin/reports/${jobId}/approve`, { method: "POST", headers: adminHeaders(key) });
 export const adminReportReject = (key: string, jobId: number) =>
