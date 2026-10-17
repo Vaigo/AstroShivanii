@@ -209,12 +209,12 @@ export default function TarotTool() {
               if (!text) return null;
               const domain = card.domain && isHi ? DOMAIN_HI[card.domain] ?? card.domain : card.domain;
               const elementLine = [pickField(card, "element", isHi), domain].filter(Boolean).join(" · ");
-              // Keyword chips: the API's keywords are English only, so Hindi
-              // mode shows none rather than English (or an unreviewed site-side
-              // translation of 270 deck-specific words). Nothing is lost: on
-              // suit cards they are just [domain, rank, element], all already
-              // shown in Hindi here, and the Hindi interpretation above carries
-              // the major cards' meaning. A future keywords_hi would show here.
+              // Keyword chips: keywords in English mode, their Hindi twin
+              // keywords_hi (same order) in Hindi mode. Older API versions send
+              // no keywords_hi; Hindi mode then shows no chips rather than
+              // English ones. Nothing is lost: on suit cards they are just
+              // [domain, rank, element], all already shown in Hindi here, and
+              // the Hindi interpretation above carries the major cards' meaning.
               const chips = (isHi ? card.keywords_hi : card.keywords) ?? [];
               return (
                 <div key={`interp-${i}`} className="result-box" style={{ marginTop: "0.75rem" }}>
