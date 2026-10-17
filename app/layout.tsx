@@ -9,26 +9,66 @@ import StructuredData from "@/components/StructuredData";
 import BackToTop from "@/components/BackToTop";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
+// Fonts. Every weight/style declared here is used somewhere (audited across
+// pages, both languages, phone + desktop, tool results included); Fraunces 500
+// and the italic weights other than 700 were not, so they are gone.
+//
+// Preloads (next/font preloads a call's `subsets` unless `preload: false`)
+// compete with the homepage hero image, the LCP element on phones. So exactly
+// the files the homepage's first render on a phone requests are preloaded
+// (Hindi, the static default; that render includes the footer):
+// - not preloaded: Fraunces italic (reading cards' corner label) and Mukta 500
+//   (desktop nav, phone menu) — that render never asks for them;
+// - preloaded: the first screen's fonts (incl. Tiro Latin, for the spaces in
+//   its Devanagari lines) plus Mukta 600/700 and Mukta 400 Latin Extended (₹ in
+//   the footer). That render asks for all of them; left to be found after the
+//   first layout, they made Lighthouse's FCP worse.
+// A family split over several calls is still one family (the generated
+// @font-face uses the plain family name). Only the first call's CSS variable
+// is used; the others sit on <html> so their @font-face rules always ship.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800", "900"],
-  style: ["normal", "italic"],
+  weight: ["400", "700", "800", "900"], // one variable file serves them all
+  style: "normal",
   display: "swap",
+});
+// Italic is only used at 700, so only 700 is asked for; Google then serves a
+// static 700 instance (23 KB instead of the 46 KB variable file).
+const frauncesItalic = Fraunces({
+  variable: "--font-fraunces-italic",
+  subsets: ["latin"],
+  weight: "700",
+  style: "italic",
+  display: "swap",
+  preload: false,
 });
 
 const tiroDevanagari = Tiro_Devanagari_Hindi({
   variable: "--font-tiro-devanagari",
-  subsets: ["devanagari"],
+  subsets: ["devanagari", "latin"],
   weight: "400",
   display: "swap",
 });
 
 const mukta = Mukta({
   variable: "--font-mukta",
-  subsets: ["devanagari", "latin"],
-  weight: ["400", "500", "600", "700"],
+  subsets: ["devanagari", "latin", "latin-ext"],
+  weight: "400",
   display: "swap",
+});
+const muktaBold = Mukta({
+  variable: "--font-mukta-bold",
+  subsets: ["devanagari", "latin"],
+  weight: ["600", "700"],
+  display: "swap",
+});
+const mukta500 = Mukta({
+  variable: "--font-mukta-500",
+  subsets: ["devanagari", "latin"],
+  weight: "500",
+  display: "swap",
+  preload: false,
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
@@ -80,7 +120,7 @@ export default function RootLayout({
   return (
     <html
       lang="hi"
-      className={`${fraunces.variable} ${tiroDevanagari.variable} ${mukta.variable}`}
+      className={[fraunces, frauncesItalic, tiroDevanagari, mukta, muktaBold, mukta500].map((f) => f.variable).join(" ")}
       style={
         {
           "--font-display": "var(--font-fraunces), Georgia, serif",
