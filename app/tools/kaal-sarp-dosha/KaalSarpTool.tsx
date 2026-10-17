@@ -12,7 +12,7 @@ import { fetchSpecialYogas } from "@/lib/api/endpoints";
 import type { BirthRequest, SpecialYogasResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
-import { PLANET_HI } from "@/lib/hindi-labels";
+import { PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
 
 const DIRECTION_LABEL: Record<string, { en: string; hi: string }> = {
   "Udit Golardha (Rahu→Ketu)": { en: "Udit Golardha (Rahu → Ketu)", hi: "उदित गोलार्ध (राहु → केतु)" },
@@ -76,7 +76,7 @@ export default function KaalSarpTool() {
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
             <BirthForm onSubmit={handleSubmit} loading={loading} />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

@@ -10,7 +10,7 @@ import { fetchRashifal, fetchWeeklyRashifal } from "@/lib/api/endpoints";
 import type { RashiPrediction, WeeklyRashifalResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
-import { PLANET_HI, colorHi, weekdayHi } from "@/lib/hindi-labels";
+import { PLANET_HI, colorHi, weekdayHi, pickMessageLang } from "@/lib/hindi-labels";
 import { todayInZone } from "@/lib/timezone";
 
 /* ︎ forces TEXT presentation — without it Windows/Android render zodiac
@@ -166,7 +166,7 @@ export default function RashifalTool() {
           </form>
         </PatrikaFrame>
 
-        {error && <p className="form-error">{error}</p>}
+        {error && <p className="form-error">{pickMessageLang(error, isHi)}</p>}
 
         {loading && (
           <div style={{ textAlign: "center" }}>

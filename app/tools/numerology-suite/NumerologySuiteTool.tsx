@@ -9,6 +9,7 @@ import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
 import { calcMulank, calcBhagyank } from "@/lib/numerology-calc";
 import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { NumerologySuiteResult } from "@/lib/api/types";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 declare global {
   interface Window {
@@ -294,7 +295,7 @@ export default function NumerologySuiteTool() {
                   {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
-                {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{resultError}</p>}
+                {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(resultError, isHi)}</p>}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
               </div>
             </PatrikaFrame>

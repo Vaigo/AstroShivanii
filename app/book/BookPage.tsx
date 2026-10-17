@@ -11,6 +11,7 @@ import { READINGS, readingName, getReading } from "@/lib/readings";
 import { createPaymentOrder, verifyPayment, SiteApiError } from "@/lib/api/site";
 import BirthForm from "@/components/BirthForm";
 import type { BirthRequest } from "@/lib/api/types";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
 
@@ -322,7 +323,7 @@ function BookForm() {
           )}
         </div>
 
-        {error && <p className="form-error" style={{ marginBottom: "1rem" }}>{error}</p>}
+        {error && <p className="form-error" style={{ marginBottom: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
 
         {/* Order summary — the user should see exactly what they're paying for
             BEFORE the pay button, not only inside its label. */}

@@ -225,7 +225,11 @@ export interface TarotCard {
   element?: string;
   element_hi?: string;
   domain?: string;
+  /** English only today (270 distinct words across the 4 decks). Should the
+   *  API add the conventional Hindi twin keywords_hi, the Tarot tool shows
+   *  it in Hindi mode; until then it shows no keyword chips in Hindi. */
   keywords: string[];
+  keywords_hi?: string[];
   position: string;                      // "card_1"…
   position_hi?: string;                  // "कार्ड 1"… (newer API versions)
   reversed: boolean;

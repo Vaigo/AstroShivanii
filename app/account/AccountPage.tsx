@@ -11,6 +11,7 @@ import {
   siteLogin, siteRegister, fetchHistory, getStoredUser, getSiteToken, clearSession,
   downloadMyReport, SiteApiError, type SiteUser, type TuOrder, type SiteBooking, type RectificationOrder,
 } from "@/lib/api/site";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 const CATEGORY_HI: Record<string, { hi: string; en: string }> = {
   love: { hi: "प्रेम", en: "Love" }, breakup: { hi: "ब्रेकअप", en: "Breakup" },
@@ -141,7 +142,7 @@ export default function AccountPage() {
                   onChange={(e) => setPassword(e.target.value)} />
               </div>
 
-              {error && <p className="form-error" style={{ marginBottom: "0.75rem" }}>{error}</p>}
+              {error && <p className="form-error" style={{ marginBottom: "0.75rem" }}>{pickMessageLang(error, isHi)}</p>}
 
               <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: "100%" }}>
                 {busy ? "…" : mode === "login" ? (isHi ? "लॉगिन करें" : "Log In") : (isHi ? "खाता बनाएं" : "Create Account")}

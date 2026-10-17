@@ -11,7 +11,7 @@ import { fetchVarshphalYearLord } from "@/lib/api/endpoints";
 import { createPaymentOrder, verifyPayment, fetchVarshphalYearlyResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { BirthRequest, VarshphalYearLordResult, VarshphalYearlyResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
-import { pickLang, PLANET_HI } from "@/lib/hindi-labels";
+import { pickLang, PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
 
 /** Classical Tajika office-bearer roles — a fixed 5-value enum from the
  *  backend (varshphal.py::_compute_varshesha), Sanskrit terms with no
@@ -304,7 +304,7 @@ export default function VarshphalYearlyTool() {
               >
                 {isHi ? "आगे बढ़ें" : "Continue"}
               </button>
-              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
             </PatrikaFrame>
           </div>
         )}
@@ -394,7 +394,7 @@ export default function VarshphalYearlyTool() {
                   {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
-                {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{resultError}</p>}
+                {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(resultError, isHi)}</p>}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
               </div>
             </PatrikaFrame>

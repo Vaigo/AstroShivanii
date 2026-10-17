@@ -21,6 +21,26 @@ export function pickLang(text: string | undefined | null, isHi: boolean): string
   return isHi ? hi : en;
 }
 
+/** API error messages carry both languages in one string, English first:
+ *  "Invalid API key | API key गलत है" (GrahaAPI's convention — ApiError and
+ *  SiteApiError pass it through as their message, and client.ts's own SETUP
+ *  error follows it). Returns the half for the current language; call it
+ *  where the message is rendered so it follows a later language switch.
+ *  Splits on the LAST " | " — the English half may quote an underlying
+ *  reason, the Hindi half is fixed text. Should a message ever come Hindi-
+ *  first, the half written in Devanagari still counts as the Hindi one. A
+ *  message without " | " (the site's own one-language fallbacks) comes back
+ *  unchanged. */
+export function pickMessageLang(text: string, isHi: boolean): string {
+  const i = text.lastIndexOf(" | ");
+  if (i < 0) return text;
+  const first = text.slice(0, i).trim();
+  const second = text.slice(i + 3).trim();
+  const hindiFirst = DEVANAGARI.test(first) && !DEVANAGARI.test(second);
+  const [en, hi] = hindiFirst ? [second, first] : [first, second];
+  return (isHi ? hi : en) || text;
+}
+
 /** One text field that the API sends either split — `key` (English) plus
  *  `key_hi` (Hindi), the current shape — or, on older API versions, as one
  *  combined "हिंदी / English" string in `key`. Prefers the split shape and

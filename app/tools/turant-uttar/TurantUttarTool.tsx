@@ -20,7 +20,7 @@ declare global {
   }
 }
 import { resolveTier, getFactSheet, type FactSheet } from "@/lib/turant-uttar-engine";
-import { PLANET_HI } from "@/lib/hindi-labels";
+import { PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
 import {
   CATEGORIES, CONTENT, FALLBACK_CATEGORY, matchCategory, matchFeatureRedirect, isMetaQuestion,
   type CategoryKey, type Tier, type FeatureRedirect,
@@ -538,7 +538,7 @@ function TurantUttarInner() {
               >
                 {t("form.calculate")}
               </button>
-              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
             </PatrikaFrame>
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>
               <button

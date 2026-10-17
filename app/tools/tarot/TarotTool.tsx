@@ -10,7 +10,7 @@ import { fetchTarot } from "@/lib/api/endpoints";
 import type { TarotResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
-import { pickField } from "@/lib/hindi-labels";
+import { pickField, pickMessageLang } from "@/lib/hindi-labels";
 
 /** Hindi for the Rider-Waite suit domains — the API sends domain in English
  *  only (same wording as GrahaAPI's own Hindi for /tarot/interpretation). */
@@ -130,7 +130,7 @@ export default function TarotTool() {
           </form>
         </PatrikaFrame>
 
-        {error && <p className="form-error">{error}</p>}
+        {error && <p className="form-error">{pickMessageLang(error, isHi)}</p>}
 
         {loading && (
           <div style={{ textAlign: "center", padding: "2rem" }}>
@@ -207,6 +207,13 @@ export default function TarotTool() {
               if (!text) return null;
               const domain = card.domain && isHi ? DOMAIN_HI[card.domain] ?? card.domain : card.domain;
               const elementLine = [pickField(card, "element", isHi), domain].filter(Boolean).join(" · ");
+              // Keyword chips: the API's keywords are English only, so Hindi
+              // mode shows none rather than English (or an unreviewed site-side
+              // translation of 270 deck-specific words). Nothing is lost: on
+              // suit cards they are just [domain, rank, element], all already
+              // shown in Hindi here, and the Hindi interpretation above carries
+              // the major cards' meaning. A future keywords_hi would show here.
+              const chips = (isHi ? card.keywords_hi : card.keywords) ?? [];
               return (
                 <div key={`interp-${i}`} className="result-box" style={{ marginTop: "0.75rem" }}>
                   <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
@@ -229,10 +236,10 @@ export default function TarotTool() {
                       <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.7 }}>
                         {text}
                       </p>
-                      {card.keywords && card.keywords.length > 0 && (
+                      {chips.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginTop: "0.5rem" }}>
-                          {card.keywords.slice(0, 4).map((k) => (
-                            <span key={k} className="trait-chip" style={{ fontSize: "0.68rem" }}>{k}</span>
+                          {chips.slice(0, 4).map((k) => (
+                            <span key={k} className={`trait-chip${isHi ? " devanagari" : ""}`} style={{ fontSize: "0.68rem" }}>{k}</span>
                           ))}
                         </div>
                       )}

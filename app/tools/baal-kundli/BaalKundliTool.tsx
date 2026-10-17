@@ -13,6 +13,7 @@ import { ageYearsAndStage } from "@/lib/childAge";
 import type { BirthRequest, KundliFullResult, MahadashaListResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 export default function BaalKundliTool() {
   const { t, lang } = useI18n();
@@ -133,7 +134,7 @@ export default function BaalKundliTool() {
             >
               {loading ? t("form.calculating") : t("form.calculate")}
             </button>
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

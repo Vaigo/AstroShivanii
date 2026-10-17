@@ -12,7 +12,7 @@ import { fetchLuckyColors } from "@/lib/api/endpoints";
 import type { BirthRequest, LuckyColorsResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
-import { SIGN_HI, PLANET_HI, colorHi } from "@/lib/hindi-labels";
+import { SIGN_HI, PLANET_HI, colorHi, pickMessageLang } from "@/lib/hindi-labels";
 
 /** Best-effort CSS color for a name returned by the API — most (Red, Gold,
  *  Blue, White, Black…) are valid CSS keywords already; a small fallback
@@ -127,7 +127,7 @@ export default function LuckyColorsTool() {
                 ? "यह उपकरण आपकी लग्न (Ascendant) पर आधारित है, जो लगभग हर 2 घंटे में बदलती है — सटीक जन्म समय दिए बिना परिणाम अनुमानित (सूर्योदय-कुंडली) रहता है।"
                 : "This tool is based on your Ascendant, which shifts roughly every 2 hours — without an exact birth time, the result stays an approximation (calculated from a sunrise chart)."}
             </p>
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

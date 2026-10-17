@@ -13,6 +13,7 @@ import {
   type MuhurtaPurpose, type MuhurtaPreviewResult, type MuhurtaFullResult, type MuhurtaDate, getStoredUser,
 } from "@/lib/api/site";
 import type { BirthRequest } from "@/lib/api/types";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 declare global {
   interface Window {
@@ -464,7 +465,7 @@ export default function ShubhMuhurtaTool() {
                   ? "तारीखें आपकी कुंडली से जांची जाती हैं — ताराबल आपके जन्म-नक्षत्र से, चंद्राष्टम आपकी राशि से। इसीलिए एक ही तारीख किसी के लिए शुभ और किसी के लिए नहीं होती।"
                   : "Dates are checked against YOUR chart — tarabala from your birth star, chandrashtama from your Moon sign. That's why the same date can be right for one person and wrong for another."}
               </p>
-              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
             </PatrikaFrame>
           </div>
         )}
@@ -528,7 +529,7 @@ export default function ShubhMuhurtaTool() {
                     >
                       {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                     </button>
-                    {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
+                    {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(payError, isHi)}</p>}
                     <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
                   </div>
                 </>

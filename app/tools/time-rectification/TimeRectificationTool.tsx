@@ -13,7 +13,7 @@ import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints
 import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError, getStoredUser } from "@/lib/api/site";
 import type { BirthRequest, AscendantOptionsResult, AscendantWindow, EventScoreResult, KpRulingResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
-import { PLANET_HI } from "@/lib/hindi-labels";
+import { PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
 import { NAKSHATRAS } from "@/lib/nakshatras";
 
 const nakHi = (name: string) => NAKSHATRAS.find((n) => n.name === name)?.name_hi ?? name;
@@ -399,7 +399,7 @@ export default function TimeRectificationTool() {
               >
                 {isHi ? "आगे बढ़ें" : "Continue"}
               </button>
-              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+              {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
             </PatrikaFrame>
           </div>
         )}
@@ -661,7 +661,7 @@ export default function TimeRectificationTool() {
                 )}
                 {resultError && (
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>
-                    {resultError}
+                    {pickMessageLang(resultError, isHi)}
                   </p>
                 )}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>

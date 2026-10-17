@@ -15,6 +15,7 @@ import {
 import {
   LINE_MEANINGS, LINE_QUALITY_NOTES, MOUNT_MEANINGS, PROMINENCE_LABEL, SHAPE_MEANINGS, splitBold,
 } from "@/lib/palmistry-meanings";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 declare global {
   interface Window {
@@ -687,7 +688,7 @@ export default function PalmistryTool() {
                   {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE + (timingAddon && palmBirth ? TIMING_ADDON_PRICE : 0)} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE + (timingAddon && palmBirth ? TIMING_ADDON_PRICE : 0)} — UPI / Card`)}
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
-                {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{resultError}</p>}
+                {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(resultError, isHi)}</p>}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
               </div>
             </PatrikaFrame>

@@ -8,7 +8,7 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import Icon from "@/components/Icon";
 import ResultCTA from "@/components/ResultCTA";
-import { PLANET_HI, PLANET_GLYPH } from "@/lib/hindi-labels";
+import { PLANET_HI, PLANET_GLYPH, pickMessageLang } from "@/lib/hindi-labels";
 import { fetchLalKitab } from "@/lib/api/endpoints";
 import type { BirthRequest, LalKitabFullResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
@@ -124,7 +124,7 @@ export default function LalKitabTool() {
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
             <BirthForm onSubmit={handleSubmit} loading={loading} />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

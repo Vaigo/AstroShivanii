@@ -9,7 +9,7 @@ import Divider from "@/components/Divider";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import ResultCTA from "@/components/ResultCTA";
-import { SIGN_HI } from "@/lib/hindi-labels";
+import { SIGN_HI, pickMessageLang } from "@/lib/hindi-labels";
 import { fetchSadeSati } from "@/lib/api/endpoints";
 import type { BirthRequest, SadeSatiResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
@@ -85,7 +85,7 @@ export default function SadeSatiTool() {
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
             <BirthForm onSubmit={handleSubmit} loading={loading} />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

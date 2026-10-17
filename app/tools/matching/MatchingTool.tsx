@@ -13,7 +13,7 @@ import type { BirthRequest, AshtakootResult, MangalDoshaResult } from "@/lib/api
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 import { NAKSHATRAS } from "@/lib/nakshatras";
-import { pickField } from "@/lib/hindi-labels";
+import { PLANET_HI, pickField, pickMessageLang } from "@/lib/hindi-labels";
 
 const nakHi = (name?: string) => (name ? NAKSHATRAS.find((n) => n.name === name)?.name_hi ?? name : "—");
 
@@ -43,8 +43,9 @@ const VAL_HI: Record<string, string> = {
   Deva: "देव", Manushya: "मनुष्य", Rakshasa: "राक्षस",
   // nadi
   Adi: "आदि", Madhya: "मध्य", Antya: "अंत्य",
-  // moon-sign lords
-  Sun: "सूर्य", Moon: "चंद्र", Mars: "मंगल", Mercury: "बुध", Jupiter: "गुरु", Venus: "शुक्र", Saturn: "शनि",
+  // planets: the moon-sign lords (Sun…Saturn) and the nakshatra lords, which
+  // also include Rahu and Ketu (lords of 6 of the 27 nakshatras)
+  ...PLANET_HI,
 };
 const TARA_NAME_HI = ["", "जन्म", "सम्पत", "विपत", "क्षेम", "प्रत्यरि", "साधक", "वध", "मित्र", "परम मैत्र"];
 const TARA_NAME_EN = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhaka", "Vadha", "Mitra", "Param Maitra"];
@@ -340,7 +341,7 @@ export default function MatchingTool() {
           </div>
         </form>
 
-        {error && <p className="form-error" style={{ marginTop: "1rem", textAlign: "center" }}>{error}</p>}
+        {error && <p className="form-error" style={{ marginTop: "1rem", textAlign: "center" }}>{pickMessageLang(error, isHi)}</p>}
 
         {loading && (
           <div style={{ textAlign: "center", padding: "3rem" }}>
@@ -427,7 +428,7 @@ export default function MatchingTool() {
                           {isHi ? name : nameHi}
                         </span>
                         {key === "nadi" && (koota as { nadi_dosha?: boolean }).nadi_dosha && (
-                          <span style={{ color: "#c0392b", marginLeft: "0.35rem", fontSize: "0.7rem" }}>⚠ Dosha</span>
+                          <span style={{ color: "#c0392b", marginLeft: "0.35rem", fontSize: "0.7rem" }}>⚠ {isHi ? "दोष" : "Dosha"}</span>
                         )}
                       </div>
                       <ScoreBar score={koota.score} max={koota.max} />

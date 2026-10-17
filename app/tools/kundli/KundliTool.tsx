@@ -8,7 +8,7 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import KundliResultView from "@/components/KundliResultView";
-import { PLANET_HI } from "@/lib/hindi-labels";
+import { PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
 import { fetchKundli, fetchMahadashaList } from "@/lib/api/endpoints";
 import type { BirthRequest, KundliFullResult, MahadashaListResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
@@ -91,7 +91,7 @@ export default function KundliTool() {
         <div style={{ maxWidth: "480px", margin: "0 auto" }}>
           <PatrikaFrame>
             <BirthForm onSubmit={handleSubmit} loading={loading} requireTime />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

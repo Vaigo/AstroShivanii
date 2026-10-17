@@ -12,7 +12,7 @@ import { fetchPersonalYear } from "@/lib/api/endpoints";
 import type { PersonalYearResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
-import { pickLang } from "@/lib/hindi-labels";
+import { pickLang, pickMessageLang } from "@/lib/hindi-labels";
 
 export default function PersonalYearTool() {
   const { t, lang } = useI18n();
@@ -76,7 +76,7 @@ export default function PersonalYearTool() {
                 hi: "आपका व्यक्तिगत वर्षांक केवल इस तारीख और चालू कैलेंडर वर्ष से निकाला जाता है — इसके लिए नाम की ज़रूरत नहीं।",
               }}
             />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

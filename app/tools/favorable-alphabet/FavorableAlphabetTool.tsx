@@ -12,6 +12,7 @@ import { fetchFirstLetter } from "@/lib/api/endpoints";
 import type { FirstLetterResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 export default function FavorableAlphabetTool() {
   const { t, lang } = useI18n();
@@ -86,7 +87,7 @@ export default function FavorableAlphabetTool() {
                 hi: "यह उपकरण केवल पहले और अंतिम अक्षर (Cornerstone और Capstone) को पढ़ता है — नाम ठीक वैसे ही लिखें जैसा जांचना है। उपनाम या छोटा नाम आपके पूरे कानूनी नाम से अलग Cornerstone/Capstone देगा।",
               }}
             />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

@@ -12,6 +12,7 @@ import { fetchKarmicDebt, fetchMissingNumbers } from "@/lib/api/endpoints";
 import type { KarmicDebtResult, MissingNumbersResult, KarmicDebtPosition } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
+import { pickMessageLang } from "@/lib/hindi-labels";
 
 const POSITION_LABEL: Record<KarmicDebtPosition, { en: string; hi: string }> = {
   birth_day: { en: "Birth Day", hi: "जन्म दिन" },
@@ -89,7 +90,7 @@ export default function KarmicDebtTool() {
                 hi: "अंक-दर-अंक जांचा जाता है — आपका जन्म दिन और पूरी जन्म तिथि ही तय करते हैं कि कौन-से अंक (13, 14, 16, 19) कार्मिक ऋण के रूप में मिलते हैं, और लो शु ग्रिड में कौन-से 1–9 अंक अनुपस्थित हैं।",
               }}
             />
-            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
+            {error && <p className="form-error" style={{ marginTop: "1rem" }}>{pickMessageLang(error, isHi)}</p>}
           </PatrikaFrame>
         </div>
 

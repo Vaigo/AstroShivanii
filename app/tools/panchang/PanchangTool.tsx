@@ -17,7 +17,7 @@ import { fetchPanchang, fetchRahuKaal, fetchMuhurta, fetchFestivals } from "@/li
 import type { PanchangFullResult, RahuKaalResult, MuhurtaSlot, FestivalItem, MasaInfo, PanchangDayInfo } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
-import { PLANET_HI, weekdayHi, yogaNameHi, karanaNameHi, moonPhaseHi } from "@/lib/hindi-labels";
+import { PLANET_HI, weekdayHi, yogaNameHi, karanaNameHi, moonPhaseHi, pickMessageLang } from "@/lib/hindi-labels";
 
 /** Today's date AS OBSERVED in `tzName` — never `toISOString()`'s UTC date,
  *  which silently returns YESTERDAY for any IST-side viewer for the ~5.5
@@ -527,7 +527,7 @@ export default function PanchangTool() {
         </div>
       </PatrikaFrame>
 
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className="form-error">{pickMessageLang(error, isHi)}</p>}
 
       {view === "month" && (
         <PatrikaFrame style={{ marginBottom: "1.5rem" }}>
