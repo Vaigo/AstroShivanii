@@ -793,6 +793,33 @@ a:hover { color: var(--saffron); }
 .hero-stagger > *:nth-child(3) { animation-delay: 180ms; }
 .hero-stagger > *:nth-child(4) { animation-delay: 270ms; }
 .hero-stagger > *:nth-child(5) { animation-delay: 360ms; }
+/* Phones: the hero is simply there from the first paint of the static HTML,
+   like the scroll reveals above. The stagger starts every item at opacity 0,
+   and Chrome only counts such content as painted at a later main-thread
+   paint — typically after hydration — so on phones the hero (Ganesha, name)
+   registered as the Largest Contentful Paint seconds after it was really
+   shown. (.hero-stagger > .hero-ganesha outranks the .hero-ganesha rule
+   further down, which carries its own entrance animation.) */
+@media (max-width: 768px) {
+  .hero-stagger > *,
+  .hero-stagger > .hero-ganesha {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* ─── Homepage: lazy rendering below the fold ───────────────────────────────── */
+/* The phone homepage is ~20,000 px of mostly Devanagari text; laying all of it
+   out before the first paint was the single biggest main-thread cost (and the
+   main source of Total Blocking Time). content-visibility: auto skips style,
+   layout and paint for sections far from the viewport and renders each one as
+   it approaches — no visual change. `auto` remembers each section's real height
+   once rendered; 1000px is only the first-time placeholder estimate. Only the
+   homepage hero carries .home-hero, so this touches nothing else. */
+.home-hero ~ section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1000px;
+}
 
 /* ─── Patrika Frame hover lift ──────────────────────────────────────────────── */
 .patrika-frame {

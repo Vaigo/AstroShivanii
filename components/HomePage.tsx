@@ -67,7 +67,9 @@ export default function HomePage() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      {/* .home-hero: every <section> after it renders lazily (globals.css) */}
       <section
+        className="home-hero"
         style={{
           minHeight: "88vh",
           display: "flex",
@@ -90,9 +92,17 @@ export default function HomePage() {
 
           <PatrikaFrame style={{ padding: "2.25rem 2.5rem 3rem" }}>
             <div className="hero-stagger">
+              {/* The LCP element on phones. Pre-sized WebP (shown at 120 CSS px,
+                  92 px on phones; 1x–3x variants) fetched at high priority —
+                  React hoists a matching <link rel="preload"> into <head>. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/ganesha.png"
+                src="/ganesha-240.webp"
+                srcSet="/ganesha-120.webp 120w, /ganesha-240.webp 240w, /ganesha-360.webp 360w"
+                sizes="(max-width: 600px) 92px, 120px"
+                width={120}
+                height={120}
+                fetchPriority="high"
                 alt="श्री गणेश"
                 className="hero-ganesha"
                 onError={(e) => { e.currentTarget.style.display = "none"; }}
@@ -475,8 +485,15 @@ export default function HomePage() {
           <Reveal>
             <PatrikaFrame>
               <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+                {/* Far below the fold: lazy, so it neither competes with the
+                    hero for bandwidth nor gets preloaded into <head>. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/shivanii-profile.png"
+                  src="/shivanii-profile-240.webp"
+                  srcSet="/shivanii-profile-120.webp 120w, /shivanii-profile-240.webp 240w, /shivanii-profile-360.webp 360w"
+                  sizes="120px"
+                  loading="lazy"
+                  decoding="async"
                   alt="Shivanii — ज्योतिषाचार्य शिवानी"
                   width={120}
                   height={120}

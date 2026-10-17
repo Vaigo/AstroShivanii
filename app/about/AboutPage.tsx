@@ -17,8 +17,12 @@ export default function AboutPage() {
 
         <PatrikaFrame>
           <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start", marginBottom: "2rem", flexWrap: "wrap" }}>
+            {/* Pre-sized WebP (180 CSS px, 1x–3x) instead of the 1 MB 1080 px PNG */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/shivanii-profile.png"
+              src="/shivanii-profile-360.webp"
+              srcSet="/shivanii-profile-240.webp 240w, /shivanii-profile-360.webp 360w, /shivanii-profile-540.webp 540w"
+              sizes="180px"
               alt="Shivanii — ज्योतिषाचार्य शिवानी"
               width={180}
               height={180}
