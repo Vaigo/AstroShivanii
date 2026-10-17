@@ -78,7 +78,7 @@ export default function Page() {
             ))}
           </div>
           <p style={{ fontSize: "0.85rem", color: "var(--muted)", textAlign: "center", marginTop: "1.5rem" }}>
-            Related: <Link href="/tools/panchang">Today's Panchang</Link> ·{" "}
+            Related: <Link href="/tools/panchang">Today&apos;s Panchang</Link> ·{" "}
             <Link href="/tools/sade-sati">Sade Sati Checker</Link>
           </p>
         </article>

@@ -93,11 +93,11 @@ export default function PanchangPage() {
           <p className="guide-p">
             <b>Vara (वार)</b> — the weekday, ruled by one of the seven classical planets. The vara
             changes at <i>sunrise</i>, not midnight — which is why a panchang for the early hours
-            of the morning shows the previous day's vara.
+            of the morning shows the previous day&apos;s vara.
           </p>
           <p className="guide-p">
             <b>Nakshatra (नक्षत्र)</b> — the 27-fold division of the zodiac the Moon occupies. The
-            day's nakshatra colours everything begun in it; it is also the basis of the muhurta
+            day&apos;s nakshatra colours everything begun in it; it is also the basis of the muhurta
             system and of matching (the birth nakshatra is set by this same calculation).
           </p>
           <p className="guide-p">

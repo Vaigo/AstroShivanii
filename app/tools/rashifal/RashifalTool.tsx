@@ -241,7 +241,7 @@ export default function RashifalTool() {
             <p style={{ fontSize: "0.78rem", color: "var(--muted)", textAlign: "center", marginTop: "0.5rem" }} className={isHi ? "devanagari" : undefined}>
               {isHi
                 ? <>ये चारों आज के लिए <span className="hl">सहायक ऊर्जा</span> बढ़ाने के सरल, पारंपरिक उपाय हैं — निर्णय इन पर निर्भर नहीं होने चाहिए।</>
-                : <>These four are simple, traditional ways to lean into <span className="hl">today's supportive energy</span> — not things your decisions should hinge on.</>}
+                : <>These four are simple, traditional ways to lean into <span className="hl">today&apos;s supportive energy</span> — not things your decisions should hinge on.</>}
             </p>
 
             {result.auspicious_hours?.length > 0 && (

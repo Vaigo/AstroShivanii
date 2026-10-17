@@ -79,6 +79,7 @@ export default function ShubhMuhurtaTool() {
       if (saved) {
         const s = JSON.parse(saved);
         if (s.step && s.purpose) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
           setPurpose(s.purpose);
           setBirth(s.birth ?? null);
           setMonth(s.month ?? "");
@@ -104,7 +105,6 @@ export default function ShubhMuhurtaTool() {
         }
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist the flow so refresh/tab-restore continues where the user left off.

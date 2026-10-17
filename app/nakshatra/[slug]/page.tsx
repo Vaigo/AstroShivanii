@@ -150,7 +150,7 @@ export default async function NakshatraPage({ params }: Props) {
           <p className="guide-p">
             {n.watch_out} <span className="devanagari">({n.watch_out_hi})</span> — every
             nakshatra has a shadow; naming it plainly is how this site works. No star is
-            "bad", and no shadow is a sentence.
+            &quot;bad&quot;, and no shadow is a sentence.
           </p>
 
           <h2 className="guide-h2">Matching &amp; remedies</h2>

@@ -63,12 +63,14 @@ export default function AccountPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the stored login lives in localStorage, browser-only, so it is read after hydration
     if (getSiteToken()) setUser(getStoredUser());
     setChecked(true);
   }, []);
 
   useEffect(() => {
     if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag for the history fetch this effect starts
     setLoadingHistory(true);
     fetchHistory()
       .then((h) => { setOrders(h.orders); setBookings(h.bookings); setRectifications(h.rectifications); setTotalSpent(h.total_spent_inr); })

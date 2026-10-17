@@ -24,7 +24,7 @@ export default function NotFound() {
           यह पृष्ठ ग्रहण में चला गया है
         </p>
         <p style={{ color: "var(--ink-light)", marginBottom: "2rem", fontSize: "0.95rem" }}>
-          The page you're looking for doesn't exist — but your path forward is easy to read.
+          The page you&apos;re looking for doesn&apos;t exist — but your path forward is easy to read.
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/" className="btn btn-primary">Go Home</Link>

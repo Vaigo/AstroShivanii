@@ -22,7 +22,7 @@ export default function TermsPage() {
           <h2 style={{ marginBottom: "0.75rem", fontSize: "1.2rem" }}>Disclaimer</h2>
           <p style={{ marginBottom: "1rem" }}>
             Astrology is a form of guidance, not a guarantee. Predictions and interpretations reflect
-            astrological principles and Shivanii's personal experience and should not be treated as fact.
+            astrological principles and Shivanii&apos;s personal experience and should not be treated as fact.
           </p>
           <h2 style={{ marginBottom: "0.75rem", fontSize: "1.2rem" }}>Refund policy</h2>
           <p style={{ marginBottom: "1rem" }}>

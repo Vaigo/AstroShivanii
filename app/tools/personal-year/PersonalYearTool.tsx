@@ -59,7 +59,7 @@ export default function PersonalYearTool() {
             </p>
           ) : (
             <p>
-              Your <span className="hl">Personal Year Number</span> reveals this year's dominant theme — new
+              Your <span className="hl">Personal Year Number</span> reveals this year&apos;s dominant theme — new
               beginnings, rest, relationships, or achievement. It cycles from 1 to 9 and repeats every 9 years.
             </p>
           )}

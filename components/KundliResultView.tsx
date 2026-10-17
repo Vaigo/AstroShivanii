@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
 import KundliChart from "@/components/KundliChart";
@@ -27,12 +28,14 @@ function DashaRibbon({ periods, isHi }: {
   periods: Array<{ lord: string; start: string; end: string }>;
   isHi: boolean;
 }) {
+  // "Now" for the today-marker, read once when the ribbon mounts — render
+  // stays pure, and on a decades-long ribbon the marker cannot move anyway.
+  const [now] = useState(() => Date.now());
   if (!periods.length) return null;
   const t0 = new Date(periods[0].start).getTime();
   const t1 = new Date(periods[periods.length - 1].end).getTime();
   const span = t1 - t0;
   if (span <= 0) return null;
-  const now = Date.now();
   const nowPct = now > t0 && now < t1 ? ((now - t0) / span) * 100 : null;
 
   return (

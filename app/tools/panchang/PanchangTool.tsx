@@ -47,7 +47,28 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace }: {
 }) {
   const t0 = toMins(sunrise), t1 = toMins(sunset);
   const span = t1 - t0;
-  if (span <= 0) return null;
+
+  // Labels must be hidden by actual PIXEL width, not a fixed percentage — a
+  // window at 10% of a ~700px desktop strip has room for a label, but 10%
+  // of a ~330px mobile strip (~33px) doesn't fit even "गुलिक" without
+  // butting up against its neighbor, reading as cramped/overlapping text.
+  // (Hooks first, before the early return: React needs the same hooks on
+  // every render, whatever sunrise/sunset come back.)
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [stripWidth, setStripWidth] = useState(0);
+  const hasStrip = span > 0;
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el) return;
+    const update = () => setStripWidth(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasStrip]);
+  const MIN_LABEL_PX = 42;
+
+  if (!hasStrip) return null;
   const pct = (hhmm: string) => Math.max(0, Math.min(100, ((toMins(hhmm) - t0) / span) * 100));
 
   const windows: Array<{ from: string; to: string; label: string; cls: "kaal" | "shubh" }> = [];
@@ -62,23 +83,6 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace }: {
 
   const nowMins = nowMinInPlace;
   const showNow = isToday && nowMins > t0 && nowMins < t1;
-
-  // Labels must be hidden by actual PIXEL width, not a fixed percentage — a
-  // window at 10% of a ~700px desktop strip has room for a label, but 10%
-  // of a ~330px mobile strip (~33px) doesn't fit even "गुलिक" without
-  // butting up against its neighbor, reading as cramped/overlapping text.
-  const stripRef = useRef<HTMLDivElement>(null);
-  const [stripWidth, setStripWidth] = useState(0);
-  useEffect(() => {
-    const el = stripRef.current;
-    if (!el) return;
-    const update = () => setStripWidth(el.clientWidth);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-  const MIN_LABEL_PX = 42;
 
   return (
     <div className="day-strip-wrap">
@@ -383,6 +387,7 @@ export default function PanchangTool() {
 
   // Auto-load today's panchang on first visit — the page should never feel empty.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetches today's panchang on first visit; load() sets its loading state first
     load(today(), DEFAULT_PLACE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -398,6 +403,7 @@ export default function PanchangTool() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetches the month when the month view opens; loadMonth() sets its loading state first
     if (view === "month" && place) loadMonth(monthCursor.year, monthCursor.month, place);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, monthCursor, place]);

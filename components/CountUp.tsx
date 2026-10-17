@@ -19,6 +19,7 @@ export default function CountUp({ end, suffix = "", prefix = "", duration = 1400
     if (!el) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the motion preference only exists in the browser, after the static HTML has hydrated
       setVal(end);
       return;
     }

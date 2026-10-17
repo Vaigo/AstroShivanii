@@ -375,7 +375,7 @@ export default function MatchingTool() {
                             : <>This sits right at the <span className="hl">acceptable threshold</span> — understanding exactly which kootas are weak matters before deciding.</>)
                         : (isHi
                             ? <><span className="hl">18 से कम अंक</span> का अर्थ अस्वीकृति नहीं — बल्कि यह है कि निर्णय से पहले हर कूट, दोष-निवारण और नवांश की गहन जांच अनिवार्य है।</>
-                            : <>A score <span className="hl">below 18</span> doesn't mean rejection — it means a careful, koota-by-koota review with dosha-cancellation and navamsa checks is essential before deciding.</>)}
+                            : <>A score <span className="hl">below 18</span> doesn&apos;t mean rejection — it means a careful, koota-by-koota review with dosha-cancellation and navamsa checks is essential before deciding.</>)}
                 </p>
               </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 
 /** Gives an in-page UI state (a tool's result screen, a calendar's month
  *  view …) its own browser-history entry, so the Back button unwinds that
@@ -15,8 +15,9 @@ import { useEffect, useRef } from "react";
  *  turant-uttar multi-step flow. */
 export function useBackStep(active: boolean, key: string, onBack: () => void) {
   const activeRef = useRef(false);
-  const onBackRef = useRef(onBack);
-  onBackRef.current = onBack;
+  // Effect Event: the popstate listener always calls the caller's latest
+  // onBack without being re-registered when that function changes.
+  const handleBack = useEffectEvent(() => onBack());
 
   useEffect(() => {
     if (active && !activeRef.current && !window.history.state?.[key]) {
@@ -28,7 +29,7 @@ export function useBackStep(active: boolean, key: string, onBack: () => void) {
   useEffect(() => {
     const onPop = () => {
       if (activeRef.current && !window.history.state?.[key]) {
-        onBackRef.current();
+        handleBack();
       }
     };
     window.addEventListener("popstate", onPop);

@@ -115,7 +115,7 @@ export default function LalKitabTool() {
           ) : (
             <p>
               <span className="hl">Lal Kitab</span> is a practical, simple-remedy system for reading planets in
-              houses — debts (karz), pakka ghar, and remedies you can act on immediately. See your chart's debts
+              houses — debts (karz), pakka ghar, and remedies you can act on immediately. See your chart&apos;s debts
               and remedies below.
             </p>
           )}
@@ -185,8 +185,8 @@ export default function LalKitabTool() {
               <p className="scroll-hint">{isHi ? "← अधिक देखने के लिए स्वाइप करें →" : "← Swipe to see more →"}</p>
               <p className={`result-explain${isHi ? " devanagari" : ""}`}>
                 {isHi
-                  ? <><span className="hl">पक्का घर</span> का अर्थ है "स्थायी घर" — हर ग्रह के 1-2 ऐसे भाव होते हैं जहां वह घर जैसा सहज महसूस करता है और अपना पूरा, स्थिर फल देता है। ✓ का मतलब है वह ग्रह अभी उसी स्थायी घर में बैठा है — नीचे पूरी तालिका में सभी ग्रहों के लिए यह देखा जा सकता है।</>
-                  : <><span className="hl">Pakka Ghar</span> means "permanent house" — each planet has 1–2 houses where it feels naturally at home and gives its full, steady results. A ✓ means that planet is currently sitting in its own permanent house — see the full table further below for every planet.</>}
+                  ? <><span className="hl">पक्का घर</span> का अर्थ है &quot;स्थायी घर&quot; — हर ग्रह के 1-2 ऐसे भाव होते हैं जहां वह घर जैसा सहज महसूस करता है और अपना पूरा, स्थिर फल देता है। ✓ का मतलब है वह ग्रह अभी उसी स्थायी घर में बैठा है — नीचे पूरी तालिका में सभी ग्रहों के लिए यह देखा जा सकता है।</>
+                  : <><span className="hl">Pakka Ghar</span> means &quot;permanent house&quot; — each planet has 1–2 houses where it feels naturally at home and gives its full, steady results. A ✓ means that planet is currently sitting in its own permanent house — see the full table further below for every planet.</>}
               </p>
 
               {/* ── Debts ── */}

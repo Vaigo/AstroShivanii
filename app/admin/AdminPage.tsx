@@ -146,8 +146,8 @@ export default function AdminPage() {
 
   useEffect(() => {
     const saved = window.sessionStorage.getItem(KEY_STORAGE);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the admin key is kept in sessionStorage, browser-only, so it is read after hydration
     if (saved) { setKey(saved); void loadAll(saved); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadAll(k: string) {

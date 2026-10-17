@@ -53,6 +53,7 @@ function BookForm() {
       if (saved) {
         const s = JSON.parse(saved);
         if (s.slug && Date.now() - (s.at ?? 0) < 12 * 3600 * 1000) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the receipt from sessionStorage, browser-only, so it is read after hydration
           setSlug(s.slug);
           setSuccess(true);
         } else {
@@ -60,7 +61,6 @@ function BookForm() {
         }
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const reading = getReading(slug);

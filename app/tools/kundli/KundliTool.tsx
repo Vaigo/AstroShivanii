@@ -71,7 +71,7 @@ export default function KundliTool() {
               भाव में बैठा है, और आप इस समय जीवन की किस <span className="hl">दशा (ग्रह-काल)</span> से गुज़र रहे हैं
               — सब कुछ सटीक गणना से, बिल्कुल निःशुल्क।{" "}
               <Link href="/guides/what-is-kundli" style={{ color: "var(--maroon)", fontWeight: 600 }}>
-                नए हैं? पढ़ें "कुंडली क्या है?" →
+                नए हैं? पढ़ें &quot;कुंडली क्या है?&quot; →
               </Link>
             </p>
           ) : (

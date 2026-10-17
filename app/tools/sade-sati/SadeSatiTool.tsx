@@ -152,7 +152,7 @@ export default function SadeSatiTool() {
                           : <>This is not Sade Sati but <span className="hl">Dhaiya (≈ 2.5 years)</span> — {result.dhaiya_type ?? ""} Saturn. The 4th-house transit (Kantaka) tests home, mind and comfort; the 8th-house transit (Ashtama) is linked to sudden changes. Lighter than Sade Sati, but it asks for the same steady routine and patience.</>)
                       : (isHi
                           ? <>अभी शनि आपकी चंद्र राशि ({result.natal_moon_sign_hi}) से साढ़े साती बनाने वाले भावों में नहीं है — <span className="hl">यह दौर आपके लिए सक्रिय नहीं है</span>। नीचे दी गई अगली अवधि नोट कर लें: साढ़े साती अचानक नहीं आती, शनि की धीमी चाल से वर्षों पहले उसकी तिथि निश्चित होती है — यही तैयारी का लाभ है।</>
-                          : <>Saturn is currently not in the houses that form Sade Sati from your Moon sign ({result.natal_moon_sign}) — <span className="hl">this period is not active for you</span>. Note the next window below: Sade Sati never arrives unannounced; Saturn's slow motion fixes its dates years in advance — which is exactly what makes preparation possible.</>)}
+                          : <>Saturn is currently not in the houses that form Sade Sati from your Moon sign ({result.natal_moon_sign}) — <span className="hl">this period is not active for you</span>. Note the next window below: Sade Sati never arrives unannounced; Saturn&apos;s slow motion fixes its dates years in advance — which is exactly what makes preparation possible.</>)}
                 </p>
               </div>
 

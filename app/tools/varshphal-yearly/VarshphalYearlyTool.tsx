@@ -91,6 +91,7 @@ export default function VarshphalYearlyTool() {
       const saved = window.sessionStorage.getItem("varshphal-yearly-state");
       if (saved) {
         const s = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
         setBirthDraft(s.birthDraft ?? null);
         setYear(s.year ?? CURRENT_YEAR);
         setUserName(s.userName ?? "");
@@ -100,7 +101,6 @@ export default function VarshphalYearlyTool() {
         setStep(s.step === "computing" ? "birth" : (s.step ?? "birth"));
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

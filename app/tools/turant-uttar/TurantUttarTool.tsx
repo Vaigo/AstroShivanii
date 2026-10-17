@@ -89,6 +89,7 @@ function TurantUttarInner() {
       if (saved) {
         const s = JSON.parse(saved);
         if (s.step && s.category) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
           setCategory(s.category);
           setQuestionText(s.questionText ?? "");
           setBirthData(s.birthData ?? null);

@@ -92,7 +92,7 @@ export default function TarotTool() {
           ) : (
             <p>
               This <span className="hl">3-card spread</span> — past, present, future — reads the energy of
-              your situation as a story. Cards <span className="hl">don't fix your fate</span>, they point at
+              your situation as a story. Cards <span className="hl">don&apos;t fix your fate</span>, they point at
               the possibilities already forming around this moment.
             </p>
           )}
@@ -145,7 +145,7 @@ export default function TarotTool() {
           <PatrikaFrame>
             {asked && (
               <p className={isHi ? "devanagari" : undefined} style={{ fontStyle: "italic", color: "var(--muted)", marginBottom: "1rem", textAlign: "center" }}>
-                "{asked}"
+                &quot;{asked}&quot;
               </p>
             )}
 
@@ -158,7 +158,9 @@ export default function TarotTool() {
                   <div className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.62rem", color: "var(--muted)", marginBottom: "0.5rem", minHeight: "2em", lineHeight: 1.3 }}>
                     {positionMeaning[i] ?? ""}
                   </div>
-                  {/* Rider-Waite scan (public domain, 1909) — reversed cards render upside-down */}
+                  {/* Rider-Waite scan (public domain, 1909) — reversed cards render upside-down.
+                      Plain <img>: the static export serves images as-is (images.unoptimized). */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/tarot/${card.id}.jpg`}
                     alt={`${card.name} (${card.name_hi})${card.reversed ? " — reversed" : ""}`}
@@ -217,6 +219,7 @@ export default function TarotTool() {
               return (
                 <div key={`interp-${i}`} className="result-box" style={{ marginTop: "0.75rem" }}>
                   <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`/tarot/${card.id}.jpg`}
                       alt=""

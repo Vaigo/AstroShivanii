@@ -13,8 +13,6 @@ import hi from "@/i18n/hi.json";
 
 type Lang = "en" | "hi";
 
-type NestedValue = string | Record<string, unknown>;
-
 function getPath(obj: Record<string, unknown>, path: string): string {
   const parts = path.split(".");
   let cur: unknown = obj;
@@ -47,6 +45,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = window.localStorage.getItem("as-lang");
     if (stored === "en" || stored === "hi") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only value, applied after hydration on purpose (see above)
       setLangState(stored);
       document.documentElement.lang = stored;
     }

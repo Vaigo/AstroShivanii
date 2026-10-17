@@ -78,7 +78,7 @@ export default function Testimonials() {
           {TESTIMONIALS.map((tm, i) => (
             <Reveal key={tm.name} delay={i * 80}>
               <figure className="testimonial-card">
-                <div className="testimonial-quote" aria-hidden="true">"</div>
+                <div className="testimonial-quote" aria-hidden="true">&quot;</div>
                 <blockquote>{isHi ? tm.text.hi : tm.text.en}</blockquote>
                 <figcaption>
                   <span className="testimonial-name">{tm.name}</span>

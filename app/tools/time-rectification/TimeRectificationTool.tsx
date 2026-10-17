@@ -90,6 +90,7 @@ export default function TimeRectificationTool() {
       const saved = window.sessionStorage.getItem("rect-state");
       if (saved) {
         const s = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
         setDayUnknown(!!s.dayUnknown);
         setBirthDraft(s.birthDraft ?? null);
         setApproxTob(s.approxTob ?? "");
@@ -105,7 +106,6 @@ export default function TimeRectificationTool() {
         setStep(s.step === "computing" ? "events" : (s.step ?? "birth"));
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -271,6 +271,7 @@ export default function TimeRectificationTool() {
   // paid result. Best-effort: failure here must never hide the paid result.
   useEffect(() => {
     if (step !== "result" || !result?.best_match || !birthDraft || kpResult || kpLoading) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag for the KP fetch this effect starts
     setKpLoading(true);
     fetchKpRulingPlanets({
       dob: result.best_match.date, approx_tob: result.best_match.tob,

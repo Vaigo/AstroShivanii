@@ -134,7 +134,6 @@ function CameraCapture({ onCapture, onClose, isHi }: { onCapture: (file: File) =
         </>
       ) : (
         <>
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video ref={videoRef} autoPlay playsInline muted
             style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: "8px", border: "2px solid var(--gold)" }} />
           <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
@@ -191,6 +190,7 @@ export default function PalmistryTool() {
       const saved = window.sessionStorage.getItem("palmistry-state");
       if (saved) {
         const s = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
         setUserName(s.userName ?? "");
         if (s.gender) setGender(s.gender);
         setOrderId(s.orderId ?? "");
@@ -205,7 +205,6 @@ export default function PalmistryTool() {
         // without photos would be a dead end).
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist as soon as anything worth keeping exists — above all the result,

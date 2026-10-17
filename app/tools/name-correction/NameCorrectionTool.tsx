@@ -154,6 +154,7 @@ export default function NameCorrectionTool() {
       const saved = window.sessionStorage.getItem("name-correction-state");
       if (saved) {
         const s = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
         setCategory(s.category ?? "personal");
         setDob(s.dob ?? "");
         setName(s.name ?? "");
@@ -164,7 +165,6 @@ export default function NameCorrectionTool() {
         setStep(s.step === "computing" ? "intake" : (s.step ?? "intake"));
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import type { BirthRequest } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 import PlaceSearch, { Place } from "./PlaceSearch";
@@ -76,12 +76,14 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
     };
   }
 
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-
+  // Report the current data to the parent whenever a field changes. An
+  // Effect Event always calls the parent's latest onChange with the latest
+  // fields, without re-running the effect when the parent re-renders with a
+  // new onChange function (what the old "latest ref" did, minus writing a
+  // ref during render).
+  const emitChange = useEffectEvent(() => onChange?.(currentBirth()));
   useEffect(() => {
-    onChangeRef.current?.(currentBirth());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    emitChange();
   }, [dob, tob, place, manual, mLat, mLon, mTz]);
 
   function handleSubmit(e: React.FormEvent) {

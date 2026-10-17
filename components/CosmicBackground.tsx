@@ -2,6 +2,40 @@
 
 import { useEffect, useRef } from "react";
 
+// The geometry never changes, so it is computed once at module load rather
+// than on every render. Seeded PRNG so server and client render identical
+// stars (no hydration mismatch).
+const STARS = (() => {
+  let seed = 108;
+  const rand = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+  return Array.from({ length: 120 }, () => ({
+    cx: rand() * 100,
+    cy: rand() * 100,
+    r: 0.1 + rand() * 0.25,
+    delay: rand() * 4,
+  }));
+})();
+
+const SPOKES = Array.from({ length: 12 }, (_, i) => {
+  const angle = (i / 12) * Math.PI * 2;
+  const x1 = 50 + 12 * Math.cos(angle);
+  const y1 = 50 + 12 * Math.sin(angle);
+  const x2 = 50 + 46 * Math.cos(angle);
+  const y2 = 50 + 46 * Math.sin(angle);
+  return { x1, y1, x2, y2 };
+});
+
+const NAKSHATRA_DOTS = Array.from({ length: 27 }, (_, i) => {
+  const angle = (i / 27) * Math.PI * 2 - Math.PI / 2;
+  return {
+    cx: 50 + 44 * Math.cos(angle),
+    cy: 50 + 44 * Math.sin(angle),
+  };
+});
+
 export default function CosmicBackground() {
   const svgRef = useRef<SVGSVGElement>(null);
   const chakraRef = useRef<SVGGElement>(null);
@@ -36,35 +70,9 @@ export default function CosmicBackground() {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  // Seeded PRNG so server and client render identical stars (no hydration mismatch)
-  let seed = 108;
-  const rand = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-  const stars = Array.from({ length: 120 }, () => ({
-    cx: rand() * 100,
-    cy: rand() * 100,
-    r: 0.1 + rand() * 0.25,
-    delay: rand() * 4,
-  }));
-
-  const spokes = Array.from({ length: 12 }, (_, i) => {
-    const angle = (i / 12) * Math.PI * 2;
-    const x1 = 50 + 12 * Math.cos(angle);
-    const y1 = 50 + 12 * Math.sin(angle);
-    const x2 = 50 + 46 * Math.cos(angle);
-    const y2 = 50 + 46 * Math.sin(angle);
-    return { x1, y1, x2, y2 };
-  });
-
-  const nakshatraDots = Array.from({ length: 27 }, (_, i) => {
-    const angle = (i / 27) * Math.PI * 2 - Math.PI / 2;
-    return {
-      cx: 50 + 44 * Math.cos(angle),
-      cy: 50 + 44 * Math.sin(angle),
-    };
-  });
+  const stars = STARS;
+  const spokes = SPOKES;
+  const nakshatraDots = NAKSHATRA_DOTS;
 
   return (
     <div className="cosmic-bg" aria-hidden="true">

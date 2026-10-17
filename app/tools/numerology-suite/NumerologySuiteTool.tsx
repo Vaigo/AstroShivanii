@@ -45,6 +45,7 @@ export default function NumerologySuiteTool() {
       const saved = window.sessionStorage.getItem("num-suite-state");
       if (saved) {
         const s = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the saved session from sessionStorage, which only exists in the browser, so it must run after hydration
         setDob(s.dob ?? "");
         setUserName(s.userName ?? "");
         setResult(s.result ?? null);
@@ -52,7 +53,6 @@ export default function NumerologySuiteTool() {
         setStep(s.step === "computing" ? "intake" : (s.step ?? "intake"));
       }
     } catch { /* corrupted state — start fresh */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

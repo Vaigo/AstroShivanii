@@ -67,7 +67,7 @@ export default function KaalSarpTool() {
           ) : (
             <p>
               <span className="hl">Kaal Sarp Dosha</span> forms when all seven classical planets sit on one side of
-              the Rahu–Ketu axis. It has a scarier reputation than it deserves — check whether it's actually present
+              the Rahu–Ketu axis. It has a scarier reputation than it deserves — check whether it&apos;s actually present
               in your chart.
             </p>
           )}
