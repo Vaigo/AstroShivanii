@@ -99,8 +99,8 @@ export default function RashifalTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "760px" }}>
-        <h1 className="section-heading">Daily Rashifal</h1>
-        <p className="section-heading-hi devanagari">दैनिक राशिफल</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "दैनिक राशिफल" : "Daily Rashifal"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Daily Rashifal" : "दैनिक राशिफल"}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           {isHi ? (

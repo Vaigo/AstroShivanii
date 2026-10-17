@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n";
 import { CITIES } from "@/lib/cities";
 import { timezoneNameFor } from "@/lib/timezone";
 
@@ -51,6 +52,8 @@ export default function PlaceSearch({ value, onSelect, label, placeholder }: Pla
   const [failed, setFailed] = useState(false);        // network / service failure
   const [noResults, setNoResults] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { lang } = useI18n();
+  const isHi = lang === "hi";
 
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
@@ -100,7 +103,7 @@ export default function PlaceSearch({ value, onSelect, label, placeholder }: Pla
 
   return (
     <div className="form-group">
-      <label className="form-label">{label ?? "जन्म स्थान / Birth place"}</label>
+      <label className="form-label">{label ?? (isHi ? "जन्म स्थान" : "Birth place")}</label>
 
       {value ? (
         <div className="place-chip">
@@ -110,8 +113,8 @@ export default function PlaceSearch({ value, onSelect, label, placeholder }: Pla
             type="button"
             className="place-chip-clear"
             onClick={() => { onSelect(null); setQuery(""); setOpen(false); }}
-            aria-label="Change place"
-            title="Change"
+            aria-label={isHi ? "स्थान बदलें" : "Change place"}
+            title={isHi ? "बदलें" : "Change"}
           >
             ✕
           </button>
@@ -125,7 +128,7 @@ export default function PlaceSearch({ value, onSelect, label, placeholder }: Pla
             onChange={(e) => handleInput(e.target.value)}
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 180)}
-            placeholder={placeholder ?? "Type any city… e.g. Kanpur, Dubai, London"}
+            placeholder={placeholder ?? (isHi ? "कोई भी शहर लिखें… जैसे कानपुर, दुबई, लंदन" : "Type any city… e.g. Kanpur, Dubai, London")}
             autoComplete="off"
             spellCheck={false}
           />
@@ -135,7 +138,7 @@ export default function PlaceSearch({ value, onSelect, label, placeholder }: Pla
             <div className="place-dropdown">
               {showQuickPicks && (
                 <>
-                  <div className="place-dropdown-head">लोकप्रिय / Popular</div>
+                  <div className="place-dropdown-head">{isHi ? "लोकप्रिय" : "Popular"}</div>
                   {CITIES.slice(0, 8).map((c) => (
                     <div
                       key={c.name}
@@ -161,13 +164,17 @@ export default function PlaceSearch({ value, onSelect, label, placeholder }: Pla
           )}
 
           {noResults && !searching && (
-            <p className="form-hint" style={{ color: "#a93226" }}>
-              कोई परिणाम नहीं — दूसरी वर्तनी आज़माएँ / No results — try another spelling, or enter coordinates manually below.
+            <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ color: "#a93226" }}>
+              {isHi
+                ? "कोई परिणाम नहीं — दूसरी वर्तनी आज़माएँ, या नीचे निर्देशांक स्वयं दर्ज करें।"
+                : "No results — try another spelling, or enter coordinates manually below."}
             </p>
           )}
           {failed && (
-            <p className="form-hint" style={{ color: "#a93226" }}>
-              Place search is unreachable right now — use &quot;enter coordinates manually&quot; below.
+            <p className={`form-hint${isHi ? " devanagari" : ""}`} style={{ color: "#a93226" }}>
+              {isHi
+                ? "स्थान खोज अभी उपलब्ध नहीं है — नीचे “निर्देशांक स्वयं दर्ज करें” चुनें।"
+                : "Place search is unreachable right now — use \"enter coordinates manually\" below."}
             </p>
           )}
         </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import TimeRectificationTool from "./TimeRectificationTool";
+import RelatedLinks from "@/components/RelatedLinks";
 
 // Unpublished (2026-08): not confident this delivers ₹1100 of real accuracy
 // yet — see project memory. Page code stays live for existing customers with
@@ -19,8 +19,7 @@ export default function Page() {
       <TimeRectificationTool />
       <div className="container" style={{ maxWidth: "760px", margin: "-2rem auto 0", padding: "0 1rem 2.5rem", textAlign: "center" }}>
         <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-          Related: <Link href="/guides/birth-time-missing-astrology">No birth time? What astrology can still tell you</Link> ·{" "}
-          <Link href="/tools/kundli">Kundli / Birth Chart Calculator</Link>
+          <RelatedLinks links={[{ href: "/guides/birth-time-missing-astrology", en: "No birth time? What astrology can still tell you", hi: "जन्म समय नहीं पता? ज्योतिष फिर भी क्या बताता है" }, { href: "/tools/kundli", en: "Kundli / Birth Chart Calculator", hi: "कुंडली / जन्म चार्ट" }]} />
         </p>
       </div>
     </>

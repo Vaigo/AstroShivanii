@@ -299,7 +299,7 @@ export default function NameCorrectionTool() {
     <section className="section">
       <div className="container" style={{ maxWidth: step === "result" ? "820px" : "560px" }}>
         <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "नाम सुधार जांच" : "Name Correction Checker"}</h1>
-        <p className="section-heading-hi devanagari">Name Correction · ₹{PRICE}</p>
+        <p className="section-heading-hi devanagari">{isHi ? "Name Correction" : "नाम सुधार जांच"} · ₹{PRICE}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           {isHi ? (
@@ -461,7 +461,7 @@ export default function NameCorrectionTool() {
                   </p>
                 )}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
-                  Ref: {refCode}
+                  {isHi ? "संदर्भ कोड" : "Ref"}: {refCode}
                 </p>
               </div>
             </PatrikaFrame>

@@ -376,8 +376,8 @@ export default function ShubhMuhurtaTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "760px" }}>
-        <h1 className="section-heading devanagari">शुभ मुहूर्त</h1>
-        <p className="section-heading-hi">Personal Muhurta Finder · ₹{PRICE}</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "शुभ मुहूर्त" : "Personal Muhurta Finder"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Personal Muhurta Finder" : "शुभ मुहूर्त"} · ₹{PRICE}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <p className={isHi ? "devanagari" : undefined}>
@@ -530,7 +530,7 @@ export default function ShubhMuhurtaTool() {
                       {paying ? (isHi ? "भुगतान खुल रहा है…" : "Opening payment…") : (isHi ? `₹${PRICE} भुगतान करें — UPI / कार्ड` : `Pay ₹${PRICE} — UPI / Card`)}
                     </button>
                     {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(payError, isHi)}</p>}
-                    <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
+                    <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>{isHi ? "संदर्भ कोड" : "Ref"}: {refCode}</p>
                   </div>
                 </>
               )}

@@ -182,14 +182,14 @@ export default function KundliResultView({
           className={`btn btn-sm ${chartMode === "lagna" ? "btn-secondary" : "btn-ghost"}`}
           onClick={() => onChartModeChange("lagna")}
         >
-          लग्न कुंडली
+          {isHi ? "लग्न कुंडली" : "Lagna chart"}
         </button>
         <button
           type="button"
           className={`btn btn-sm ${chartMode === "moon" ? "btn-secondary" : "btn-ghost"}`}
           onClick={() => onChartModeChange("moon")}
         >
-          चन्द्र कुंडली
+          {isHi ? "चन्द्र कुंडली" : "Moon chart"}
         </button>
       </div>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
@@ -202,8 +202,19 @@ export default function KundliResultView({
         />
       </div>
       <p style={{ textAlign: "center", fontSize: "0.72rem", color: "var(--muted)", marginTop: "-0.5rem", marginBottom: "1rem" }}>
-        {chartMode === "moon" ? "चन्द्र कुंडली — भाव चंद्र राशि से गिने गए · " : ""}
-        (व)=वक्री · ↑=उच्च · ↓=नीच · (अ)=अस्त · ★=वर्गोत्तम · ल=लग्न · अंक = राशि संख्या · astroshivanii.com
+        {isHi ? (
+          <>
+            {chartMode === "moon" ? "चन्द्र कुंडली — भाव चंद्र राशि से गिने गए · " : ""}
+            (व)=वक्री · ↑=उच्च · ↓=नीच · (अ)=अस्त · ★=वर्गोत्तम · ल=लग्न · अंक = राशि संख्या · astroshivanii.com
+          </>
+        ) : (
+          // The chart itself keeps the traditional Hindi labels, so the key spells them out
+          <>
+            {chartMode === "moon" ? "Moon chart — houses counted from the Moon sign · " : ""}
+            सू Sun · चं Moon · मं Mars · बु Mercury · गु Jupiter · शु Venus · श Saturn · रा Rahu · के Ketu ·
+            (व)=retrograde · ↑=exalted · ↓=debilitated · (अ)=combust · ★=vargottama · ल=ascendant · number = sign number · astroshivanii.com
+          </>
+        )}
       </p>
 
       {/* उच्च / नीच / अस्त ग्रह — the chart's strength story at a glance */}
@@ -429,28 +440,28 @@ export default function KundliResultView({
           key:value table here read as gibberish. */}
       {av && (() => {
         const entries: Array<{ term: string; value: string; hi: string; en: string }> = [
-          { term: isHi ? "राशि" : "Rashi (Moon sign)", value: `${av.rashi} (स्वामी ${av.rashiLord})`,
+          { term: isHi ? "राशि" : "Rashi (Moon sign)", value: isHi ? `${av.rashi} (स्वामी ${av.rashiLord})` : `${av.en.rashi} (lord ${av.en.rashiLord})`,
             hi: "जन्म के समय चांद जिस राशि में था। आपका गुस्सा, प्यार, मूड — सब इसी से पढ़े जाते हैं, और रोज़ का राशिफल भी इसी राशि का देखा जाता है।",
             en: "The sign the Moon was in when you were born. Your temper, affection, moods — all are read from this, and your daily horoscope goes by this sign too." },
-          { term: isHi ? "नक्षत्र–चरण" : "Nakshatra–Pada", value: `${av.nakshatraPada} (स्वामी ${av.nakshatraLord})`,
+          { term: isHi ? "नक्षत्र–चरण" : "Nakshatra–Pada", value: isHi ? `${av.nakshatraPada} (स्वामी ${av.nakshatraLord})` : `${av.en.nakshatraPada} (lord ${av.en.nakshatraLord})`,
             hi: "आसमान 27 तारा-समूहों में बंटा है — जन्म के समय चांद जिसमें था, वही आपका नक्षत्र। राशि से भी बारीक पहचान — जैसे शहर के बाद मोहल्ले का पता।",
             en: "The sky is divided into 27 star-groups — your nakshatra is the one the Moon sat in at your birth. It's a finer address than the sign — like knowing the street, not just the city." },
-          { term: isHi ? "वर्ण" : "Varna", value: av.varna,
+          { term: isHi ? "वर्ण" : "Varna", value: isHi ? av.varna : av.en.varna,
             hi: "आपके स्वभाव की मूल किस्म — सोच-विचार वाले, आगे बढ़कर अगुवाई करने वाले, व्यापार-बुद्धि वाले, या मेहनत से काम बनाने वाले। शादी की कुंडली मिलाते समय 36 में से 1 अंक इसका।",
             en: "Your temperament's basic type — the thinker, the leader, the deal-maker, or the hard worker. When matching charts for marriage, 1 of the 36 points comes from this." },
-          { term: isHi ? "वश्य" : "Vashya", value: av.vashya,
+          { term: isHi ? "वश्य" : "Vashya", value: isHi ? av.vashya : av.en.vashya,
             hi: "किस तरह के लोगों से आपकी झट से बन जाती है — और कौन आपको आसानी से मना लेता है। मिलान में 2 अंक।",
             en: "Which kinds of people you instantly click with — and who can win you over easily. Worth 2 matching points." },
-          { term: isHi ? "योनि" : "Yoni", value: av.yoni,
+          { term: isHi ? "योनि" : "Yoni", value: isHi ? av.yoni : av.en.yoni,
             hi: "हर नक्षत्र का एक प्रतीक-जानवर है (घोड़ा, हाथी, सांप…)। दो लोगों के जानवर आपस में दोस्त हैं या दुश्मन — इसी से सहज तालमेल देखा जाता है। मिलान में 4 अंक।",
             en: "Every nakshatra has a symbolic animal (horse, elephant, serpent…). Whether two people's animals are friends or foes shows their instinctive comfort together. Worth 4 matching points." },
-          { term: isHi ? "गण" : "Gana", value: av.gana,
+          { term: isHi ? "गण" : "Gana", value: isHi ? av.gana : av.en.gana,
             hi: "स्वभाव की तीन किस्में — सौम्य (देव), व्यावहारिक (मनुष्य), तेज़-तर्रार और निडर (राक्षस — नाम से न घबराएं, इसका मतलब बुरा इंसान बिल्कुल नहीं)। मिलान में 6 अंक।",
             en: "Three temperament families — gentle (Deva), practical (Manushya), bold and fearless (Rakshasa — don't mind the name, it does NOT mean a bad person). Worth 6 matching points." },
-          { term: isHi ? "नाड़ी" : "Nadi", value: av.nadi,
+          { term: isHi ? "नाड़ी" : "Nadi", value: isHi ? av.nadi : av.en.nadi,
             hi: "शरीर की मूल प्रकृति — जैसे आयुर्वेद में वात-पित्त-कफ। शादी में दोनों की नाड़ी अलग-अलग होनी चाहिए, इसीलिए मिलान में इसके सबसे ज़्यादा — पूरे 8 अंक।",
             en: "Your body's basic constitution — like vata-pitta-kapha in Ayurveda. In marriage, the two nadis should differ, which is why this carries the most weight — a full 8 points." },
-          { term: isHi ? "तत्व" : "Tatva", value: av.tatva,
+          { term: isHi ? "तत्व" : "Tatva", value: isHi ? av.tatva : av.en.tatva,
             hi: "आपकी राशि की ऊर्जा किस तरह की है — आग (जोश), मिट्टी (टिकाऊपन), हवा (विचार) या पानी (भावना)।",
             en: "What kind of energy your sign runs on — fire (drive), earth (steadiness), air (ideas), or water (feeling)." },
           { term: isHi ? "नामाक्षर" : "Naming syllable", value: `"${av.nameSyllable}"`,
@@ -472,7 +483,7 @@ export default function KundliResultView({
                 <div key={e.term} style={{ borderBottom: "1px solid rgba(201,154,58,0.15)", paddingBottom: "0.5rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap", alignItems: "baseline" }}>
                     <span style={{ color: "var(--muted)", fontWeight: 600, fontSize: "0.82rem" }}>{e.term}</span>
-                    <span className="devanagari" style={{ fontWeight: 600, fontSize: "0.88rem" }}>{e.value}</span>
+                    <span className={/[\u0900-\u097F]/.test(e.value) ? "devanagari" : undefined} style={{ fontWeight: 600, fontSize: "0.88rem" }}>{e.value}</span>
                   </div>
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.78rem", color: "var(--ink-light)", lineHeight: 1.55, margin: "0.2rem 0 0" }}>
                     {isHi ? e.hi : e.en}

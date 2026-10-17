@@ -488,14 +488,21 @@ export default function PalmistryTool() {
         />
       )}
       <div className="container" style={{ maxWidth: step === "result" ? "900px" : "720px" }}>
-        <h1 className="section-heading">हस्त रेखा विश्लेषण</h1>
-        <p className="section-heading-hi devanagari">Palmistry Reading (Hast Rekha Shastra) · ₹{PRICE}</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "हस्त रेखा विश्लेषण" : "Palmistry Reading"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Palmistry Reading (Hast Rekha Shastra)" : "हस्त रेखा विश्लेषण"} · ₹{PRICE}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <p className="devanagari">
-            अपनी <span className="hl">हथेली की तस्वीर</span> भेजें — हाथ की बनावट, रेखाएं, पर्वत और विशेष चिह्नों का
-            वास्तविक विश्लेषण, हर खोज के साथ ईमानदार भरोसे का स्तर।
-          </p>
+          {isHi ? (
+            <p className="devanagari">
+              अपनी <span className="hl">हथेली की तस्वीर</span> भेजें — हाथ की बनावट, रेखाएं, पर्वत और विशेष चिह्नों का
+              वास्तविक विश्लेषण, हर खोज के साथ ईमानदार भरोसे का स्तर।
+            </p>
+          ) : (
+            <p>
+              Send a <span className="hl">photo of your palm</span> — a real analysis of your hand shape, lines, mounts
+              and special marks, with an honest confidence level for every finding.
+            </p>
+          )}
         </div>
 
         <div className="tu-steps">
@@ -688,7 +695,7 @@ export default function PalmistryTool() {
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
                 {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(resultError, isHi)}</p>}
-                <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
+                <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>{isHi ? "संदर्भ कोड" : "Ref"}: {refCode}</p>
               </div>
             </PatrikaFrame>
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>

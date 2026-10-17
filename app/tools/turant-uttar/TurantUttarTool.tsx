@@ -46,12 +46,50 @@ const COMPAT_COLOR: Record<string, string> = { excellent: "#1a7a3a", good: "#1a7
 
 type Step = "pick" | "birth" | "computing" | "teaser" | "narrating" | "unlocked";
 
-/** useSearchParams() requires a Suspense boundary for static export builds. */
+/** useSearchParams() requires a Suspense boundary for static export builds.
+ *  The static HTML only gets the fallback, so the fallback carries the same
+ *  heading and intro — otherwise the page ships without an H1. */
 export default function TurantUttarTool() {
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <section className="section">
+          <div className="container" style={{ maxWidth: "720px" }}>
+            <TurantUttarHeader />
+          </div>
+        </section>
+      }
+    >
       <TurantUttarInner />
     </Suspense>
+  );
+}
+
+function TurantUttarHeader() {
+  const { lang } = useI18n();
+  const isHi = lang === "hi";
+
+  return (
+    <>
+      <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "तुरंत उत्तर पाएं" : "Turant Uttar — Instant Answer"}</h1>
+      <p className="section-heading-hi devanagari">{isHi ? "Instant Quick-Take Answer" : "तुरंत उत्तर पाएं"} · ₹{PRICE}</p>
+
+      <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+        {isHi ? (
+          <p className="devanagari">
+            आपका <span className="hl">प्रश्न</span> चुनें — हम आपकी कुंडली से{" "}
+            <span className="hl">वास्तविक गणना</span> करते हैं और तुरंत एक संक्षिप्त उत्तर देते हैं।
+            गहन विश्लेषण चाहिए? शिवानी जी से पूर्ण पाठन बुक करें।
+          </p>
+        ) : (
+          <p>
+            Choose your <span className="hl">question</span> — we make a{" "}
+            <span className="hl">real calculation</span> from your Kundli and give you a short answer instantly.
+            Need an in-depth analysis? Book a full reading with Shivanii.
+          </p>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -340,16 +378,7 @@ function TurantUttarInner() {
     <section className="section">
       {/* Focused width while asking; generous width for reading the answer */}
       <div className="container" style={{ maxWidth: step === "unlocked" ? "900px" : "720px" }}>
-        <h1 className="section-heading">तुरंत उत्तर पाएं</h1>
-        <p className="section-heading-hi devanagari">Instant Quick-Take Answer · ₹{PRICE}</p>
-
-        <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <p className="devanagari">
-            आपका <span className="hl">प्रश्न</span> चुनें — हम आपकी कुंडली से{" "}
-            <span className="hl">वास्तविक गणना</span> करते हैं और तुरंत एक संक्षिप्त उत्तर देते हैं।
-            गहन विश्लेषण चाहिए? शिवानी जी से पूर्ण पाठन बुक करें।
-          </p>
-        </div>
+        <TurantUttarHeader />
 
         {/* Always-visible 3-step map — a first-time visitor sees the whole
             journey (and the price) up front, and always knows where they are. */}
@@ -606,7 +635,7 @@ function TurantUttarInner() {
                   </p>
                 )}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
-                  Ref: {refCode}
+                  {isHi ? "संदर्भ कोड" : "Ref"}: {refCode}
                 </p>
                 <p className={`cta-note${isHi ? " devanagari" : ""}`} style={{ fontSize: "0.75rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>
                   {isHi

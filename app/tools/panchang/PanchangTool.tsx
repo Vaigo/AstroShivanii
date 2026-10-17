@@ -35,11 +35,12 @@ function toMins(hhmm: string): number {
 /** Sunrise→sunset drawn as one band: red = the three kaal windows to avoid,
  *  green = Abhijit muhurta, maroon line = "now" (when viewing today).
  *  Answers "when is today safe?" as a picture instead of four boxes. */
-function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace }: {
+function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace, isHi }: {
   sunrise: string; sunset: string;
   kaal: RahuKaalResult | null;
   abhijit: MuhurtaSlot | null;
   isToday: boolean;
+  isHi: boolean;
   /** Minutes-since-midnight IN THE QUERIED PLACE'S timezone — NOT the
    *  browser's own clock, which would misplace the "now" marker for anyone
    *  checking a city in a different timezone than their own device. */
@@ -74,12 +75,12 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace }: {
   const windows: Array<{ from: string; to: string; label: string; cls: "kaal" | "shubh" }> = [];
   if (kaal) {
     windows.push(
-      { from: kaal.rahu_kaal.start, to: kaal.rahu_kaal.end, label: "राहु काल", cls: "kaal" },
-      { from: kaal.gulika_kaal.start, to: kaal.gulika_kaal.end, label: "गुलिक", cls: "kaal" },
-      { from: kaal.yamaganda.start, to: kaal.yamaganda.end, label: "यमगण्ड", cls: "kaal" },
+      { from: kaal.rahu_kaal.start, to: kaal.rahu_kaal.end, label: isHi ? "राहु काल" : "Rahu Kaal", cls: "kaal" },
+      { from: kaal.gulika_kaal.start, to: kaal.gulika_kaal.end, label: isHi ? "गुलिक" : "Gulika", cls: "kaal" },
+      { from: kaal.yamaganda.start, to: kaal.yamaganda.end, label: isHi ? "यमगण्ड" : "Yamaganda", cls: "kaal" },
     );
   }
-  if (abhijit) windows.push({ from: abhijit.start, to: abhijit.end, label: "अभिजीत", cls: "shubh" });
+  if (abhijit) windows.push({ from: abhijit.start, to: abhijit.end, label: isHi ? "अभिजीत" : "Abhijit", cls: "shubh" });
 
   const nowMins = nowMinInPlace;
   const showNow = isToday && nowMins > t0 && nowMins < t1;
@@ -106,17 +107,21 @@ function DayStrip({ sunrise, sunset, kaal, abhijit, isToday, nowMinInPlace }: {
           <div className="day-strip-now" style={{ left: `${((nowMins - t0) / span) * 100}%` }} aria-hidden="true" />
         )}
       </div>
-      <div className="day-strip-labels devanagari">
-        <span>☀ {sunrise} सूर्योदय</span>
-        <span>लाल = टालें · हरा = श्रेष्ठ</span>
-        <span>सूर्यास्त {sunset} ☾</span>
+      <div className={`day-strip-labels${isHi ? " devanagari" : ""}`}>
+        <span>☀ {sunrise} {isHi ? "सूर्योदय" : "Sunrise"}</span>
+        <span>{isHi ? "लाल = टालें · हरा = श्रेष्ठ" : "Red = avoid · Green = best"}</span>
+        <span>{isHi ? "सूर्यास्त" : "Sunset"} {sunset} ☾</span>
       </div>
     </div>
   );
 }
 
 const WEEKDAY_HI = ["रवि", "सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि"];
+const WEEKDAY_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
+const MONTH_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+/** Hora lords come from lib/panchang-calc in Hindi */
+const HORA_EN: Record<string, string> = { "सूर्य": "Sun", "शुक्र": "Venus", "बुध": "Mercury", "चंद्र": "Moon", "शनि": "Saturn", "गुरु": "Jupiter", "मंगल": "Mars" };
 /** Weekly weekday-vrats (every Somvar/Shanivar…) would mark almost every
  *  Monday/Saturday — same reasoning as festivals-2026/page.tsx: list the
  *  tithi-based ones distinctly, mention weekly vrats in prose instead. */
@@ -181,6 +186,7 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
   const masaA = MASA_LABEL(masaStart, isHi);
   const masaB = MASA_LABEL(masaEnd, isHi);
   const masaLabel = masaA && masaB ? (masaA === masaB ? masaA : `${masaA} – ${masaB}`) : masaA ?? masaB;
+  const dev = isHi ? "devanagari " : "";
 
   const sortedFests = [...festivals].sort((a, b) => a.date.localeCompare(b.date));
   const majorFests = sortedFests.filter((f) => f.major);
@@ -188,18 +194,18 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
 
   const FestRow = ({ f }: { f: FestivalItem }) => {
     const color = festivalColor(f);
-    const weekday = WEEKDAY_HI[new Date(`${f.date}T12:00:00`).getDay()];
+    const weekday = (isHi ? WEEKDAY_HI : WEEKDAY_EN)[new Date(`${f.date}T12:00:00`).getDay()];
     return (
       <button type="button" className="pcal-fest-row" onClick={() => onPickDay(f.date)}
         style={{ borderLeftColor: color, background: `${color}0d` }}>
-        <span className="pcal-date-chip devanagari">
+        <span className={`pcal-date-chip${isHi ? " devanagari" : ""}`}>
           <span className="dnum">{parseInt(f.date.slice(8, 10), 10)}</span>
           <span className="dvar">{weekday}</span>
         </span>
         <span style={{ minWidth: 0 }}>
-          <span className="devanagari" style={{ fontWeight: 700, fontSize: f.major ? "0.95rem" : "0.85rem", color: f.major ? MAJOR_COLOR : "var(--maroon-deep)", display: "block" }}>
-            {f.major && "✦ "}{festLabel(f, true)}
-            {f.name_hi && <span style={{ fontWeight: 500, color: "var(--muted)", fontSize: "0.75rem" }}> · {f.name}</span>}
+          <span className={isHi ? "devanagari" : undefined} style={{ fontWeight: 700, fontSize: f.major ? "0.95rem" : "0.85rem", color: f.major ? MAJOR_COLOR : "var(--maroon-deep)", display: "block" }}>
+            {f.major && "✦ "}{festLabel(f, isHi)}
+            {isHi && f.name_hi && <span style={{ fontWeight: 500, color: "var(--muted)", fontSize: "0.75rem" }}> · {f.name}</span>}
           </span>
           <span style={{ color: "var(--ink-light)", fontSize: "0.76rem", display: "block", marginTop: "0.1rem" }}>{f.significance}</span>
         </span>
@@ -210,19 +216,19 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
   return (
     <div>
       <div className="pcal-head">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onPrev} aria-label="पिछला महीना" style={{ fontSize: "1.1rem" }}>←</button>
-        <h3 className="devanagari pcal-month">❈ {MONTH_HI[month]} {year} ❈</h3>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onNext} aria-label="अगला महीना" style={{ fontSize: "1.1rem" }}>→</button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onPrev} aria-label={isHi ? "पिछला महीना" : "Previous month"} style={{ fontSize: "1.1rem" }}>←</button>
+        <h3 className={`${dev}pcal-month`}>❈ {(isHi ? MONTH_HI : MONTH_EN)[month]} {year} ❈</h3>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onNext} aria-label={isHi ? "अगला महीना" : "Next month"} style={{ fontSize: "1.1rem" }}>→</button>
       </div>
       {masaLabel && (
-        <p className="devanagari pcal-masa">
+        <p className={`${dev}pcal-masa`}>
           {isHi ? "विक्रम संवत् मास" : "Vikram Samvat masa"}: {masaLabel}
         </p>
       )}
 
       <div className="pcal-dow-row">
-        {WEEKDAY_HI.map((w, i) => (
-          <div key={w} className={`devanagari pcal-dow${i === 0 ? " sun" : ""}`}>{w}</div>
+        {(isHi ? WEEKDAY_HI : WEEKDAY_EN).map((w, i) => (
+          <div key={w} className={`${dev}pcal-dow${i === 0 ? " sun" : ""}`}>{w}</div>
         ))}
       </div>
 
@@ -234,8 +240,10 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
           const accent = lead ? festivalColor(lead) : null;
           const today = isToday(c.iso);
           const info = dayInfos.get(c.iso);
-          // "कृष्ण तृतीया" → "कृ. तृतीया" — keeps the cell line short
-          const tithiShort = info?.tithi_hi.replace("शुक्ल ", "शु. ").replace("कृष्ण ", "कृ. ");
+          // "कृष्ण तृतीया" → "कृ. तृतीया", "Krishna Tritiya" → "Kr. Tritiya" — keeps the cell line short
+          const tithiShort = isHi
+            ? info?.tithi_hi.replace("शुक्ल ", "शु. ").replace("कृष्ण ", "कृ. ")
+            : info?.tithi.replace("Shukla ", "Sh. ").replace("Krishna ", "Kr. ");
           const cls = ["pcal-cell", lead?.major ? "major" : "", today ? "today" : ""].filter(Boolean).join(" ");
           return (
             <button
@@ -243,18 +251,18 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
               key={c.iso}
               className={cls}
               onClick={() => onPickDay(c.iso)}
-              title={[info && `${info.masa_hi} ${info.tithi_hi}`, ...fests.map((f) => f.name)].filter(Boolean).join(" · ")}
+              title={[info && (isHi ? `${info.masa_hi} ${info.tithi_hi}` : `${info.masa} ${info.tithi}`), ...fests.map((f) => festLabel(f, isHi))].filter(Boolean).join(" · ")}
               style={accent ? { borderTopColor: accent, background: lead?.major ? undefined : `${accent}14` } : undefined}
             >
               <span className="pcal-day">{c.day}</span>
-              {today && <span className="pcal-today-chip devanagari">आज</span>}
+              {today && <span className={`pcal-today-chip${isHi ? " devanagari" : ""}`}>{isHi ? "आज" : "Today"}</span>}
               {info && (
-                <span className="devanagari pcal-tithi">
-                  <span className="pcal-tithi-masa">{info.masa_hi} </span>{tithiShort}
+                <span className={`${dev}pcal-tithi`}>
+                  <span className="pcal-tithi-masa">{isHi ? info.masa_hi : info.masa} </span>{tithiShort}
                 </span>
               )}
               {lead && (
-                <span className="devanagari pcal-fest-name" style={{ color: accent ?? "var(--maroon-deep)" }}>
+                <span className={`${dev}pcal-fest-name`} style={{ color: accent ?? "var(--maroon-deep)" }}>
                   {lead.major && "✦ "}{festLabel(lead, isHi)}
                   {fests.length > 1 && ` +${fests.length - 1}`}
                 </span>
@@ -286,8 +294,8 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
       {/* Full-text lists below — the grid necessarily truncates long names */}
       {majorFests.length > 0 && (
         <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px dashed rgba(201,154,58,0.35)" }}>
-          <h4 className="devanagari" style={{ fontSize: "1.05rem", color: MAJOR_COLOR, marginBottom: "0.6rem" }}>
-            {isHi ? `✦ ${MONTH_HI[month]} ${year} के प्रमुख त्यौहार` : `✦ Major Festivals — ${MONTH_HI[month]} ${year}`}
+          <h4 className={isHi ? "devanagari" : undefined} style={{ fontSize: "1.05rem", color: MAJOR_COLOR, marginBottom: "0.6rem" }}>
+            {isHi ? `✦ ${MONTH_HI[month]} ${year} के प्रमुख त्यौहार` : `✦ Major Festivals — ${MONTH_EN[month]} ${year}`}
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
             {majorFests.map((f, i) => <FestRow key={`m${i}`} f={f} />)}
@@ -296,7 +304,7 @@ function MonthCalendar({ year, month, festivals, dayInfos, masaStart, masaEnd, i
       )}
       {vratFests.length > 0 && (
         <div style={{ marginTop: "1.25rem" }}>
-          <h4 className="devanagari" style={{ fontSize: "0.95rem", color: "var(--maroon-deep)", marginBottom: "0.6rem" }}>
+          <h4 className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.95rem", color: "var(--maroon-deep)", marginBottom: "0.6rem" }}>
             {isHi ? "व्रत एवं अन्य तिथियाँ" : "Vrats & Other Tithis"}
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
@@ -379,11 +387,14 @@ export default function PanchangTool() {
       setFestivals(f?.festivals?.slice(0, 6) ?? []);
       setShownPlace(p.label);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : t("form.error"));
+      // Both languages, picked at render time (pickMessageLang): the first,
+      // automatic load runs before a stored English preference is applied,
+      // so t() here would still answer in Hindi.
+      setError(e instanceof ApiError ? e.message : "Something went wrong. Please try again. | कुछ गलत हो गया। कृपया पुनः प्रयास करें।");
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
   // Auto-load today's panchang on first visit — the page should never feel empty.
   useEffect(() => {
@@ -449,7 +460,9 @@ export default function PanchangTool() {
   // English mode showing untranslated Devanagari here.
   const items = panchang
     ? [
-        { label: "तिथि / Tithi", value: panchang.tithi.name_hi
+        { label: isHi ? "तिथि" : "Tithi", value: !isHi
+            ? (panchang.tithi.paksha_num === 15 ? panchang.tithi.name : `${panchang.tithi.paksha} ${panchang.tithi.name}`)
+            : panchang.tithi.name_hi
             ? (panchang.tithi.paksha_num === 15 ? panchang.tithi.name_hi : `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name_hi}`)
             : `${panchang.tithi.paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${panchang.tithi.name}`,
           sub: isHi
@@ -458,37 +471,37 @@ export default function PanchangTool() {
           meaning: isHi
             ? "चांद के हिसाब से आज की तारीख — हर व्रत-त्योहार (एकादशी, पूर्णिमा, अमावस्या…) अंग्रेज़ी तारीख से नहीं, इसी से तय होता है"
             : "Today's date by the Moon's calendar — every fast and festival (Ekadashi, Purnima, Amavasya…) is fixed by this, not by the English date" },
-        { label: "वार / Day", value: isHi ? weekdayHi(panchang.vara.name) : panchang.vara.name,
+        { label: isHi ? "वार" : "Day", value: isHi ? weekdayHi(panchang.vara.name) : panchang.vara.name,
           sub: isHi ? `स्वामी: ${PLANET_HI[panchang.vara.lord] ?? panchang.vara.lord}` : `Lord: ${panchang.vara.lord}`,
           meaning: isHi
             ? "हर दिन का एक मालिक ग्रह होता है — जैसे गुरुवार गुरु का दिन है, इसलिए उस दिन पढ़ाई और धन के काम अच्छे माने जाते हैं"
             : "Each day of the week has an owner planet — Thursday belongs to Jupiter, for example, so study and money matters go well that day" },
-        { label: "नक्षत्र / Nakshatra", value: `${panchang.nakshatra.name}`,
+        { label: isHi ? "नक्षत्र" : "Nakshatra", value: isHi ? panchang.nakshatra.name_hi : panchang.nakshatra.name,
           sub: isHi
-            ? `${panchang.nakshatra.name_hi} · पाद ${panchang.nakshatra.pada} · स्वामी ${PLANET_HI[panchang.nakshatra.lord] ?? panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`
-            : `${panchang.nakshatra.name_hi} · pada ${panchang.nakshatra.pada} · lord ${panchang.nakshatra.lord} · ends ${panchang.nakshatra.end_time}`,
+            ? `पाद ${panchang.nakshatra.pada} · स्वामी ${PLANET_HI[panchang.nakshatra.lord] ?? panchang.nakshatra.lord} · समाप्ति ${panchang.nakshatra.end_time}`
+            : `pada ${panchang.nakshatra.pada} · lord ${panchang.nakshatra.lord} · ends ${panchang.nakshatra.end_time}`,
           meaning: isHi
             ? "आसमान के 27 तारा-समूहों में से आज चांद जहां है — शुभ काम का समय (मुहूर्त) और बच्चों के नाम इसी से चुने जाते हैं"
             : "Where the Moon sits today among the sky's 27 star-groups — auspicious timings (muhurta) and babies' names are chosen from this" },
-        { label: "योग / Yoga", value: isHi ? yogaNameHi(panchang.yoga.name) : panchang.yoga.name,
+        { label: isHi ? "योग" : "Yoga", value: isHi ? yogaNameHi(panchang.yoga.name) : panchang.yoga.name,
           sub: isHi ? `समाप्ति ${panchang.yoga.end_time}` : `ends ${panchang.yoga.end_time}`,
           meaning: isHi
             ? "सूरज और चांद की जोड़ी से बनने वाला दिन का मिज़ाज — कुछ दिन नरम होते हैं, कुछ सख्त; बड़े काम से पहले यही देखा जाता है"
             : "The day's mood, set by the Sun-Moon pairing — some days run gentle, some harsh; it's checked before big undertakings" },
-        { label: "करण / Karana", value: isHi ? karanaNameHi(panchang.karana.name) : panchang.karana.name,
+        { label: isHi ? "करण" : "Karana", value: isHi ? karanaNameHi(panchang.karana.name) : panchang.karana.name,
           sub: isHi ? `समाप्ति ${panchang.karana.end_time}` : `ends ${panchang.karana.end_time}`,
           meaning: isHi
             ? "तिथि का आधा हिस्सा — रोज़मर्रा के छोटे कामों (लेन-देन, कोई नई शुरुआत) के लिए और बारीक जांच"
             : "Half of a tithi — a finer check for small everyday actions like transactions or starting something new" },
-        { label: "चंद्र कला / Moon Phase", value: isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase, sub: "",
+        { label: isHi ? "चंद्र कला" : "Moon Phase", value: isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase, sub: "",
           meaning: isHi
             ? "आज चांद कितना भरा है — बढ़ता चांद नई शुरुआत के लिए अच्छा माना जाता है, घटता चांद काम निपटाने और छोड़ने के लिए"
             : "How full the Moon is today — a growing moon is considered good for new beginnings, a shrinking one for finishing and letting go" },
-        { label: "सूर्योदय / Sunrise", value: panchang.sun_rise, sub: "",
+        { label: isHi ? "सूर्योदय" : "Sunrise", value: panchang.sun_rise, sub: "",
           meaning: isHi
             ? "पंचांग का दिन रात 12 बजे से नहीं, सूर्योदय से शुरू होता है — इसीलिए सुबह-सुबह की तिथि पिछले दिन वाली भी हो सकती है"
             : "The panchang day starts at sunrise, not midnight — which is why the early-morning tithi can still belong to the previous day" },
-        { label: "सूर्यास्त / Sunset", value: panchang.sun_set, sub: "",
+        { label: isHi ? "सूर्यास्त" : "Sunset", value: panchang.sun_set, sub: "",
           meaning: isHi
             ? "यहां से दिन के शुभ-अशुभ समय (नीचे दिए चौघड़िया) रात वाले हिस्से में बदल जाते हैं"
             : "From this moment, the day's good/bad time-slots (the choghadiya below) switch over to their night set" },
@@ -500,7 +513,7 @@ export default function PanchangTool() {
       <PatrikaFrame style={{ marginBottom: "1.5rem" }}>
         <form onSubmit={handleSubmit} className="inline-tool-form" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", alignItems: "end" }}>
           <div className="form-group">
-            <label className="form-label" htmlFor="pdate">दिनांक / Date</label>
+            <label className="form-label" htmlFor="pdate">{isHi ? "दिनांक" : "Date"}</label>
             <input
               id="pdate"
               type="date"
@@ -510,10 +523,10 @@ export default function PanchangTool() {
               required
             />
           </div>
-          <PlaceSearch value={place} onSelect={setPlace} label="स्थान / City" placeholder="Type any city… e.g. Kanpur, Dubai, London" />
+          <PlaceSearch value={place} onSelect={setPlace} label={isHi ? "स्थान" : "City"} />
           {view === "day" && (
             <button type="submit" className="btn btn-primary" disabled={loading || !place}>
-              {loading ? t("form.calculating") : "पंचांग देखें / Show Panchang"}
+              {loading ? t("form.calculating") : isHi ? "पंचांग देखें" : "Show Panchang"}
             </button>
           )}
         </form>
@@ -525,10 +538,10 @@ export default function PanchangTool() {
 
         <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1rem" }}>
           <button type="button" className={`btn btn-sm ${view === "day" ? "btn-secondary" : "btn-ghost"}`} onClick={() => setView("day")}>
-            दैनिक पंचांग / Daily
+            {isHi ? "दैनिक पंचांग" : "Daily Panchang"}
           </button>
           <button type="button" className={`btn btn-sm ${view === "month" ? "btn-secondary" : "btn-ghost"}`} onClick={() => setView("month")}>
-            मासिक पंचांग / Monthly
+            {isHi ? "मासिक पंचांग" : "Monthly Calendar"}
           </button>
         </div>
       </PatrikaFrame>
@@ -575,12 +588,14 @@ export default function PanchangTool() {
             {panchang.date} — {shownPlace}
           </h2>
           {panchang.masa && (
-            <p className="devanagari" style={{ textAlign: "center", color: "#8a5a17", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.2rem" }}>
-              {panchang.masa.name_hi} मास{panchang.tithi.name_hi ? ` · ${panchang.tithi.paksha === "Shukla" ? "शुक्ल पक्ष" : "कृष्ण पक्ष"} ${panchang.tithi.name_hi}` : ""}
+            <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", color: "#8a5a17", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.2rem" }}>
+              {isHi
+                ? `${panchang.masa.name_hi} मास${panchang.tithi.name_hi ? ` · ${panchang.tithi.paksha === "Shukla" ? "शुक्ल पक्ष" : "कृष्ण पक्ष"} ${panchang.tithi.name_hi}` : ""}`
+                : `${panchang.masa.name} month · ${panchang.tithi.paksha} paksha ${panchang.tithi.name}`}
             </p>
           )}
-          <p className="devanagari" style={{ textAlign: "center", color: "var(--muted)", fontSize: "0.85rem", marginBottom: "0.75rem" }}>
-            लाहिरी अयनांश · वास्तविक खगोलीय गणना
+          <p className={isHi ? "devanagari" : undefined} style={{ textAlign: "center", color: "var(--muted)", fontSize: "0.85rem", marginBottom: "0.75rem" }}>
+            {isHi ? "लाहिरी अयनांश · वास्तविक खगोलीय गणना" : "Lahiri ayanamsa · real astronomical calculation"}
           </p>
 
           {/* ── Heavenly Pulse — quick-glance strip, additive to the detailed grid below ── */}
@@ -631,7 +646,7 @@ export default function PanchangTool() {
               <MoonSignPanel
                 nakshatraIndex={panchang.nakshatra.index}
                 pada={panchang.nakshatra.pada}
-                moonPhase={panchang.moon_phase}
+                moonPhase={isHi ? moonPhaseHi(panchang.moon_phase) : panchang.moon_phase}
                 isHi={isHi}
               />
             </div>
@@ -661,28 +676,31 @@ export default function PanchangTool() {
             abhijit={abhijit}
             isToday={placeIsToday}
             nowMinInPlace={nowMinInPlace}
+            isHi={isHi}
           />
 
           {abhijit && (
             <div className="kaal-box good" style={{ marginBottom: "0.6rem", marginTop: "0.9rem" }}>
-              <strong>अभिजीत मुहूर्त / Abhijit Muhurta: {abhijit.start} – {abhijit.end}</strong>
-              <div style={{ fontSize: "0.78rem" }}>दिन का सर्वश्रेष्ठ सामान्य मुहूर्त — शुभ कार्य आरम्भ के लिए उत्तम।</div>
+              <strong>{isHi ? "अभिजीत मुहूर्त" : "Abhijit Muhurta"}: {abhijit.start} – {abhijit.end}</strong>
+              <div style={{ fontSize: "0.78rem" }}>
+                {isHi ? "दिन का सर्वश्रेष्ठ सामान्य मुहूर्त — शुभ कार्य आरम्भ के लिए उत्तम।" : "The day's best general muhurta — ideal for beginning auspicious work."}
+              </div>
             </div>
           )}
 
           {kaal && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.6rem" }}>
               <div className="kaal-box">
-                <strong>राहु काल: {kaal.rahu_kaal.start} – {kaal.rahu_kaal.end}</strong>
-                <div style={{ fontSize: "0.78rem" }}>शुभ कार्य आरम्भ न करें</div>
+                <strong>{isHi ? "राहु काल" : "Rahu Kaal"}: {kaal.rahu_kaal.start} – {kaal.rahu_kaal.end}</strong>
+                <div style={{ fontSize: "0.78rem" }}>{isHi ? "शुभ कार्य आरम्भ न करें" : "Don't begin auspicious work"}</div>
               </div>
               <div className="kaal-box">
-                <strong>गुलिक काल: {kaal.gulika_kaal.start} – {kaal.gulika_kaal.end}</strong>
-                <div style={{ fontSize: "0.78rem" }}>अशुभ अवधि</div>
+                <strong>{isHi ? "गुलिक काल" : "Gulika Kaal"}: {kaal.gulika_kaal.start} – {kaal.gulika_kaal.end}</strong>
+                <div style={{ fontSize: "0.78rem" }}>{isHi ? "अशुभ अवधि" : "Inauspicious period"}</div>
               </div>
               <div className="kaal-box">
-                <strong>यमगण्ड: {kaal.yamaganda.start} – {kaal.yamaganda.end}</strong>
-                <div style={{ fontSize: "0.78rem" }}>यात्रा व नए कार्य टालें</div>
+                <strong>{isHi ? "यमगण्ड" : "Yamaganda"}: {kaal.yamaganda.start} – {kaal.yamaganda.end}</strong>
+                <div style={{ fontSize: "0.78rem" }}>{isHi ? "यात्रा व नए कार्य टालें" : "Avoid journeys and new ventures"}</div>
               </div>
             </div>
           )}
@@ -692,14 +710,26 @@ export default function PanchangTool() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.6rem", marginTop: "0.6rem" }}>
               {bhadraActive && (
                 <div className="kaal-box">
-                  <strong>भद्रा (विष्टि करण) चल रही है — समाप्ति {panchang.karana.end_time}</strong>
-                  <div style={{ fontSize: "0.78rem" }}>रक्षाबंधन, गृह-प्रवेश जैसे शुभ आरम्भ भद्रा के बाद करें।</div>
+                  <strong>
+                    {isHi
+                      ? `भद्रा (विष्टि करण) चल रही है — समाप्ति ${panchang.karana.end_time}`
+                      : `Bhadra (Vishti karana) is running — ends ${panchang.karana.end_time}`}
+                  </strong>
+                  <div style={{ fontSize: "0.78rem" }}>
+                    {isHi
+                      ? "रक्षाबंधन, गृह-प्रवेश जैसे शुभ आरम्भ भद्रा के बाद करें।"
+                      : "Hold auspicious beginnings such as Raksha Bandhan or griha pravesh until Bhadra is over."}
+                  </div>
                 </div>
               )}
               {panchakActive && (
                 <div className="kaal-box">
-                  <strong>पंचक चल रहा है</strong>
-                  <div style={{ fontSize: "0.78rem" }}>दक्षिण-यात्रा, छत डालना, शय्या-निर्माण आदि परम्परा में टाले जाते हैं। भयभीत न हों — पूजा-पाठ व नित्य कर्म शुभ हैं।</div>
+                  <strong>{isHi ? "पंचक चल रहा है" : "Panchak is running"}</strong>
+                  <div style={{ fontSize: "0.78rem" }}>
+                    {isHi
+                      ? "दक्षिण-यात्रा, छत डालना, शय्या-निर्माण आदि परम्परा में टाले जाते हैं। भयभीत न हों — पूजा-पाठ व नित्य कर्म शुभ हैं।"
+                      : "Tradition avoids journeys to the south, laying a roof, making a bed and the like. Nothing to fear — worship and daily duties are auspicious."}
+                  </div>
                 </div>
               )}
             </div>
@@ -709,7 +739,7 @@ export default function PanchangTool() {
           {chog && (
             <div style={{ marginTop: "1.25rem" }}>
               <h3 style={{ fontSize: "1.05rem", color: "var(--maroon-deep)", marginBottom: "0.5rem", textAlign: "center" }}>
-                चोघड़िया / Choghadiya
+                {isHi ? "चोघड़िया" : "Choghadiya"}
               </h3>
               <ChoghadiyaGrid
                 day={chog.day}
@@ -720,7 +750,9 @@ export default function PanchangTool() {
                 isHi={isHi}
               />
               <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.5rem" }}>
-                हरा = शुभ (अमृत, शुभ, लाभ) · पीला = सामान्य (चल — यात्रा हेतु ठीक) · लाल = टालें (उद्वेग, काल, रोग)
+                {isHi
+                  ? "हरा = शुभ (अमृत, शुभ, लाभ) · पीला = सामान्य (चल — यात्रा हेतु ठीक) · लाल = टालें (उद्वेग, काल, रोग)"
+                  : "Green = good (Amrit, Shubh, Labh) · Yellow = neutral (Char — fine for travel) · Red = avoid (Udveg, Kaal, Rog)"}
               </p>
             </div>
           )}
@@ -729,17 +761,19 @@ export default function PanchangTool() {
           {dayHoras.length > 0 && (
             <div style={{ marginTop: "1.25rem" }}>
               <h3 style={{ fontSize: "1.05rem", color: "var(--maroon-deep)", marginBottom: "0.5rem" }}>
-                होरा — दिन के 12 ग्रह-घंटे
+                {isHi ? "होरा — दिन के 12 ग्रह-घंटे" : "Hora — the day's 12 planetary hours"}
               </h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "0.45rem" }}>
                 {dayHoras.map((h, i) => (
                   <div key={`h${i}`} style={slotStyle(h.quality)}>
-                    <strong>{h.name} होरा</strong><br />{h.start}–{h.end}
+                    <strong>{isHi ? `${h.name} होरा` : `${HORA_EN[h.name] ?? h.name} hora`}</strong><br />{h.start}–{h.end}
                   </div>
                 ))}
               </div>
               <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.4rem" }}>
-                गुरु/शुक्र होरा — शुभ आरम्भ · बुध — व्यापार-लेखन · चंद्र — यात्रा-मेल · सूर्य — सरकारी कार्य · शनि/मंगल होरा में नए शुभ कार्य टालें
+                {isHi
+                  ? "गुरु/शुक्र होरा — शुभ आरम्भ · बुध — व्यापार-लेखन · चंद्र — यात्रा-मेल · सूर्य — सरकारी कार्य · शनि/मंगल होरा में नए शुभ कार्य टालें"
+                  : "Jupiter/Venus hora — good beginnings · Mercury — business and writing · Moon — travel and meetings · Sun — government work · avoid new auspicious work in a Saturn/Mars hora"}
               </p>
             </div>
           )}
@@ -748,14 +782,14 @@ export default function PanchangTool() {
           {festivals.length > 0 && (
             <div style={{ marginTop: "1.25rem" }}>
               <h3 style={{ fontSize: "1.05rem", color: "var(--maroon-deep)", marginBottom: "0.5rem" }}>
-                आगामी व्रत एवं त्यौहार
+                {isHi ? "आगामी व्रत एवं त्यौहार" : "Upcoming Vrats & Festivals"}
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
                 {festivals.map((f, i) => (
                   <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "baseline", fontSize: "0.85rem", borderBottom: "1px dashed rgba(201,154,58,0.3)", paddingBottom: "0.35rem" }}>
                     <strong style={{ color: "var(--maroon)", whiteSpace: "nowrap" }}>{f.date.slice(8, 10)}-{f.date.slice(5, 7)}</strong>
-                    <span style={{ fontWeight: f.major ? 800 : 600, color: f.major ? MAJOR_COLOR : undefined }} className={f.name_hi ? "devanagari" : undefined}>
-                      {f.major && "✦ "}{f.name_hi ?? f.name}
+                    <span style={{ fontWeight: f.major ? 800 : 600, color: f.major ? MAJOR_COLOR : undefined }} className={isHi && f.name_hi ? "devanagari" : undefined}>
+                      {f.major && "✦ "}{festLabel(f, isHi)}
                     </span>
                     <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>{f.significance}</span>
                   </div>

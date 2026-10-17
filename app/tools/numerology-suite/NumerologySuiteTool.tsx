@@ -182,14 +182,21 @@ export default function NumerologySuiteTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: step === "result" ? "900px" : "720px" }}>
-        <h1 className="section-heading">अंक ज्योतिष संगतता सूट</h1>
-        <p className="section-heading-hi devanagari">Numerology Compatibility Suite · ₹{PRICE}</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "अंक ज्योतिष संगतता सूट" : "Numerology Compatibility Suite"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Numerology Compatibility Suite" : "अंक ज्योतिष संगतता सूट"} · ₹{PRICE}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <p className="devanagari">
-            एक ही रिपोर्ट में <span className="hl">प्रेम, करियर, व्यापार और विवाह</span> — आपके मूलांक व भाग्यांक से
-            चार-आयामी अंक ज्योतिष विश्लेषण, एक साथ जोड़कर।
-          </p>
+          {isHi ? (
+            <p className="devanagari">
+              एक ही रिपोर्ट में <span className="hl">प्रेम, करियर, व्यापार और विवाह</span> — आपके मूलांक व भाग्यांक से
+              चार-आयामी अंक ज्योतिष विश्लेषण, एक साथ जोड़कर।
+            </p>
+          ) : (
+            <p>
+              <span className="hl">Love, career, business and marriage</span> in one report — a four-way numerology
+              analysis of your Mulank and Bhagyank, read together.
+            </p>
+          )}
         </div>
 
         <div className="tu-steps">
@@ -296,7 +303,7 @@ export default function NumerologySuiteTool() {
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
                 {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(resultError, isHi)}</p>}
-                <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
+                <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>{isHi ? "संदर्भ कोड" : "Ref"}: {refCode}</p>
               </div>
             </PatrikaFrame>
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>

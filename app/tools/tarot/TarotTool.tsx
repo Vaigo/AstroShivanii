@@ -79,8 +79,8 @@ export default function TarotTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "800px" }}>
-        <h1 className="section-heading">Tarot Reading</h1>
-        <p className="section-heading-hi devanagari">टैरो पाठन</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "टैरो पाठन" : "Tarot Reading"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Tarot Reading" : "टैरो पाठन"}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           {isHi ? (

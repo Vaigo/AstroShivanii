@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getActiveChoghadiyaSlot, CHOG_MEANING } from "@/lib/panchang-calc";
+import { getActiveChoghadiyaSlot, CHOG_MEANING, CHOG_NAME_EN } from "@/lib/panchang-calc";
 import type { TimeSlot } from "@/lib/panchang-calc";
 import Icon from "@/components/Icon";
 
@@ -58,7 +58,7 @@ export default function ChoghadiyaGrid({ day, night, sunrise, sunset, nowMinInPl
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: 700, color: q.text, fontSize: "0.9rem" }}>{s.name}</span>
+                <span style={{ fontWeight: 700, color: q.text, fontSize: "0.9rem" }}>{isHi ? s.name : CHOG_NAME_EN[s.name] ?? s.name}</span>
                 <span style={{ color: q.text, display: "inline-flex", alignItems: "center", gap: "0.2rem", fontSize: "0.66rem", fontWeight: 600 }}>
                   <Icon name={q.icon} size={12} />{isHi ? q.hi : q.en}
                 </span>

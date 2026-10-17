@@ -314,14 +314,21 @@ export default function TimeRectificationTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: step === "result" ? "900px" : "720px" }}>
-        <h1 className="section-heading">जन्म समय शुद्धिकरण</h1>
-        <p className="section-heading-hi devanagari">Time Rectification · ₹{PRICE}</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "जन्म समय शुद्धिकरण" : "Birth Time Rectification"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Time Rectification" : "जन्म समय शुद्धिकरण"} · ₹{PRICE}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <p className="devanagari">
-            जन्म समय <span className="hl">ठीक से पता नहीं</span>? अपने जीवन की कुछ{" "}
-            <span className="hl">निश्चित घटनाएं</span> बताएं — हम दशा-गणना से आपका संभावित सही समय निकालते हैं।
-          </p>
+          {isHi ? (
+            <p className="devanagari">
+              जन्म समय <span className="hl">ठीक से पता नहीं</span>? अपने जीवन की कुछ{" "}
+              <span className="hl">निश्चित घटनाएं</span> बताएं — हम दशा-गणना से आपका संभावित सही समय निकालते हैं।
+            </p>
+          ) : (
+            <p>
+              <span className="hl">Not sure</span> of your exact birth time? Tell us a few{" "}
+              <span className="hl">certain events</span> from your life — we work out your likely correct time from the dashas.
+            </p>
+          )}
         </div>
 
         <div className="tu-steps">
@@ -666,7 +673,7 @@ export default function TimeRectificationTool() {
                   </p>
                 )}
                 <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>
-                  Ref: {refCode}
+                  {isHi ? "संदर्भ कोड" : "Ref"}: {refCode}
                 </p>
                 <p className={`cta-note${isHi ? " devanagari" : ""}`} style={{ fontSize: "0.75rem", marginTop: "0.4rem", color: "var(--gold-pale)" }}>
                   {isHi
@@ -710,8 +717,10 @@ export default function TimeRectificationTool() {
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.6rem", color: "var(--maroon-deep)", marginTop: "0.4rem" }}>
                   <strong>{result.best_match.date} · {result.best_match.tob}</strong>
                 </div>
-                <p className={`devanagari`} style={{ marginTop: "0.3rem", color: "var(--muted)" }}>
-                  {result.best_match.ascendant_hi} लग्न ({result.best_match.ascendant}) · {isHi ? "विश्वास स्तर" : "Confidence"}: {result.best_match.confidence_pct}%
+                <p className={isHi ? "devanagari" : undefined} style={{ marginTop: "0.3rem", color: "var(--muted)" }}>
+                  {isHi
+                    ? `${result.best_match.ascendant_hi} लग्न`
+                    : `${result.best_match.ascendant} ascendant`} · {isHi ? "विश्वास स्तर" : "Confidence"}: {result.best_match.confidence_pct}%
                 </p>
                 <p className={isHi ? "devanagari" : undefined} style={{ marginTop: "0.2rem", color: "var(--muted)", fontSize: "0.85rem" }}>
                   {isHi ? "लग्नेश" : "Ascendant Lord"}: {isHi ? PLANET_HI[result.best_match.ascendant_lord] ?? result.best_match.ascendant_lord : result.best_match.ascendant_lord}

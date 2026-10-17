@@ -1,9 +1,11 @@
-import Link from "next/link";
+import BreadcrumbTrail from "./BreadcrumbTrail";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export interface Crumb {
   name: string;
+  /** Shown instead of `name` in Hindi mode (the JSON-LD keeps `name`) */
+  nameHi?: string;
   /** Path starting with "/" — omit for the current page */
   href?: string;
 }
@@ -27,18 +29,7 @@ export default function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <nav className="breadcrumbs" aria-label="Breadcrumb">
-        {crumbs.map((c, i) => (
-          <span key={i}>
-            {i > 0 && <span className="breadcrumb-sep" aria-hidden="true">›</span>}
-            {c.href ? (
-              <Link href={c.href}>{c.name}</Link>
-            ) : (
-              <span className="breadcrumb-current" aria-current="page">{c.name}</span>
-            )}
-          </span>
-        ))}
-      </nav>
+      <BreadcrumbTrail crumbs={crumbs} />
     </>
   );
 }

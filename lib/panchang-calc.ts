@@ -137,6 +137,11 @@ export const CHOG_MEANING: Record<string, { en: string; hi: string }> = {
   "रोग": { en: "Illness-linked — be cautious with health matters.", hi: "रोग-कारक — स्वास्थ्य संबंधी कार्यों में सावधानी।" },
 };
 
+/** Choghadiya names (the slots carry the Hindi name) as written in English. */
+export const CHOG_NAME_EN: Record<string, string> = {
+  "अमृत": "Amrit", "शुभ": "Shubh", "लाभ": "Labh", "चल": "Char", "उद्वेग": "Udveg", "काल": "Kaal", "रोग": "Rog",
+};
+
 /** Minutes elapsed since `sunriseMin`, treating `hhmm` as belonging to the
  *  same sunrise→next-sunrise cycle (night slots wrap past midnight, so a
  *  raw clock time earlier than sunrise means "the next calendar day"). */

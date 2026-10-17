@@ -23,8 +23,17 @@ export default function MoonSignPanel({ nakshatraIndex, pada, moonPhase, isHi }:
       </div>
       <div style={{ fontSize: "2.2rem", lineHeight: 1, color: "var(--gold)" }} aria-hidden="true">{glyph}</div>
       <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--maroon-deep)", marginTop: "0.2rem" }}>
-        {rashi.name}{" "}
-        <span className="devanagari" style={{ color: "var(--muted)", fontSize: "0.85em" }}>{rashi.name_hi}</span>
+        {isHi ? (
+          <>
+            <span className="devanagari">{rashi.name_hi}</span>{" "}
+            <span style={{ color: "var(--muted)", fontSize: "0.85em" }}>{rashi.name}</span>
+          </>
+        ) : (
+          <>
+            {rashi.name}{" "}
+            <span className="devanagari" style={{ color: "var(--muted)", fontSize: "0.85em" }}>{rashi.name_hi}</span>
+          </>
+        )}
       </div>
       <div style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "0.15rem" }}>
         {isHi ? `स्वामी: ${rashi.lord_hi}` : `Ruled by ${rashi.lord}`}

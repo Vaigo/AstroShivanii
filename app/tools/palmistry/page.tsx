@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import PalmistryTool from "./PalmistryTool";
+import RelatedLinks from "@/components/RelatedLinks";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
@@ -62,8 +62,7 @@ export default function Page() {
       <PalmistryTool />
       <div className="container" style={{ maxWidth: "760px", margin: "-2rem auto 0", padding: "0 1rem 2.5rem", textAlign: "center" }}>
         <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-          Related: <Link href="/tools/kundli">Kundli / Birth Chart</Link> ·{" "}
-          <Link href="/tools/matching">Marriage Matching</Link>
+          <RelatedLinks links={[{ href: "/tools/kundli", en: "Kundli / Birth Chart", hi: "कुंडली / जन्म चार्ट" }, { href: "/tools/matching", en: "Marriage Matching", hi: "गुण मिलान" }]} />
         </p>
       </div>
     </>

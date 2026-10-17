@@ -241,14 +241,21 @@ export default function VarshphalYearlyTool() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: step === "result" ? "900px" : "720px" }}>
-        <h1 className="section-heading">वार्षिक भविष्यफल</h1>
-        <p className="section-heading-hi devanagari">Yearly Horoscope (Varshphal) · ₹{PRICE}</p>
+        <h1 className={`section-heading${isHi ? " devanagari" : ""}`}>{isHi ? "वार्षिक भविष्यफल" : "Yearly Horoscope (Varshphal)"}</h1>
+        <p className="section-heading-hi devanagari">{isHi ? "Yearly Horoscope (Varshphal)" : "वार्षिक भविष्यफल"} · ₹{PRICE}</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <p className="devanagari">
-            <span className="hl">वर्षफल</span> (सौर वापसी कुंडली) से आपके जन्मदिन से अगले जन्मदिन तक का वर्ष कैसा
-            रहेगा — करियर, धन, स्वास्थ्य, रिश्ते और आध्यात्म — जानें।
-          </p>
+          {isHi ? (
+            <p className="devanagari">
+              <span className="hl">वर्षफल</span> (सौर वापसी कुंडली) से आपके जन्मदिन से अगले जन्मदिन तक का वर्ष कैसा
+              रहेगा — करियर, धन, स्वास्थ्य, रिश्ते और आध्यात्म — जानें।
+            </p>
+          ) : (
+            <p>
+              Your <span className="hl">Varshphal</span> (solar-return chart) shows how the year from this birthday to the
+              next will go — career, money, health, relationships and spirituality.
+            </p>
+          )}
         </div>
 
         <div className="tu-steps">
@@ -395,7 +402,7 @@ export default function VarshphalYearlyTool() {
                 </button>
                 {payError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{payError}</p>}
                 {resultError && <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.8rem", color: "#ffd7c9", marginBottom: "0.6rem" }}>{pickMessageLang(resultError, isHi)}</p>}
-                <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>Ref: {refCode}</p>
+                <p className="cta-note" style={{ fontSize: "0.72rem", marginTop: "0.6rem", color: "var(--gold-pale)" }}>{isHi ? "संदर्भ कोड" : "Ref"}: {refCode}</p>
               </div>
             </PatrikaFrame>
             <p style={{ textAlign: "center", marginTop: "0.75rem" }}>

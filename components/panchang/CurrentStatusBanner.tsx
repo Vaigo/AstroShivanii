@@ -1,6 +1,6 @@
 "use client";
 
-import { getActiveChoghadiyaSlot, minutesUntilNextChogSlot, CHOG_MEANING } from "@/lib/panchang-calc";
+import { getActiveChoghadiyaSlot, minutesUntilNextChogSlot, CHOG_MEANING, CHOG_NAME_EN } from "@/lib/panchang-calc";
 import type { TimeSlot } from "@/lib/panchang-calc";
 
 interface CurrentStatusBannerProps {
@@ -56,7 +56,7 @@ export default function CurrentStatusBanner({ day, night, sunrise, nowMinInPlace
         {isHi ? "अभी सक्रिय" : "Currently Active"}
       </div>
       <div style={{ fontSize: "1.25rem", fontWeight: 700, color: q.text }}>
-        {active.slot.name}{" "}
+        {isHi ? active.slot.name : CHOG_NAME_EN[active.slot.name] ?? active.slot.name}{" "}
         <span style={{ fontSize: "0.72rem", fontWeight: 600 }}>({isHi ? q.hi : q.en})</span>
       </div>
       <div style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{active.slot.start} – {active.slot.end}</div>
@@ -67,7 +67,7 @@ export default function CurrentStatusBanner({ day, night, sunrise, nowMinInPlace
       )}
       {next && (
         <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: "0.5rem" }}>
-          {isHi ? "आगामी" : "Next"}: <strong>{next.next.slot.name}</strong> @ {next.next.slot.start} — {formatCountdown(next.minutes, isHi)}
+          {isHi ? "आगामी" : "Next"}: <strong>{isHi ? next.next.slot.name : CHOG_NAME_EN[next.next.slot.name] ?? next.next.slot.name}</strong> @ {next.next.slot.start} — {formatCountdown(next.minutes, isHi)}
         </div>
       )}
     </div>

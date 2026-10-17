@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import ShubhMuhurtaTool from "./ShubhMuhurtaTool";
+import RelatedLinks from "@/components/RelatedLinks";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
@@ -61,8 +61,7 @@ export default function Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <ShubhMuhurtaTool />
       <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--muted)", paddingBottom: "2.5rem" }}>
-        Related: <Link href="/tools/panchang">Panchang</Link> · <Link href="/tools/kundli">Kundli / Birth Chart</Link> ·{" "}
-        <Link href="/readings/ask-one-question">Ask Shivanii Directly</Link>
+        <RelatedLinks links={[{ href: "/tools/panchang", en: "Panchang", hi: "पंचांग" }, { href: "/tools/kundli", en: "Kundli / Birth Chart", hi: "कुंडली / जन्म चार्ट" }, { href: "/readings/ask-one-question", en: "Ask Shivanii Directly", hi: "शिवानी जी से सीधे पूछें" }]} />
       </p>
     </>
   );

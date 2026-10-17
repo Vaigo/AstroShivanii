@@ -143,7 +143,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
           {resolvedOffset !== null && place && (
             <p className="form-hint" style={{ marginTop: "-0.5rem", marginBottom: "0.75rem" }}>
               {place.tzName} · UTC{resolvedOffset >= 0 ? "+" : ""}{resolvedOffset}{" "}
-              {tob ? "(आपकी जन्म-तिथि के अनुसार / for your birth date)" : "(जन्म-तिथि अनुसार)"}
+              {isHi ? (tob ? "(आपकी जन्म-तिथि के अनुसार)" : "(जन्म-तिथि अनुसार)") : "(for your birth date)"}
             </p>
           )}
           <p style={{ marginBottom: "1rem" }}>
