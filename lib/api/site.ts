@@ -82,6 +82,45 @@ export async function siteLogin(email: string, password: string) {
   return d.user;
 }
 
+/* ── forgot / reset password ──
+ * The emailed link opens /account/reset-password/?token=… (single use, 1 hour).
+ * Every message is "English | Hindi": show one half with pickMessageLang. */
+export interface ForgotPasswordAnswer {
+  /** email: a link is on its way (if an account uses the address) ·
+   *  support: the server cannot email yet, so the message points to WhatsApp ·
+   *  response: development server only, reset_token is in the answer */
+  delivery: "email" | "support" | "response";
+  message: string;
+  reset_token?: string;
+}
+/** The answer is the same whether or not an account uses the address. */
+export function siteForgotPassword(email: string) {
+  return siteFetch<ForgotPasswordAnswer>("/v1/site/auth/forgot-password", { body: { email } });
+}
+/** 400 INVALID_OR_EXPIRED_TOKEN for an unknown, expired or already used link. */
+export function siteResetPassword(token: string, newPassword: string) {
+  return siteFetch<{ message: string }>("/v1/site/auth/reset-password", { body: { token, new_password: newPassword } });
+}
+
+/** Where a paid tool's confirmation email goes. The tool paywalls ask for no
+ *  email, so the backend sends it to the logged-in account's address, read
+ *  from the X-Site-Token that createPaymentOrder sends. "" when nobody is
+ *  logged in or the stored login has expired: that order gets no email, so
+ *  the page must not promise one. (The booking form sends its own email.) */
+export function accountReceiptEmail(): string {
+  const token = getSiteToken();
+  const email = getStoredUser()?.email ?? "";
+  if (!token || !email) return "";
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const exp = JSON.parse(window.atob(payload))?.exp;
+    if (typeof exp === "number" && exp * 1000 <= Date.now()) return "";
+  } catch {
+    return "";
+  }
+  return email;
+}
+
 /* ── profile ── */
 export function fetchHistory() {
   return siteFetch<{ orders: TuOrder[]; bookings: SiteBooking[]; rectifications: RectificationOrder[]; total_spent_inr: number }>(

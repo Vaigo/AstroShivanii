@@ -8,9 +8,10 @@ import DownloadReportButton from "@/components/DownloadReportButton";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
+import ConfirmationEmailNote from "@/components/ConfirmationEmailNote";
 import {
   createPaymentOrder, verifyPayment, fetchPalmistryResult, precheckPalmistryPhotos, SiteApiError,
-  type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict, type MuhurtaBirth, getStoredUser,
+  type PalmistryResult, type PalmistryHand, type PalmistryPrecheckVerdict, type MuhurtaBirth, getStoredUser, accountReceiptEmail,
 } from "@/lib/api/site";
 import {
   LINE_MEANINGS, LINE_QUALITY_NOTES, MOUNT_MEANINGS, PROMINENCE_LABEL, SHAPE_MEANINGS, splitBold,
@@ -177,6 +178,9 @@ export default function PalmistryTool() {
   const [paying, setPaying] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
+  // After a verified payment: the logged-in account's email, where the backend
+  // sends this order's confirmation ("" = none is sent, so no note).
+  const [confirmationTo, setConfirmationTo] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<PalmistryResult | null>(null);
   const [refCode, setRefCode] = useState(() => `PM-${Date.now().toString(36).toUpperCase()}`);
@@ -333,6 +337,7 @@ export default function PalmistryTool() {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           try {
             await verifyPayment(r);
+            setConfirmationTo(accountReceiptEmail());
             await handleAnalyze(r.razorpay_order_id);
           } catch {
             setPayError(isHi
@@ -826,6 +831,7 @@ export default function PalmistryTool() {
                   : `Any issue? Message on WhatsApp with your ref code (${refCode}).`}
               </p>
 
+              <ConfirmationEmailNote email={confirmationTo} isHi={isHi} />
               <Divider />
               <ResultCTA
                 hook={{

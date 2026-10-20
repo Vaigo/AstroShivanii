@@ -10,6 +10,7 @@ import Icon from "@/components/Icon";
 import { READINGS, readingName, getReading } from "@/lib/readings";
 import { createPaymentOrder, verifyPayment, SiteApiError } from "@/lib/api/site";
 import BirthForm from "@/components/BirthForm";
+import ConfirmationEmailNote, { deliverableEmail } from "@/components/ConfirmationEmailNote";
 import type { BirthRequest } from "@/lib/api/types";
 import { pickMessageLang } from "@/lib/hindi-labels";
 
@@ -42,6 +43,9 @@ function BookForm() {
   const [callSlot, setCallSlot] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // Where the backend emails this booking's confirmation: the email typed
+  // above ("" when it is not a sendable address, so no note is shown).
+  const [confirmationTo, setConfirmationTo] = useState("");
   const [error, setError] = useState("");
 
   // A refresh right after paying must show the confirmation again, not the
@@ -55,6 +59,7 @@ function BookForm() {
         if (s.slug && Date.now() - (s.at ?? 0) < 12 * 3600 * 1000) {
           // eslint-disable-next-line react-hooks/set-state-in-effect -- restores the receipt from sessionStorage, browser-only, so it is read after hydration
           setSlug(s.slug);
+          setConfirmationTo(typeof s.email === "string" ? deliverableEmail(s.email) : "");
           setSuccess(true);
         } else {
           window.sessionStorage.removeItem("book-success");
@@ -126,8 +131,10 @@ function BookForm() {
           /* 3. Verify the signature server-side — marks the booking 'paid' */
           try {
             await verifyPayment(r);
+            const to = deliverableEmail(email);
+            setConfirmationTo(to);
             setSuccess(true);
-            try { window.sessionStorage.setItem("book-success", JSON.stringify({ slug, at: Date.now() })); } catch { /* non-fatal */ }
+            try { window.sessionStorage.setItem("book-success", JSON.stringify({ slug, at: Date.now(), email: to })); } catch { /* non-fatal */ }
           } catch (err) {
             setError(err instanceof SiteApiError ? err.message
               : (isHi ? "भुगतान सत्यापन में समस्या — WhatsApp पर संपर्क करें" : "Verification issue — please contact us on WhatsApp"));
@@ -176,6 +183,7 @@ function BookForm() {
             {t("book.success")}
           </p>
         )}
+        <ConfirmationEmailNote email={confirmationTo} isHi={isHi} style={{ margin: "0 auto 1.25rem" }} />
         {/* What happens next — kills the "did it actually work?" anxiety */}
         <ol
           className={isHi ? "devanagari" : undefined}
@@ -189,7 +197,7 @@ function BookForm() {
             <>
               <li>{isHi ? "आपकी कुंडली के सभी 27 खंड अभी तैयार किए जा रहे हैं — इसमें कुछ मिनट लगेंगे।" : "All 27 sections of your kundli are being prepared now — this takes a few minutes."}</li>
               <li>{isHi ? "तैयार होते ही शिवानी जी इसे अंतिम स्वीकृति देंगी।" : "Once ready, Shivanii gives it her final sign-off."}</li>
-              <li>{isHi ? "स्वीकृति मिलते ही आपके \"मेरा खाता\" पेज पर डाउनलोड बटन दिखेगा — हम आपको WhatsApp पर सूचित करेंगे।" : "As soon as it's approved, a download button appears on your Account page — we'll notify you on WhatsApp."}</li>
+              <li>{isHi ? "स्वीकृति मिलते ही आपके \"मेरा खाता\" पेज पर डाउनलोड बटन दिखेगा — हम आपको ईमेल और WhatsApp पर सूचित करेंगे।" : "As soon as it's approved, a download button appears on your Account page — we'll notify you by email and on WhatsApp."}</li>
             </>
           ) : (
             <>

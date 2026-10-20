@@ -7,8 +7,9 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
+import ConfirmationEmailNote from "@/components/ConfirmationEmailNote";
 import { fetchVarshphalYearLord } from "@/lib/api/endpoints";
-import { createPaymentOrder, verifyPayment, fetchVarshphalYearlyResult, SiteApiError, getStoredUser } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, fetchVarshphalYearlyResult, SiteApiError, getStoredUser, accountReceiptEmail } from "@/lib/api/site";
 import type { BirthRequest, VarshphalYearLordResult, VarshphalYearlyResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { pickLang, PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
@@ -80,6 +81,9 @@ export default function VarshphalYearlyTool() {
   const [paying, setPaying] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
+  // After a verified payment: the logged-in account's email, where the backend
+  // sends this order's confirmation ("" = none is sent, so no note).
+  const [confirmationTo, setConfirmationTo] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<VarshphalYearlyResult | null>(null);
 
@@ -179,6 +183,7 @@ export default function VarshphalYearlyTool() {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           try {
             await verifyPayment(r);
+            setConfirmationTo(accountReceiptEmail());
             await handleCompute(r.razorpay_order_id);
           } catch {
             setPayError(isHi
@@ -476,6 +481,7 @@ export default function VarshphalYearlyTool() {
                   : `This result stays saved in this browser, even after refresh. Any issue? Message on WhatsApp with your ref code (${refCode}).`}
               </p>
 
+              <ConfirmationEmailNote email={confirmationTo} isHi={isHi} />
               <Divider />
               <ResultCTA
                 hook={{

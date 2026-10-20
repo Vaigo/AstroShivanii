@@ -11,8 +11,9 @@ import Icon from "@/components/Icon";
 import ResultCTA from "@/components/ResultCTA";
 import KundliChart from "@/components/KundliChart";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
+import ConfirmationEmailNote from "@/components/ConfirmationEmailNote";
 import { fetchKundli } from "@/lib/api/endpoints";
-import { getSiteToken, createPaymentOrder, verifyPayment, fetchTurantUttarAI, getStoredUser } from "@/lib/api/site";
+import { getSiteToken, createPaymentOrder, verifyPayment, fetchTurantUttarAI, getStoredUser, accountReceiptEmail } from "@/lib/api/site";
 
 declare global {
   interface Window {
@@ -272,6 +273,9 @@ function TurantUttarInner() {
   const [paying, setPaying] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
+  // After a verified payment: the logged-in account's email, where the backend
+  // sends this order's confirmation ("" = none is sent, so no note).
+  const [confirmationTo, setConfirmationTo] = useState("");
 
   /** Primary path: real Razorpay payment (test keys until launch), then the
    *  answer unlocks with a server-verified order id → history shows 'paid'. */
@@ -295,6 +299,7 @@ function TurantUttarInner() {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           try {
             await verifyPayment(r);
+            setConfirmationTo(accountReceiptEmail());
             await handleUnlock(r.razorpay_order_id);
           } catch {
             setPayError(isHi
@@ -813,6 +818,7 @@ function TurantUttarInner() {
                   : `This answer stays saved in this browser, even after refresh. Any issue? Message on WhatsApp with your ref code (${refCode}).`}
               </p>
 
+              <ConfirmationEmailNote email={confirmationTo} isHi={isHi} />
               <Divider />
               <ResultCTA
                 hideTurantUttar

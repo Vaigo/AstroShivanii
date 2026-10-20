@@ -6,8 +6,9 @@ import PatrikaFrame from "@/components/PatrikaFrame";
 import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
+import ConfirmationEmailNote from "@/components/ConfirmationEmailNote";
 import { calcMulank, calcBhagyank } from "@/lib/numerology-calc";
-import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError, getStoredUser } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError, getStoredUser, accountReceiptEmail } from "@/lib/api/site";
 import type { NumerologySuiteResult } from "@/lib/api/types";
 import { pickMessageLang } from "@/lib/hindi-labels";
 
@@ -33,6 +34,9 @@ export default function NumerologySuiteTool() {
   const [paying, setPaying] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
+  // After a verified payment: the logged-in account's email, where the backend
+  // sends this order's confirmation ("" = none is sent, so no note).
+  const [confirmationTo, setConfirmationTo] = useState("");
   const [resultError, setResultError] = useState("");
   const [result, setResult] = useState<NumerologySuiteResult | null>(null);
 
@@ -122,6 +126,7 @@ export default function NumerologySuiteTool() {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           try {
             await verifyPayment(r);
+            setConfirmationTo(accountReceiptEmail());
             await handleCompute(r.razorpay_order_id);
           } catch {
             setPayError(isHi
@@ -406,6 +411,7 @@ export default function NumerologySuiteTool() {
                   : `This result stays saved in this browser, even after refresh. Any issue? Message on WhatsApp with your ref code (${refCode}).`}
               </p>
 
+              <ConfirmationEmailNote email={confirmationTo} isHi={isHi} />
               <Divider />
               <ResultCTA
                 hook={{

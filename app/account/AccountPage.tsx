@@ -142,6 +142,12 @@ export default function AccountPage() {
                 <label className="form-label" htmlFor="acc-pass">{isHi ? "पासवर्ड (कम से कम 6 अक्षर)" : "Password (min 6 characters)"}</label>
                 <PasswordInput id="acc-pass" required minLength={6} value={password}
                   onChange={(e) => setPassword(e.target.value)} />
+                {mode === "login" && (
+                  <Link href="/account/forgot-password" className={isHi ? "devanagari" : undefined}
+                    style={{ alignSelf: "flex-end", fontSize: "0.8rem", color: "var(--maroon)", fontWeight: 600, textDecoration: "underline" }}>
+                    {isHi ? "पासवर्ड भूल गए?" : "Forgot password?"}
+                  </Link>
+                )}
               </div>
 
               {error && <p className="form-error" style={{ marginBottom: "0.75rem" }}>{pickMessageLang(error, isHi)}</p>}

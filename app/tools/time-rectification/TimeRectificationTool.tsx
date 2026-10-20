@@ -8,9 +8,10 @@ import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import LifeEventRows, { emptyEventRow, isValidRow, type EventRow } from "@/components/LifeEventRows";
 import PayPhoneField, { normalizePhone } from "@/components/PayPhoneField";
+import ConfirmationEmailNote from "@/components/ConfirmationEmailNote";
 import { EVENT_TYPES } from "@/lib/rectification-data";
 import { fetchAscendantOptions, fetchKpRulingPlanets } from "@/lib/api/endpoints";
-import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError, getStoredUser } from "@/lib/api/site";
+import { createPaymentOrder, verifyPayment, fetchRectificationResult, SiteApiError, getStoredUser, accountReceiptEmail } from "@/lib/api/site";
 import type { BirthRequest, AscendantOptionsResult, AscendantWindow, EventScoreResult, KpRulingResult } from "@/lib/api/types";
 import { ApiError } from "@/lib/api/client";
 import { PLANET_HI, pickMessageLang } from "@/lib/hindi-labels";
@@ -70,6 +71,9 @@ export default function TimeRectificationTool() {
   const [paying, setPaying] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [payError, setPayError] = useState("");
+  // After a verified payment: the logged-in account's email, where the backend
+  // sends this order's confirmation ("" = none is sent, so no note).
+  const [confirmationTo, setConfirmationTo] = useState("");
 
   const [result, setResult] = useState<EventScoreResult | null>(null);
   const [resultError, setResultError] = useState("");
@@ -210,6 +214,7 @@ export default function TimeRectificationTool() {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           try {
             await verifyPayment(r);
+            setConfirmationTo(accountReceiptEmail());
             await handleCompute(r.razorpay_order_id);
           } catch {
             setPayError(isHi
@@ -809,6 +814,7 @@ export default function TimeRectificationTool() {
                 </button>
               </p>
 
+              <ConfirmationEmailNote email={confirmationTo} isHi={isHi} />
               <Divider />
               <ResultCTA
                 hook={{
