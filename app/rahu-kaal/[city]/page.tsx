@@ -25,11 +25,18 @@ export default async function Page({ params }: { params: Promise<{ city: string 
   const c = cityBySlug(city);
   if (!c) notFound();
 
+  // Delhi is the reference city every other page compares with, so "why is Delhi's Rahu Kaal different
+  // from Delhi" made no sense (and went into the FAQPage markup too).
   const faqs = [
-    {
-      q: `${c.hi} का राहु काल दिल्ली से अलग क्यों है?`,
-      a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। ${c.hi} का सूर्योदय (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) दिल्ली से अलग समय पर होता है, इसलिए राहु काल भी कुछ मिनट आगे-पीछे रहता है। यहां दिया समय ${c.hi} की अपनी खगोलीय गणना से है।`,
-    },
+    c.slug === "delhi"
+      ? {
+          q: "दिल्ली का राहु काल कैसे निकाला जाता है?",
+          a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। यहां दिया समय दिल्ली (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) के अपने सूर्योदय से निकाला गया है; दूसरे शहरों में सूर्योदय अलग होने से राहु काल कुछ मिनट आगे-पीछे रहता है।`,
+        }
+      : {
+          q: `${c.hi} का राहु काल दिल्ली से अलग क्यों है?`,
+          a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। ${c.hi} का सूर्योदय (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) दिल्ली से अलग समय पर होता है, इसलिए राहु काल भी कुछ मिनट आगे-पीछे रहता है। यहां दिया समय ${c.hi} की अपनी खगोलीय गणना से है।`,
+        },
     {
       q: "राहु काल में क्या टालना चाहिए?",
       a: "परम्परा के अनुसार नया काम शुरू करना, यात्रा आरंभ, बड़ी खरीदारी, लेन-देन और शुभ संस्कार राहु काल में टाले जाते हैं। पहले से चल रहे काम जारी रख सकते हैं। पूजा-उपासना (विशेषतः राहु शांति) इस अवधि में की जा सकती है।",
@@ -68,9 +75,9 @@ export default async function Page({ params }: { params: Promise<{ city: string 
           <p className="devanagari" style={{ fontWeight: 600, color: "var(--maroon)" }}>
             {c.hi} के आज के सूर्योदय-सूर्यास्त से खगोलीय गणना — अनुमान नहीं, सटीक समय।
           </p>
+          {/* one string, not "text {expr} text": the build rendered that as "Delhi<!-- -->is" with the space lost */}
           <p>
-            Rahu Kaal in {c.en} is computed from the city&apos;s own sunrise and sunset for each date — the window
-            below updates live and includes the next 6 days for planning.
+            {`Rahu Kaal in ${c.en} is computed from the city's own sunrise and sunset for each date — the window below updates live and includes the next 6 days for planning.`}
           </p>
         </div>
 

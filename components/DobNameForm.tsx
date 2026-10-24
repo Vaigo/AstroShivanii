@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useTodayIso } from "@/lib/useToday";
 
 /** Sent silently when a tool hides the DOB field — the API's shared request
  *  schema requires the `dob` key to be present, but that specific
@@ -57,6 +58,7 @@ export default function DobNameForm({
 }: DobNameFormProps) {
   const { t, lang } = useI18n();
   const isHi = lang === "hi";
+  const today = useTodayIso(); // the visitor's today, set after hydration (see lib/useToday.ts)
   const [dob, setDob] = useState(hideDob ? UNUSED_DOB_PLACEHOLDER : "");
   const [name, setName] = useState("");
 
@@ -81,7 +83,7 @@ export default function DobNameForm({
             value={dob}
             onChange={(e) => setDob(e.target.value)}
             required
-            max={new Date().toISOString().split("T")[0]}
+            max={today}
           />
           <span className={`form-hint${isHi ? " devanagari" : ""}`}>
             {isHi ? resolvedDobHint.hi : resolvedDobHint.en}

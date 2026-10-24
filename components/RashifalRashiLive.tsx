@@ -56,8 +56,9 @@ export default function RashifalRashiLive({ rashiIndex, rashiEn, rashiHi }: Prop
     <div style={{ maxWidth: "680px", margin: "0 auto" }}>
       <PatrikaFrame>
         <div style={{ textAlign: "center" }}>
+          {/* date only once the live data is in: a build-time date in the static HTML is stale */}
           <div className="result-label">
-            आज का {rashiHi} राशिफल · {d.getDate()} {MONTHS_HI[d.getMonth()]} {d.getFullYear()}
+            {`आज का ${rashiHi} राशिफल`}{today ? ` · ${d.getDate()} ${MONTHS_HI[d.getMonth()]} ${d.getFullYear()}` : ""}
           </div>
           {!today ? (
             <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0" }}>गणना हो रही है…</p>

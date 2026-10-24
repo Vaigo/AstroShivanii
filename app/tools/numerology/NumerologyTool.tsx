@@ -9,6 +9,7 @@ import DownloadReportButton from "@/components/DownloadReportButton";
 import { calcMulank, calcBhagyank, calcNameNumber, calcLoShu, calcKua } from "@/lib/numerology-calc";
 import { PROFILES, KARMIC_DEBT, KARMIC_LESSONS, LO_SHU_GRID, PLANES, KUA_GROUP_INFO } from "@/lib/numerology-data";
 import { useBackStep } from "@/lib/useBackStep";
+import { useTodayIso } from "@/lib/useToday";
 
 interface Result {
   mulank:    ReturnType<typeof calcMulank>;
@@ -56,6 +57,7 @@ function KarmicDebtBadge({ debtNum, isHi }: { debtNum: number; isHi: boolean }) 
 export default function NumerologyTool() {
   const { lang } = useI18n();
   const isHi = lang === "hi";
+  const today = useTodayIso(); // the visitor's today, set after hydration (see lib/useToday.ts)
 
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
@@ -172,7 +174,7 @@ export default function NumerologyTool() {
                 type="date"
                 value={dob}
                 onChange={e => setDob(e.target.value)}
-                max={new Date().toISOString().split("T")[0]}
+                max={today}
               />
               <span className={`form-hint${isHi ? " devanagari" : ""}`}>
                 {isHi

@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/lib/i18n";
 import { EVENT_TYPES, type EventTypeKey } from "@/lib/rectification-data";
+import { useTodayIso } from "@/lib/useToday";
 
 export interface EventRow {
   id: string;
@@ -37,6 +38,7 @@ interface LifeEventRowsProps {
 export default function LifeEventRows({ rows, onChange, min, max = 10 }: LifeEventRowsProps) {
   const { lang } = useI18n();
   const isHi = lang === "hi";
+  const today = useTodayIso(); // the visitor's today, set after hydration (see lib/useToday.ts)
 
   function update(id: string, patch: Partial<EventRow>) {
     onChange(rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
@@ -81,7 +83,7 @@ export default function LifeEventRows({ rows, onChange, min, max = 10 }: LifeEve
               className="form-input"
               value={row.date}
               onChange={(e) => update(row.id, { date: e.target.value })}
-              max={new Date().toISOString().split("T")[0]}
+              max={today}
             />
           </div>
 

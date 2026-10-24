@@ -83,8 +83,10 @@ export default function RahuKaalLive({ cityEn, cityHi, lat, lon, tz }: Props) {
     <div style={{ maxWidth: "640px", margin: "0 auto" }}>
       <PatrikaFrame>
         <div style={{ textAlign: "center" }}>
+          {/* the date is added only after the live times load: printed at build time it shipped a stale
+              "today" in the static HTML (and mismatched on hydration) */}
           <div className="result-label">
-            आज का राहु काल — {cityHi} · {fmtHi(todayDate)}
+            {`आज का राहु काल — ${cityHi}`}{rows ? ` · ${fmtHi(todayDate)}` : ""}
           </div>
           {!rows ? (
             <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0" }}>गणना हो रही है…</p>

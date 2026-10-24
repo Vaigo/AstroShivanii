@@ -5,6 +5,7 @@ import type { BirthRequest } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 import PlaceSearch, { Place } from "./PlaceSearch";
 import { timezoneNameFor, utcOffsetHoursAt } from "@/lib/timezone";
+import { useTodayIso } from "@/lib/useToday";
 
 interface BirthFormProps {
   /** Standalone mode: called when the user presses the submit button. */
@@ -43,6 +44,7 @@ const DEFAULT_PLACE: Place = {
 export default function BirthForm({ onSubmit, onChange, embedded, loading, label, requireTime, dayUnknown, hideTob }: BirthFormProps) {
   const { t, lang } = useI18n();
   const isHi = lang === "hi";
+  const today = useTodayIso(); // the visitor's today, set after hydration (see lib/useToday.ts)
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
   const [place, setPlace] = useState<Place | null>(DEFAULT_PLACE);
@@ -113,7 +115,7 @@ export default function BirthForm({ onSubmit, onChange, embedded, loading, label
           value={dob}
           onChange={(e) => setDob(e.target.value)}
           required
-          max={dayUnknown ? new Date().toISOString().slice(0, 7) : new Date().toISOString().split("T")[0]}
+          max={dayUnknown ? today?.slice(0, 7) : today}
         />
       </div>
 

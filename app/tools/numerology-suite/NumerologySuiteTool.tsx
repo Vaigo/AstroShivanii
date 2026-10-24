@@ -11,6 +11,7 @@ import { calcMulank, calcBhagyank } from "@/lib/numerology-calc";
 import { createPaymentOrder, verifyPayment, fetchNumerologySuiteResult, SiteApiError, getStoredUser, accountReceiptEmail } from "@/lib/api/site";
 import type { NumerologySuiteResult } from "@/lib/api/types";
 import { pickMessageLang } from "@/lib/hindi-labels";
+import { useTodayIso } from "@/lib/useToday";
 
 declare global {
   interface Window {
@@ -25,6 +26,7 @@ type Step = "intake" | "teaser" | "paywall" | "computing" | "result";
 export default function NumerologySuiteTool() {
   const { lang } = useI18n();
   const isHi = lang === "hi";
+  const today = useTodayIso(); // the visitor's today, set after hydration (see lib/useToday.ts)
 
   const [step, setStep] = useState<Step>("intake");
   const [dob, setDob] = useState("");
@@ -222,7 +224,7 @@ export default function NumerologySuiteTool() {
                 <input
                   id="ns-dob" type="date" className="form-input"
                   value={dob} onChange={(e) => setDob(e.target.value)}
-                  max={new Date().toISOString().split("T")[0]} required
+                  max={today} required
                 />
                 <span className="form-hint">
                   {isHi

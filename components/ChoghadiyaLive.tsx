@@ -108,8 +108,9 @@ export default function ChoghadiyaLive({ cityEn, cityHi, lat, lon, tz }: Props) 
     <div style={{ maxWidth: "760px", margin: "0 auto" }}>
       <PatrikaFrame>
         <div style={{ textAlign: "center" }}>
+          {/* date only once the live data is in: a build-time date in the static HTML is stale */}
           <div className="result-label">
-            आज का चौघड़िया — {cityHi} · {today.getDate()} {MONTHS_HI[today.getMonth()]} {today.getFullYear()}
+            {`आज का चौघड़िया — ${cityHi}`}{data ? ` · ${today.getDate()} ${MONTHS_HI[today.getMonth()]} ${today.getFullYear()}` : ""}
           </div>
           {!data ? (
             <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0" }}>गणना हो रही है…</p>

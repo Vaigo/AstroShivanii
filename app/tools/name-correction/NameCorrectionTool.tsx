@@ -10,6 +10,7 @@ import ConfirmationEmailNote from "@/components/ConfirmationEmailNote";
 import { createPaymentOrder, verifyPayment, fetchNameCorrectionResult, SiteApiError, getStoredUser, accountReceiptEmail } from "@/lib/api/site";
 import type { NameCorrectionResult } from "@/lib/api/types";
 import { pickMessageLang } from "@/lib/hindi-labels";
+import { useTodayIso } from "@/lib/useToday";
 
 declare global {
   interface Window {
@@ -128,6 +129,7 @@ function familyVerdictChip(verdict: string, isHi: boolean): { label: string; bg:
 export default function NameCorrectionTool() {
   const { lang } = useI18n();
   const isHi = lang === "hi";
+  const today = useTodayIso(); // the visitor's today, set after hydration (see lib/useToday.ts)
 
   const [step, setStep] = useState<Step>("intake");
   const [category, setCategory] = useState<Category>("personal");
@@ -364,7 +366,7 @@ export default function NameCorrectionTool() {
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
                     required
-                    max={new Date().toISOString().split("T")[0]}
+                    max={today}
                   />
                   <span className={`form-hint${isHi ? " devanagari" : ""}`}>
                     {isHi ? DATE_HINT[category].hi : DATE_HINT[category].en}
