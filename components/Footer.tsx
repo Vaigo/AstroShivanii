@@ -132,7 +132,7 @@ export default function Footer() {
         </nav>
         <p style={{ marginBottom: "0.5rem" }}>{t("footer.disclaimer")}</p>
         <p style={{ marginTop: "0.75rem", color: "var(--muted-light)" }}>
-          &copy; {new Date().getFullYear()} AstroShivanii · Astrologer Shivanii. All rights reserved. · Powered by{" "}
+          &copy; <span suppressHydrationWarning>{new Date().getFullYear()}</span> AstroShivanii · Astrologer Shivanii. All rights reserved. · Powered by{" "}
           <a href="https://grahaapi.com" target="_blank" rel="noopener" style={{ color: "inherit" }}>GrahaAPI</a> ·{" "}
           <span className="devanagari">सत्यं शिवं सुन्दरम्</span>
         </p>

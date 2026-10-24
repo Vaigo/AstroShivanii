@@ -432,6 +432,70 @@ export function muhurtaPageBySlug(slug: string): MuhurtaPageDef | undefined {
   return MUHURTA_PAGES.find((p) => p.slug === slug);
 }
 
+// ── Search wording ────────────────────────────────────────────────────────────
+// Search Console (Oct 2026): most muhurta clicks come from Hinglish, month-specific queries —
+// "gadi lene ka shubh muhurat october 2026", "bike lene ka shubh muhurat" — while these pages were titled
+// and described in English ("Vehicle Purchase Muhurat"). The Hindi heading keeps the exact phrase that
+// already ranks; the romanised phrase people type, and the Latin month names, are added after it.
+export const PURPOSE_COPY: Record<string, { hi: string; roman: string; en: string }> = {
+  vehicle_purchase: { hi: "गाड़ी या बाइक लेने का शुभ मुहूर्त", roman: "Gadi Lene Ka Shubh Muhurat", en: "vehicle purchase muhurat" },
+  griha_pravesh: { hi: "गृह प्रवेश का शुभ मुहूर्त", roman: "Griha Pravesh Shubh Muhurat", en: "housewarming muhurat" },
+  marriage: { hi: "शादी-विवाह का शुभ मुहूर्त", roman: "Vivah Muhurat, Shadi Ka Shubh Muhurat", en: "wedding dates" },
+  property_purchase: { hi: "ज़मीन, प्लॉट या मकान खरीदने का शुभ मुहूर्त", roman: "Plot Kharidne Ka Muhurat", en: "property purchase muhurat" },
+  business: { hi: "दुकान या व्यापार शुरू करने का शुभ मुहूर्त", roman: "Dukan Kholne Ka Muhurat", en: "business opening muhurat" },
+  naamkaran: { hi: "नामकरण संस्कार का शुभ मुहूर्त", roman: "Naamkaran Muhurat", en: "naming ceremony muhurat" },
+  travel: { hi: "यात्रा का शुभ मुहूर्त", roman: "Yatra Muhurat", en: "travel muhurat" },
+  education: { hi: "विद्यारंभ का शुभ मुहूर्त", roman: "Vidyarambh Muhurat", en: "education start muhurat" },
+};
+
+/** Wedding and housewarming lists still contain dates inside Chaturmas / Kharmas, which these pages' own FAQ
+ *  says are avoided (open question for Shivanii, LAUNCH.md P3-S17). Until the finder screens them, those
+ *  two page types make no "these are the shubh days of <months>" claim in the description and do not
+ *  highlight upcoming dates at the top. */
+export const SEASONAL_CAUTION = new Set(["marriage", "griha_pravesh"]);
+
+export const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const monthOf = (d: string) => Number(d.split("-")[1]) - 1;
+
+/** "अक्टूबर" or "अक्टूबर–दिसंबर" — the months the list actually covers. */
+export function monthRangeHi(dates: { date: string }[]): string {
+  const first = MONTHS_HI[monthOf(dates[0].date)];
+  const last = MONTHS_HI[monthOf(dates[dates.length - 1].date)];
+  return first === last ? first : `${first}–${last}`;
+}
+
+/** "November–December 2026" — the Latin month names people type next to the year. */
+export function monthRangeEn(dates: { date: string }[]): string {
+  const first = MONTHS_EN[monthOf(dates[0].date)];
+  const last = MONTHS_EN[monthOf(dates[dates.length - 1].date)];
+  const year = dates[0].date.slice(0, 4);
+  return first === last ? `${first} ${year}` : `${first}–${last} ${year}`;
+}
+
+/** <title>: the Hindi heading people already find, then the Hinglish phrase they type. The year is repeated
+ *  in the Hinglish half when the Hindi half is short enough to leave room, so a -2026 and a -2027 page
+ *  do not look identical to a year-less query. */
+export function muhurtaTitle(def: MuhurtaPageDef): string {
+  const roman = PURPOSE_COPY[def.purpose]?.roman ?? def.enTitle.split(" — ")[0];
+  return `${def.hiTitle} — ${roman}${def.hiTitle.length <= 34 ? ` ${def.year}` : ""}`;
+}
+
+/** Meta description built from the dates this page really lists (so it names the right months), ending in
+ *  the Latin month names. Falls back to the hand-written English one if the finder returned nothing. */
+export function muhurtaDescription(def: MuhurtaPageDef, dates: { date: string }[]): string {
+  const copy = PURPOSE_COPY[def.purpose];
+  if (!copy || dates.length === 0) return def.description;
+  if (SEASONAL_CAUTION.has(def.purpose)) {
+    const what = def.purpose === "marriage" ? "शादी-विवाह" : "गृह प्रवेश";
+    return `${what} की पंचांग-जांची तारीखें ${def.year} — नक्षत्र, तिथि, चौघड़िया सहित। चातुर्मास व खरमास के दिन अलग से देखें। ${copy.roman.split(", ").pop()} ${def.year}.`;
+  }
+  const head = `${copy.hi} ${def.year}: ${monthRangeHi(dates)} के शुभ दिन — नक्षत्र, तिथि, चौघड़िया सहित।`;
+  const full = `${head} ${copy.roman}, ${monthRangeEn(dates)}.`;
+  return full.length <= 158 ? full : `${head} ${monthRangeEn(dates)}.`;
+}
+
 // ── Build-time date fetching ──────────────────────────────────────────────────
 
 export interface FinderDate {
@@ -472,6 +536,23 @@ function chunkRange(start: Date, end: Date): [string, string][] {
   return chunks;
 }
 
+const datesCache = new Map<string, Promise<FinderDate[]>>();
+
+/** One fetch per (purpose, year) per build process: generateMetadata (title/description name the real
+ *  months) and the page body both need the dates, and the finder is a POST that Next does not dedupe. */
+export function fetchMuhurtaDates(purpose: string, year: number): Promise<FinderDate[]> {
+  const key = `${purpose}:${year}`;
+  let p = datesCache.get(key);
+  if (!p) {
+    p = fetchMuhurtaDatesUncached(purpose, year).then((r) => {
+      if (r.length === 0) datesCache.delete(key); // a failed fetch must not stick for the life of a dev server
+      return r;
+    });
+    datesCache.set(key, p);
+  }
+  return p;
+}
+
 /** Scan ONE calendar year for auspicious dates — [max(tomorrow, Jan 1 of
  *  `year`), Dec 31 of `year`], chunked in ≤60-day windows. Bounding to the
  *  named year (not a rolling "next N months" window) is what keeps the
@@ -480,7 +561,7 @@ function chunkRange(start: Date, end: Date): [string, string][] {
  *  lapsed, or if the API is unreachable — the page then renders its
  *  explainer with an honest "list temporarily unavailable" note rather than
  *  failing the whole build. */
-export async function fetchMuhurtaDates(purpose: string, year: number): Promise<FinderDate[]> {
+async function fetchMuhurtaDatesUncached(purpose: string, year: number): Promise<FinderDate[]> {
   const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   const jan1 = new Date(year, 0, 1);
   const dec31 = new Date(year, 11, 31);

@@ -2834,3 +2834,7 @@ a:hover { color: var(--saffron); }
   /* Keep the parchment panels readable as plain paper */
   .patrika-frame, .result-box { box-shadow: none !important; }
 }
+
+/* ─── Muhurta pages: separators between the VISIBLE upcoming dates / month links (see MuhurtaPastHider) ── */
+.mu-up:not([hidden]) ~ .mu-up:not([hidden])::before,
+.mu-mo:not([hidden]) ~ .mu-mo:not([hidden])::before { content: " · "; white-space: pre; }

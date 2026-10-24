@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import MuhurtaPastHider from "@/components/MuhurtaPastHider";
 import {
   MUHURTA_PAGES,
+  MONTHS_HI,
   muhurtaPageBySlug,
+  muhurtaTitle,
+  muhurtaDescription,
+  SEASONAL_CAUTION,
   fetchMuhurtaDates,
   type FinderDate,
 } from "@/lib/muhurta-pages";
@@ -17,14 +22,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const def = muhurtaPageBySlug(slug);
   if (!def) return {};
+  // the dates are fetched once per build (cached in lib/muhurta-pages.ts), so the description can name the
+  // months the list really covers instead of a generic English line
+  const dates = await fetchMuhurtaDates(def.purpose, def.year);
   return {
-    title: `${def.hiTitle} — ${def.enTitle.split(" — ")[0]}`,
-    description: def.description,
+    title: muhurtaTitle(def),
+    description: muhurtaDescription(def, dates),
     alternates: { canonical: `/muhurta/${def.slug}/` },
   };
 }
 
-const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
 const WEEKDAY_HI: Record<string, string> = {
   Sunday: "रविवार", Monday: "सोमवार", Tuesday: "मंगलवार", Wednesday: "बुधवार",
   Thursday: "गुरुवार", Friday: "शुक्रवार", Saturday: "शनिवार",
@@ -63,13 +70,45 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     })),
   };
 
+  // When the list was computed (printed as "last computed", never as "today"), and the first few dates in it
+  const computedOn = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const computedLabel = `${computedOn.getDate()} ${MONTHS_HI[computedOn.getMonth()]} ${computedOn.getFullYear()}`;
+  const upcoming = dates.slice(0, 8);
+
   return (
     <section className="section">
+      <MuhurtaPastHider />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="container" style={{ maxWidth: "860px" }}>
         <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: `Muhurat ${def.year}`, href: "/muhurta" }, { name: def.hiTitle }]} />
         <h1 className="section-heading">{def.hiTitle}</h1>
         <p className="section-heading-hi devanagari">{def.hiHook}</p>
+
+        {/* Wedding and housewarming lists still include Chaturmas/Kharmas dates (see SEASONAL_CAUTION): no
+            "upcoming shubh days" highlight on those two page types until the finder screens them. */}
+        {dates.length > 0 && !SEASONAL_CAUTION.has(def.purpose) && (
+          <div className="devanagari" style={{ textAlign: "center", margin: "0 0 1.5rem", lineHeight: 1.9 }}>
+            {/* 8 are rendered; the page hider keeps the first 5 that are not in the past (data-mu-keep) */}
+            <p data-mu-group data-mu-keep="5" style={{ margin: 0 }}>
+              <strong>आने वाले शुभ दिन:</strong>{" "}
+              {upcoming.map((d) => (
+                <span key={d.date} className="mu-up" data-mu-date={d.date} style={{ whiteSpace: "nowrap" }}>
+                  {fmtDay(d.date)} ({WEEKDAY_HI[d.weekday] ?? d.weekday})
+                </span>
+              ))}
+            </p>
+            <p style={{ margin: "0.4rem 0 0", fontSize: "0.9rem" }}>
+              {[...byMonth.entries()].map(([month, rows]) => (
+                <span key={month} className="mu-mo" data-mu-month={`m-${rows[0].date.slice(0, 7)}`}>
+                  <a href={`#m-${rows[0].date.slice(0, 7)}`} style={{ display: "inline-block", padding: "0.3rem 0.2rem" }}>{month}</a>
+                </span>
+              ))}
+            </p>
+            <p style={{ margin: "0.3rem 0 0", fontSize: "0.75rem", color: "var(--muted)" }}>
+              सूची की अंतिम गणना: {computedLabel}।
+            </p>
+          </div>
+        )}
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <p>
@@ -98,7 +137,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           </p>
         ) : (
           [...byMonth.entries()].map(([month, rows]) => (
-            <div key={month} style={{ marginBottom: "1.8rem" }}>
+            <div key={month} id={`m-${rows[0].date.slice(0, 7)}`} data-mu-group style={{ marginBottom: "1.8rem", scrollMarginTop: "1rem" }}>
               <h2 className="guide-h2 devanagari">{month} के शुभ दिन</h2>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.88rem" }}>
@@ -113,7 +152,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
                   </thead>
                   <tbody>
                     {rows.map((d) => (
-                      <tr key={d.date} style={{ borderBottom: "1px solid rgba(201,154,58,0.25)" }}>
+                      <tr key={d.date} data-mu-date={d.date} style={{ borderBottom: "1px solid rgba(201,154,58,0.25)" }}>
                         <td className="devanagari" style={{ padding: "0.45rem", fontWeight: 600, whiteSpace: "nowrap" }}>
                           {fmtDay(d.date)}
                           {d.quality === "Excellent" && <span title="Excellent" style={{ color: "var(--gold-bright)" }}> ★</span>}
