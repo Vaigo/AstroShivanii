@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Kaal Sarp Dosha Checker — In Your Chart?",
+  title: "काल सर्प दोष जांच — Free Kaal Sarp Dosha Check",
   description:
-    "Check whether Kaal Sarp Dosha is present in your birth chart, its direction, and which planets are involved. Free Vedic astrology calculator.",
+    "जानें आपकी कुंडली में काल सर्प (कालसर्प) दोष है या नहीं, उसकी दिशा और शामिल ग्रह — मुफ्त वैदिक कैलकुलेटर। Free Kaal Sarp Dosha checker.",
   alternates: { canonical: "/tools/kaal-sarp-dosha/" },
 };
 

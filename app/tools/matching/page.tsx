@@ -7,9 +7,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Marriage Matching (Guna Milan) Calculator",
+  title: "कुंडली मिलान (Kundli Matching) — Free Guna Milan",
   description:
-    "Free Vedic Ashtakoot Guna Milan calculator — 36-point compatibility score, Mangal Dosha check, Nadi analysis. No sign-up needed.",
+    "मुफ्त कुंडली मिलान (अष्टकूट गुण मिलान): 36 गुणों का स्कोर, मंगल दोष और नाड़ी की जांच — बिना साइन-अप। Free Kundli Matching (Ashtakoot Guna Milan) calculator.",
   alternates: { canonical: "/tools/matching/" },
 };
 

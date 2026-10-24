@@ -20,14 +20,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const guide = getGuide(slug);
   if (!guide) return {};
+  // guides written in Hindi get a Hindi-first title/description (see Guide.hi in lib/guides.ts)
+  const title = guide.hi?.metaTitle ?? guide.title;
+  const description = guide.hi?.metaDescription ?? guide.description;
   return {
-    title: guide.title,
-    description: guide.description,
+    title,
+    description,
     alternates: { canonical: `/guides/${guide.slug}/` },
     openGraph: {
       type: "article",
-      title: guide.title,
-      description: guide.description,
+      title,
+      description,
       url: `/guides/${guide.slug}/`,
       // Page-level openGraph replaces the layout's wholesale in Next.js (no
       // deep merge), so images must be repeated here — see app/page.tsx.
@@ -44,10 +47,10 @@ export default async function GuidePage({ params }: Props) {
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: guide.title,
-    description: guide.description,
+    headline: guide.hi?.h1 ?? guide.title,
+    description: guide.hi?.metaDescription ?? guide.description,
     dateModified: guide.updated,
-    inLanguage: "en-IN",
+    inLanguage: guide.hi ? "hi-IN" : "en-IN",
     author: {
       "@type": "Person",
       name: "Shivanii",
@@ -85,7 +88,7 @@ export default async function GuidePage({ params }: Props) {
           crumbs={[
             { name: "Home", href: "/" },
             { name: "Guides", href: "/guides" },
-            { name: guide.title },
+            { name: guide.hi?.h1 ?? guide.title },
           ]}
         />
 
@@ -94,12 +97,26 @@ export default async function GuidePage({ params }: Props) {
             <div className="contact-icon" style={{ marginBottom: "0.75rem" }}>
               <Icon name={guide.icon} size={26} />
             </div>
-            <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", marginBottom: "0.5rem" }}>
-              {guide.title}
-            </h1>
-            <p className="devanagari" style={{ color: "var(--muted)", fontSize: "1.05rem", marginBottom: "0.75rem" }}>
-              {guide.titleHi}
-            </p>
+            {guide.hi ? (
+              <>
+                {/* Hindi-body guide: the Hindi question is the H1, the English title is the subtitle */}
+                <h1 className="devanagari" style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", marginBottom: "0.5rem" }}>
+                  {guide.hi.h1}
+                </h1>
+                <p style={{ color: "var(--muted)", fontSize: "1.05rem", marginBottom: "0.75rem" }}>
+                  {guide.title}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", marginBottom: "0.5rem" }}>
+                  {guide.title}
+                </h1>
+                <p className="devanagari" style={{ color: "var(--muted)", fontSize: "1.05rem", marginBottom: "0.75rem" }}>
+                  {guide.titleHi}
+                </p>
+              </>
+            )}
             <p className="guide-card-meta">
               {guide.readMins} min read · Updated{" "}
               {new Date(guide.updated).toLocaleDateString("en-IN", { year: "numeric", month: "long" })}

@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Name Correction Checker ₹501 — All Name Types",
+  title: "नाम सुधार जांच — Name Correction ₹501",
   description:
-    "Check whether a personal, business, or other name's numerology (Destiny number) harmonises with its owner's Mulank and Bhagyank — up to 10 natural, pronounceable spelling suggestions, plus an optional family sync analysis using your parents' names. ₹501, instant result.",
+    "नाम का अंक (Destiny number) आपके मूलांक-भाग्यांक से मेल खाता है या नहीं — 10 तक उच्चारण-योग्य वर्तनी सुझाव, परिवार सिंक वैकल्पिक। ₹501, तुरंत। Name correction checker.",
   alternates: { canonical: "/tools/name-correction/" },
 };
 

@@ -21,12 +21,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = readingName(slug, "en");
   const desc = readingDesc(slug, "en");
   const shortDesc = truncateDescription(desc);
+  // The Hindi service name leads (what people search), then the English name and the flat price. The site
+  // suffix adds 11 characters, so a long name drops the English half rather than being cut by Google.
+  const price = `₹${reading.priceINR.toLocaleString("en-IN")}`;
+  const hiName = readingName(slug, "hi");
+  const full = `${hiName} — ${name} (${price})`;
+  const title = full.length <= 50 ? full : `${hiName} (${price})`;
   return {
-    title: `${name} — ₹${reading.priceINR.toLocaleString("en-IN")}, Flat Pricing`,
+    title,
     description: shortDesc,
     alternates: { canonical: `/readings/${slug}/` },
     openGraph: {
-      title: name,
+      title,
       description: shortDesc,
       // Page-level openGraph replaces the layout's wholesale in Next.js (no
       // deep merge), so images must be repeated here — see app/page.tsx.

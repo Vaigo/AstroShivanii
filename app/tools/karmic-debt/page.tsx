@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Karmic Debt & Missing Numbers Checker",
+  title: "कार्मिक ऋण अंक जांच — Free Karmic Debt Check",
   description:
-    "Check for karmic debt numbers (13, 14, 16, 19) and missing/repeated numbers in your birth date, with remedies. Free numerology calculator.",
+    "जन्म तिथि में कार्मिक ऋण अंक (13, 14, 16, 19) और अनुपस्थित/दोहराए गए अंक, उपायों सहित — मुफ्त अंक ज्योतिष कैलकुलेटर। Free karmic debt checker.",
   alternates: { canonical: "/tools/karmic-debt/" },
 };
 

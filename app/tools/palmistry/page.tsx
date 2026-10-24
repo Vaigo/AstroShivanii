@@ -5,9 +5,9 @@ import RelatedLinks from "@/components/RelatedLinks";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Palmistry Reading ₹299 — Hast Rekha Shastra from Your Photo",
+  title: "हस्तरेखा विश्लेषण ₹299 — Palmistry from Photos",
   description:
-    "Upload a photo of your palm for a real Hast Rekha Shastra analysis — hand shape, lines, mounts and special marks, each with an honest confidence score, not a blanket guess.",
+    "Upload photos of both your palms for a real Hast Rekha Shastra analysis — hand shape, lines, mounts and special marks, each with an honest confidence score, not a blanket guess.",
 };
 
 const appJsonLd = {
@@ -15,7 +15,7 @@ const appJsonLd = {
   "@type": "WebApplication",
   name: "Palmistry Reading (Hast Rekha Shastra)",
   description:
-    "A real palmistry analysis from a photo of your palm — hand shape, lines, mounts and marks, with an honest confidence score per finding.",
+    "A real palmistry analysis from photos of both your palms — hand shape, lines, mounts and marks, with an honest confidence score per finding.",
   url: `${SITE_URL}/tools/palmistry/`,
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Any",

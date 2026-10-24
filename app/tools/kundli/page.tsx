@@ -7,9 +7,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Kundli / Birth Chart Calculator",
+  title: "मुफ्त जन्म कुंडली — Free Kundli in Hindi",
   description:
-    "Calculate your Vedic birth chart (Kundli) for free. Get planetary positions, yogas, current Vimshottari dasha, and Lagna personality. No sign-up needed.",
+    "मुफ्त जन्म कुंडली ऑनलाइन: ग्रह-स्थिति, लग्न, योग और वर्तमान विंशोत्तरी दशा — बिना साइन-अप। Free Vedic birth chart (Kundli) calculator.",
   alternates: { canonical: "/tools/kundli/" },
 };
 

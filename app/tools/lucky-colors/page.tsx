@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Lucky Color Calculator — Vedic Astrology",
+  title: "शुभ रंग — Free Lucky Color Calculator",
   description:
-    "Find your auspicious and inauspicious colors based on your Lagna and Nakshatra lord. Free Vedic astrology calculator — enter your birth details.",
+    "लग्न और नक्षत्र-स्वामी के आधार पर आपके शुभ और अशुभ रंग — जन्म विवरण डालें, मुफ्त। Free Vedic lucky colour calculator.",
   alternates: { canonical: "/tools/lucky-colors/" },
 };
 

@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Personal Year Number Calculator",
+  title: "व्यक्तिगत वर्षांक — Free Personal Year Number",
   description:
-    "Calculate your Personal Year Number and discover this year's dominant theme, ruling planet, gemstone, and favourable days. Free numerology calculator.",
+    "अपना पर्सनल ईयर नंबर जानें — इस वर्ष का प्रमुख विषय, स्वामी ग्रह, रत्न और अनुकूल दिन — मुफ्त। Free personal year calculator.",
   alternates: { canonical: "/tools/personal-year/" },
 };
 

@@ -8,7 +8,7 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Yearly Horoscope ₹1,499 — Varshphal Forecast",
+  title: "वर्षफल रिपोर्ट ₹1,499 — Varshphal Forecast",
   description:
     "A full Varshphal (solar return) yearly forecast — career, finance, health, relationships and spiritual themes for your coming year, with your Varshesha and overall year score.",
   alternates: { canonical: "/tools/varshphal-yearly/" },

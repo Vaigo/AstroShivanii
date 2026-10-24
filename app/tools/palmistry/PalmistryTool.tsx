@@ -301,7 +301,7 @@ export default function PalmistryTool() {
 
   function renderCheckStatus(check: PalmistryPrecheckVerdict | "checking" | null) {
     if (check === "checking") {
-      return <p className="form-hint" style={{ marginTop: "0.4rem" }}>{isHi ? "तस्वीर जाँची जा रही है…" : "Checking photo quality…"}</p>;
+      return <p className="form-hint" style={{ marginTop: "0.4rem" }}>{isHi ? "तस्वीर जांची जा रही है…" : "Checking photo quality…"}</p>;
     }
     if (!check) return null;
     if (check.verdict === "good") {
@@ -670,7 +670,7 @@ export default function PalmistryTool() {
                 onClick={handleContinueFromIntake}
               >
                 {palmCheck === "checking" || otherCheck === "checking"
-                  ? (isHi ? "तस्वीरें जाँची जा रही हैं…" : "Checking photos…")
+                  ? (isHi ? "तस्वीरें जांची जा रही हैं…" : "Checking photos…")
                   : (isHi ? "आगे बढ़ें" : "Continue")}
               </button>
               {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}

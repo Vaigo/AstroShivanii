@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Favorable Alphabet Calculator — Numerology",
+  title: "शुभ अक्षर — Free Favorable Alphabet Calculator",
   description:
-    "Discover your name's Cornerstone (first letter) and Capstone (last letter) numerology meaning, career resonance, and recommended careers. Free calculator.",
+    "अपने नाम के पहले (Cornerstone) और अंतिम (Capstone) अक्षर का अंक ज्योतिष अर्थ और उपयुक्त करियर — मुफ्त। Free favorable alphabet calculator.",
   alternates: { canonical: "/tools/favorable-alphabet/" },
 };
 

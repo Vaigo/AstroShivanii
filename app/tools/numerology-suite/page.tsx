@@ -8,7 +8,7 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Numerology Suite ₹299 — Love, Career & Marriage",
+  title: "अंक ज्योतिष संगतता सूट ₹299 — Love & Career",
   description:
     "A 4-in-1 numerology report from your Mulank and Bhagyank — love style, career fit, business partnerships, and marriage compatibility, in one instant report.",
   alternates: { canonical: "/tools/numerology-suite/" },

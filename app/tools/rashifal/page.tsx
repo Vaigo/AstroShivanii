@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Daily Rashifal — Vedic Horoscope",
+  title: "दैनिक राशिफल — Free Daily Rashifal Calculator",
   description:
-    "Free daily Vedic horoscope (Rashifal) for all 12 rashis. Transit-based predictions for career, love, health, and finance. No sign-up needed.",
+    "सभी 12 राशियों का आज का मुफ्त राशिफल — करियर, प्रेम, स्वास्थ्य और धन, गोचर के आधार पर। Free daily Vedic horoscope (Rashifal), no sign-up.",
   alternates: { canonical: "/tools/rashifal/" },
 };
 

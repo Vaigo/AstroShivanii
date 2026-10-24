@@ -7,9 +7,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Sade Sati Checker — Is It Active?",
+  title: "साढ़े साती चेक — Free Sade Sati Calculator",
   description:
-    "Check if Saturn's Sade Sati is currently active in your chart. Free Vedic astrology calculator — enter your birth details.",
+    "जानें क्या आपकी कुंडली में शनि की साढ़े साती अभी चल रही है — जन्म विवरण डालें, मुफ्त जांच। Free Sade Sati checker.",
   alternates: { canonical: "/tools/sade-sati/" },
 };
 

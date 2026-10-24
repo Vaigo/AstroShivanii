@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Tarot Card Reading — 3-Card Spread",
+  title: "मुफ्त टैरो कार्ड रीडिंग — Free 3-Card Tarot",
   description:
-    "Free 3-card tarot reading — past, present, future — using the classic Rider-Waite-Smith deck. No sign-up needed.",
+    "मुफ्त 3-कार्ड टैरो रीडिंग — अतीत, वर्तमान, भविष्य — क्लासिक राइडर-वेट-स्मिथ डेक से, बिना साइन-अप। Free 3-card tarot reading.",
   alternates: { canonical: "/tools/tarot/" },
 };
 

@@ -8,9 +8,9 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Lal Kitab Calculator — Debts & Remedies",
+  title: "लाल किताब गणना — Free Lal Kitab Calculator",
   description:
-    "Calculate your Lal Kitab chart — planetary houses, active debts (karz), pakka ghar, and practical remedies (upayas). Free Vedic astrology calculator.",
+    "लाल किताब कुंडली: ग्रहों के भाव, सक्रिय ऋण (कर्ज), पक्का घर और व्यावहारिक उपाय — मुफ्त। Free Lal Kitab chart, debts and remedies calculator.",
   alternates: { canonical: "/tools/lal-kitab/" },
 };
 

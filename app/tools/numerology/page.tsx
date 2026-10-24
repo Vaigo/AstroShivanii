@@ -8,8 +8,8 @@ import ToolFaq from "@/components/ToolFaq";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://astroshivanii.com";
 
 export const metadata: Metadata = {
-  title: "Free Numerology — Mulank, Bhagyank & Lo Shu Grid",
-  description: "Calculate your Mulank (psychic number), Bhagyank (destiny number), Name Number, and Lo Shu Grid with Karmic Lessons and Karmic Debt — free, instant, no sign-up.",
+  title: "मुफ्त अंक ज्योतिष — Free Numerology, Mulank",
+  description: "मुफ्त अंक ज्योतिष: मूलांक, भाग्यांक, नाम अंक और लो शू ग्रिड, कार्मिक ऋण सहित — तुरंत, बिना साइन-अप। Free numerology calculator.",
   alternates: { canonical: "/tools/numerology/" },
 };
 
