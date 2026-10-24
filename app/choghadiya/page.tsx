@@ -2,14 +2,34 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ChoghadiyaLive from "@/components/ChoghadiyaLive";
+import { bakedChoghadiya } from "@/lib/baked";
+import { bestShubhPeriods, choghadiyaSentence, datedTail, fitDescription, periodLabel } from "@/lib/daily-data";
+import { fmtHi, weekdayHi } from "@/lib/hi-date";
 import { SEO_CITIES } from "@/lib/seo-cities";
 
-export const metadata: Metadata = {
-  title: "आज का चौघड़िया — Aaj Ka Choghadiya, Live Day & Night Muhurat",
-  description:
-    "Aaj ka choghadiya: today's live day and night choghadiya (Amrit, Shubh, Labh, Char, Kaal, Rog, Udveg) with the current period highlighted, plus Abhijit muhurta — computed from your city's own sunrise. Delhi, Mumbai and 30+ Indian cities.",
-  alternates: { canonical: "/choghadiya/" },
-};
+const delhi = SEO_CITIES[0];
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Delhi's table from the build (shared with the page body), dated, goes into the snippet
+  const baked = await bakedChoghadiya(delhi);
+  let description =
+    "Aaj ka choghadiya: today's day and night choghadiya (Amrit, Shubh, Labh, Char, Kaal, Rog, Udveg) with the current period highlighted, plus Abhijit muhurta — computed from your city's own sunrise. Delhi, Mumbai and 30+ Indian cities, refreshed every day.";
+  if (baked) {
+    // the best periods (Amrit first), not just the first by clock; no Abhijit on a Wednesday, when it is not observed
+    const best = (n: number) => bestShubhPeriods(baked.data, n).map(periodLabel).join(", ");
+    const abhijit = weekdayHi(baked.date) === "बुधवार" ? "" : `; अभिजीत ${baked.data.abhijit.start}–${baked.data.abhijit.end}`;
+    description = fitDescription(
+      `${fmtHi(baked.date)}: दिल्ली के शुभ चौघड़िया — ${best(3)}${abhijit}। Aaj ka choghadiya, 30+ cities.`,
+      `${fmtHi(baked.date)}: दिल्ली के शुभ चौघड़िया — ${best(2)}${abhijit}। Aaj ka choghadiya.`,
+      `${fmtHi(baked.date)}: दिल्ली के शुभ चौघड़िया — ${best(2)}। Aaj ka choghadiya, 30+ cities.`,
+    );
+  }
+  return {
+    title: "आज का चौघड़िया — Aaj Ka Choghadiya, Live Day & Night Muhurat",
+    description,
+    alternates: { canonical: "/choghadiya/" },
+  };
+}
 
 const FAQS = [
   {
@@ -30,19 +50,30 @@ const FAQS = [
   },
 ];
 
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQS.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
+export default async function Page() {
+  const baked = await bakedChoghadiya(delhi);
+  const faqs = [
+    // the day's answer in plain words, dated (this text is frozen at build; the widget below follows today)
+    ...(baked
+      ? [
+          {
+            q: "दिल्ली में आज कौन-से चौघड़िया शुभ हैं?",
+            a: `${choghadiyaSentence(delhi.hi, baked.date, baked.data)} ${datedTail(baked.date, "चौघड़िया")} दूसरे शहरों की तालिका इस पेज की शहरों की सूची में दिए पेजों पर है।`,
+          },
+        ]
+      : []),
+    ...FAQS,
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
 
-const delhi = SEO_CITIES[0];
-
-export default function Page() {
   return (
     <section className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
@@ -57,11 +88,11 @@ export default function Page() {
           </p>
           <p>
             Choghadiya divides the day and the night into 8 parts each, ruled by planets — Amrit, Shubh, Labh and
-            Char are auspicious. Times below are computed live from the city&apos;s own sunrise.
+            Char are auspicious. Times below are computed from the city&apos;s own sunrise and refreshed every day; the period running right now is highlighted.
           </p>
         </div>
 
-        <ChoghadiyaLive cityEn={delhi.en} cityHi={delhi.hi} lat={delhi.lat} lon={delhi.lon} tz={delhi.tz} />
+        <ChoghadiyaLive cityEn={delhi.en} cityHi={delhi.hi} lat={delhi.lat} lon={delhi.lon} tz={delhi.tz} initial={baked} />
 
         <h2 className="guide-h2 devanagari" style={{ marginTop: "2.5rem" }}>अपने शहर का चौघड़िया देखें</h2>
         <div className="guide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "0.6rem", margin: "1rem 0 2rem" }}>
@@ -107,7 +138,7 @@ export default function Page() {
 
           <h2 className="guide-h2 devanagari">आम सवाल</h2>
           <div className="faq-list">
-            {FAQS.map((f, i) => (
+            {faqs.map((f, i) => (
               <details key={i} className="faq-item">
                 <summary className="faq-q devanagari">
                   <span>{f.q}</span>

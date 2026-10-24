@@ -6,6 +6,7 @@ import { RASHIS } from "@/lib/rashis";
 import { SEO_CITIES } from "@/lib/seo-cities";
 import { MUHURTA_PAGES } from "@/lib/muhurta-pages";
 import { FESTIVAL_PAGES } from "@/lib/festival-pages";
+import { BAKE_DATE } from "@/lib/baked";
 
 /**
  * Programmatic sitemap — replaces the old hand-edited public/sitemap.xml,
@@ -39,6 +40,9 @@ const STATIC_ROUTES = [
   "/rashifal",
 ];
 
+// hub pages whose content the build recomputes every night (see lib/baked.ts)
+const DATA_ROUTES = new Set(["/rahu-kaal", "/choghadiya", "/rashifal"]);
+
 const TOOLS = [
   "panchang",
   "kundli",
@@ -65,26 +69,34 @@ const TOOLS = [
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-  const url = (path: string, priority: number, changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]) => ({
+  // lastModified is only claimed where the build really recomputes the page's content: the daily pages and
+  // the muhurta lists (dates drop out as they pass) carry the build day. The festival pages are computed from
+  // a fixed calendar year and everything else is unchanged by the nightly rebuild, so those state no date
+  // rather than a new one every night.
+  const url = (
+    path: string,
+    priority: number,
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
+    recomputed = false,
+  ) => ({
     url: `${BASE}${path}/`.replace(/\/\/$/, "/"),
-    lastModified: now,
+    ...(recomputed ? { lastModified: BAKE_DATE } : {}),
     changeFrequency,
     priority,
   });
 
   return [
     url("", 1.0, "daily"),
-    ...STATIC_ROUTES.slice(1).map((r) => url(r, 0.7, "weekly")),
+    ...STATIC_ROUTES.slice(1).map((r) => url(r, 0.7, DATA_ROUTES.has(r) ? "daily" : "weekly", DATA_ROUTES.has(r))),
     ...TOOLS.map((t) => url(`/tools/${t}`, 0.9, "weekly")),
     ...GUIDES.map((g) => url(`/guides/${g.slug}`, 0.7, "monthly")),
     ...READINGS.map((r) => url(`/readings/${r.slug}`, 0.8, "monthly")),
     ...NAKSHATRAS.map((n) => url(`/nakshatra/${n.slug}`, 0.6, "monthly")),
     ...RASHIS.map((r) => url(`/rashi/${r.slug}`, 0.6, "monthly")),
-    ...SEO_CITIES.map((c) => url(`/rahu-kaal/${c.slug}`, 0.8, "daily")),
-    ...SEO_CITIES.map((c) => url(`/choghadiya/${c.slug}`, 0.8, "daily")),
-    ...RASHIS.map((r) => url(`/rashifal/${r.slug}`, 0.8, "daily")),
-    ...MUHURTA_PAGES.map((p) => url(`/muhurta/${p.slug}`, 0.9, "weekly")),
+    ...SEO_CITIES.map((c) => url(`/rahu-kaal/${c.slug}`, 0.8, "daily", true)),
+    ...SEO_CITIES.map((c) => url(`/choghadiya/${c.slug}`, 0.8, "daily", true)),
+    ...RASHIS.map((r) => url(`/rashifal/${r.slug}`, 0.8, "daily", true)),
+    ...MUHURTA_PAGES.map((p) => url(`/muhurta/${p.slug}`, 0.9, "weekly", true)),
     ...FESTIVAL_PAGES.map((f) => url(`/festivals/${f.slug}`, 0.9, "weekly")),
   ];
 }

@@ -82,7 +82,7 @@ export function fetchSadeSati(
 /** Panchang endpoints take a BirthRequest-shaped body where `dob` is the date.
  *  We anchor tob to 12:00 noon so the vara reflects the civil day (the vara
  *  changes at sunrise — a midnight anchor would return the previous day). */
-function panchangBody(date: string, lat: number, lon: number, tz: number) {
+export function panchangBody(date: string, lat: number, lon: number, tz: number) {
   return { dob: date, tob: "12:00", lat, lon, tz };
 }
 

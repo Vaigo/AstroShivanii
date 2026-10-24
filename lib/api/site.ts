@@ -14,7 +14,7 @@ export interface TuOrder {
   id: number; ref_code: string | null; category: string; question: string;
   language: string; amount_inr: number; status: string; narrated_by: string; created_at: number;
   name?: string; user_email?: string; dob?: string; tob?: string;
-  /** Real Anthropic API cost for this answer's narration, in USD — null when
+  /** Real AI-provider cost for this answer's narration, in USD — null when
    *  narrated_by is 'template' (no AI call was made) or on pre-tracking rows. */
   ai_cost_usd?: number | null;
 }
@@ -356,7 +356,7 @@ export interface PalmistryPrecheckResult {
 /** Free, no-payment, no-login pre-flight check — call this the moment a
  *  photo is selected, BEFORE the paywall, so a bad photo is caught and the
  *  user is told to retake it before they ever pay ₹299. Runs only the
- *  deterministic engine server-side (no Anthropic call), so it's cheap to
+ *  deterministic engine server-side (no AI call), so it's cheap to
  *  call on every file selection. Deliberately NOT siteFetch (multipart). */
 export function precheckPalmistryPhotos(args: { palmImage: File; otherHandImage?: File }): Promise<PalmistryPrecheckResult> {
   const form = new FormData();
@@ -450,7 +450,7 @@ export interface ReportJob {
   id: number; booking_id: number; status: string; error: string | null;
   created_at: number; updated_at: number; approved_at: number | null;
   name?: string; email?: string; whatsapp?: string; dob?: string; tob?: string; amount_inr?: number;
-  /** Real Anthropic API cost across all ~27 section-narration calls for this
+  /** Real AI-provider cost across all ~27 section-narration calls for this
    *  one report, in USD — set once generation finishes. */
   ai_cost_usd?: number | null;
 }

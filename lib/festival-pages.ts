@@ -3,9 +3,11 @@
  * queries. Dates are NOT hand-typed: at build time each slug is matched
  * against the computed festival calendar (the same /v1/panchang/festivals
  * data the /festivals-2026 page uses), and that day's auspicious choghadiya
- * slots are fetched for the "पूजा कब करें" section. The deploy cron
- * (1st/15th) keeps everything fresh without human edits.
+ * slots are fetched for the "पूजा कब करें" section. The nightly deploy
+ * keeps everything fresh without human edits.
  */
+import type { FestivalItem } from "@/lib/api/types";
+import { STRICT, bakeOr, buildPost, withDeadline } from "@/lib/build-api";
 
 export interface FestivalPageDef {
   slug: string;
@@ -179,41 +181,63 @@ export interface FestivalComputed {
   abhijit: { start: string; end: string } | null;
 }
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-const KEY = process.env.NEXT_PUBLIC_API_KEY ?? process.env.NEXT_PUBLIC_API_TEST_KEY ?? "sk-test-dev";
 const REF = { lat: 28.6139, lon: 77.209, tz: 5.5 }; // Delhi reference, stated on page
 
+/** The festival data for one request, or null when the build could not get it (the page then says "date
+ *  unavailable"). The nightly (strict) build throws instead, so a missing month never replaces a complete
+ *  page. buildPost refuses test-mode (sample) answers: sample data must never ship as real dates. */
 async function apiPost(path: string, body: unknown): Promise<Record<string, unknown> | null> {
   try {
-    const res = await fetch(`${BASE}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${KEY}` },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    if (json?.meta?.mode === "test") return null; // never ship sample data as real dates
-    return json?.data ?? null;
-  } catch {
+    return await withDeadline(buildPost<Record<string, unknown>>(path, body));
+  } catch (e) {
+    if (STRICT) throw e;
+    console.warn(`[bake] festivals ${path}: ${e instanceof Error ? e.message : String(e)}`);
     return null;
   }
 }
 
-let _calendar: { date: string; name: string }[] | null = null;
+let _year: Promise<FestivalItem[]> | null = null;
 
-/** The 2026 festival calendar, fetched once per build and cached in-module. */
-async function festivalCalendar(): Promise<{ date: string; name: string }[]> {
-  if (_calendar) return _calendar;
-  const all: { date: string; name: string }[] = [];
-  for (let m = 1; m <= 12; m++) {
-    const data = await apiPost("/v1/panchang/festivals", {
-      dob: `2026-${String(m).padStart(2, "0")}-01`, tob: "12:00", ...REF,
-    });
-    const items = (data?.festivals as { date: string; name: string }[] | undefined) ?? [];
-    for (const f of items) if (f.date?.startsWith("2026")) all.push({ date: f.date, name: f.name });
+/**
+ * Every festival the API lists for 2026: twelve monthly calls, made ONCE per build process and shared by the
+ * 14 /festivals/* pages and /festivals-2026 (each used to run its own twelve-call loop, ~180 slow calls a
+ * build on a single-process API). A missing month throws under the nightly strict build; any other build
+ * skips the month and says so.
+ */
+export function festivalYear2026(): Promise<FestivalItem[]> {
+  if (!_year) {
+    _year = bakeOr(
+      "festival calendar 2026",
+      async () => {
+        const seen = new Set<string>();
+        const all: FestivalItem[] = [];
+        for (let m = 1; m <= 12; m++) {
+          try {
+            const data = await buildPost<{ festivals?: FestivalItem[] }>("/v1/panchang/festivals", {
+              dob: `2026-${String(m).padStart(2, "0")}-01`, tob: "12:00", ...REF,
+            });
+            for (const f of data.festivals ?? []) {
+              const key = `${f.date}|${f.name}`;
+              if (f.date?.startsWith("2026") && !seen.has(key)) {
+                seen.add(key);
+                all.push(f);
+              }
+            }
+          } catch (e) {
+            if (STRICT) throw e;
+            console.warn(`[bake] festivals 2026 month ${m}: ${e instanceof Error ? e.message : String(e)} (month skipped)`);
+          }
+        }
+        return all;
+      },
+      [] as FestivalItem[],
+    );
   }
-  _calendar = all;
-  return all;
+  return _year;
+}
+
+async function festivalCalendar(): Promise<{ date: string; name: string }[]> {
+  return (await festivalYear2026()).map((f) => ({ date: f.date, name: f.name }));
 }
 
 export async function computeFestival(def: FestivalPageDef): Promise<FestivalComputed> {

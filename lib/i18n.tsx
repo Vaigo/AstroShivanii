@@ -43,7 +43,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("hi");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("as-lang");
+    // storage can throw (blocked cookies, some in-app browsers): the site then simply keeps the default language
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage.getItem("as-lang");
+    } catch {
+      /* default language */
+    }
     if (stored === "en" || stored === "hi") {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only value, applied after hydration on purpose (see above)
       setLangState(stored);
@@ -57,7 +63,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       document.documentElement.lang = l;
     }
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("as-lang", l);
+      try {
+        window.localStorage.setItem("as-lang", l);
+      } catch {
+        /* the choice just does not persist */
+      }
     }
   }, []);
 

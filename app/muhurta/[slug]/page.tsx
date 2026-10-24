@@ -116,8 +116,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             the classical rules for this purpose, and each date carries that day&apos;s auspicious choghadiya hours.
           </p>
           <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-            समय दिल्ली के सूर्योदय से हैं — आपके शहर में कुछ मिनट का अंतर संभव है। सूची हर महीने की 1 और 15 तारीख को
-            स्वतः ताज़ा होती है।
+            समय दिल्ली के सूर्योदय से हैं — आपके शहर में कुछ मिनट का अंतर संभव है। सूची हर रात ताज़ा की जाती है।
           </p>
         </div>
 

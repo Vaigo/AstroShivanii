@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 
 /**
- * The muhurta lists are computed at build time and rebuilt on the 1st and 15th, so a date that has passed
- * since the last build (a "21 October" row on 24 October) would still be shown as upcoming. Rows and
+ * The muhurta lists are computed at build time and rebuilt every night, so a date that has passed
+ * since the last build (a late build leaves yesterday's row on today's page) would still be shown as upcoming. Rows and
  * list items carry data-mu-date="YYYY-MM-DD"; once the page is in the browser, those before today
  * (India's date: the dates are Delhi-based) are hidden, and a data-mu-group container with nothing
  * left is hidden too (separators between visible items come from CSS in globals.css, so hiding never leaves a

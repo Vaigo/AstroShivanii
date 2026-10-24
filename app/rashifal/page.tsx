@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { RASHIS, RASHI_GLYPH } from "@/lib/rashis";
+import RashifalAllLive from "@/components/RashifalAllLive";
+import { bakedRashifalAll } from "@/lib/baked";
+import { fmtHi } from "@/lib/hi-date";
 
-export const metadata: Metadata = {
-  title: "आज का राशिफल — Aaj Ka Rashifal, सभी 12 राशियां",
-  description:
-    "Aaj ka rashifal in Hindi: daily horoscope for all 12 rashis computed from today's real planetary transits — career, money, love, health stars, lucky numbers and auspicious hours. Updated live every day.",
-  alternates: { canonical: "/rashifal/" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // the build day's date (a rashifal exists for it, shared with the page body) goes into the snippet
+  const baked = await bakedRashifalAll();
+  return {
+    title: "आज का राशिफल — Aaj Ka Rashifal, सभी 12 राशियां",
+    description: baked
+      ? `${fmtHi(baked.date)} का राशिफल: सभी 12 राशियों के सितारे, सबसे मज़बूत क्षेत्र और शुभ अंक — आज के असली गोचर से। Aaj ka rashifal in Hindi.`
+      : "Aaj ka rashifal in Hindi: daily horoscope for all 12 rashis computed from today's real planetary transits — career, money, love, health stars, lucky numbers and auspicious hours. Updated every day.",
+    alternates: { canonical: "/rashifal/" },
+  };
+}
 
-export default function Page() {
+export default async function Page() {
+  const baked = await bakedRashifalAll();
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: "860px" }}>
@@ -22,23 +30,15 @@ export default function Page() {
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           <p className="devanagari" style={{ fontWeight: 600, color: "var(--maroon)" }}>
-            हर राशि का फल आज की असली ग्रह-स्थितियों से — कोई template नहीं, कोई copy-paste नहीं।
+            हर राशि के सितारे आज की असली ग्रह-स्थितियों से गणना होते हैं — किसी छपे राशिफल की नक़ल नहीं।
           </p>
           <p>
-            Every prediction is computed from today&apos;s actual transits over your Moon sign (Lahiri ayanamsa) —
-            that&apos;s why it changes daily and differs for every rashi.
+            The stars for each rashi are computed from today&apos;s actual transits over your Moon sign (Lahiri
+            ayanamsa) — that&apos;s why they change daily and differ for every rashi.
           </p>
         </div>
 
-        <div className="guide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.8rem" }}>
-          {RASHIS.map((r) => (
-            <Link key={r.slug} href={`/rashifal/${r.slug}/`} className="guide-card" style={{ padding: "0.9rem 1rem", textAlign: "center" }}>
-              <span style={{ fontSize: "1.4rem", display: "block" }}>{RASHI_GLYPH[r.index]}</span>
-              <strong className="devanagari" style={{ display: "block", marginTop: "0.25rem" }}>{r.name_hi}</strong>
-              <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{r.name}</span>
-            </Link>
-          ))}
-        </div>
+        <RashifalAllLive initial={baked} />
 
         <p className="guide-p devanagari" style={{ textAlign: "center", marginTop: "2rem" }}>
           अपनी सही चंद्र-राशि नहीं पता? <Link href="/tools/kundli/">निःशुल्क कुंडली</Link> से जानें · साप्ताहिक

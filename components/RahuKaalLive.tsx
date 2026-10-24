@@ -1,15 +1,20 @@
 "use client";
 
 /**
- * Live Rahu Kaal widget for the /rahu-kaal SEO pages: today's window big and
- * bold, then the next 7 days as a table. All times computed astronomically
- * for the given city (sunrise-based, so they differ city to city — that is
- * the whole point of per-city pages).
+ * Rahu Kaal widget for the /rahu-kaal SEO pages: today's window big and bold, then the next days as a table.
+ * All times are computed astronomically for the given city (sunrise-based, so they differ city to city —
+ * that is the whole point of per-city pages).
+ *
+ * The build bakes the build day's window into the static HTML (`initial`, see lib/baked.ts), so crawlers and
+ * no-JS visitors see real times. In the browser the baked window is matched against India's date: today's
+ * slice is shown, and only if the page was served too long after its build is today fetched live.
  */
 import { useEffect, useState } from "react";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import { fetchRahuKaal } from "@/lib/api/endpoints";
-import type { RahuKaalResult } from "@/lib/api/types";
+import { isRahuKaalResult, pickRahuDays, RAHU_SHOW_DAYS, type RahuKaalBaked, type RahuKaalDay } from "@/lib/daily-data";
+import { addDaysIso, fmtHi, fmtHiShort, weekdayHi } from "@/lib/hi-date";
+import { useIstTodayIso } from "@/lib/useToday";
 
 interface Props {
   cityEn: string;
@@ -17,56 +22,43 @@ interface Props {
   lat: number;
   lon: number;
   tz: number;
+  /** The build's answer for this city; absent when the build could not fetch it (the widget then fetches). */
+  initial?: RahuKaalBaked | null;
 }
 
-interface DayRow {
-  date: string;
-  weekdayHi: string;
-  data: RahuKaalResult | null;
-}
+export default function RahuKaalLive({ cityEn, cityHi, lat, lon, tz, initial }: Props) {
+  // India's date: undefined until hydrated, so the first client render equals the static HTML
+  const today = useIstTodayIso();
+  const baked = initial ? pickRahuDays(initial.days, today) : null;
+  const needLive = !baked && today !== undefined;
 
-const WEEKDAY_HI = ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
-const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
-
-function istToday(): Date {
-  // "today" must be India's today, not the visitor's browser timezone
-  const s = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-  return new Date(s);
-}
-
-function iso(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function fmtHi(d: Date): string {
-  return `${d.getDate()} ${MONTHS_HI[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-export default function RahuKaalLive({ cityEn, cityHi, lat, lon, tz }: Props) {
-  const [rows, setRows] = useState<DayRow[] | null>(null);
-  const [error, setError] = useState(false);
+  const [live, setLive] = useState<{ base: string; rows: RahuKaalDay[] | null } | null>(null);
 
   useEffect(() => {
-    const base = istToday();
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(base);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
+    if (!needLive || !today) return;
+    let cancelled = false;
+    const dates = Array.from({ length: RAHU_SHOW_DAYS }, (_, i) => addDaysIso(today, i));
     Promise.all(
-      days.map(async (d) => {
+      dates.map(async (date) => {
         try {
-          const data = await fetchRahuKaal(iso(d), lat, lon, tz);
-          return { date: iso(d), weekdayHi: WEEKDAY_HI[d.getDay()], data };
+          const data = await fetchRahuKaal(date, lat, lon, tz);
+          // a 200 with an unexpected body is "not available", never a render crash
+          return { date, weekdayHi: weekdayHi(date), data: isRahuKaalResult(data) ? data : null };
         } catch {
-          return { date: iso(d), weekdayHi: WEEKDAY_HI[d.getDay()], data: null };
+          return { date, weekdayHi: weekdayHi(date), data: null };
         }
       }),
     ).then((r) => {
-      if (r.every((row) => row.data === null)) setError(true);
-      setRows(r);
+      if (!cancelled) setLive({ base: today, rows: r.every((row) => row.data === null) ? null : r });
     });
-  }, [lat, lon, tz]);
+    return () => {
+      cancelled = true;
+    };
+  }, [needLive, today, lat, lon, tz]);
+
+  const liveNow = live && live.base === today ? live : null;
+  const error = !!liveNow && liveNow.rows === null;
+  const rows = baked ?? liveNow?.rows ?? null;
 
   if (error) {
     return (
@@ -76,34 +68,32 @@ export default function RahuKaalLive({ cityEn, cityHi, lat, lon, tz }: Props) {
     );
   }
 
-  const today = rows?.[0];
-  const todayDate = istToday();
+  const first = rows?.[0];
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "640px", margin: "0 auto" }} data-baked={baked?.[0]?.date}>
       <PatrikaFrame>
         <div style={{ textAlign: "center" }}>
-          {/* the date is added only after the live times load: printed at build time it shipped a stale
-              "today" in the static HTML (and mismatched on hydration) */}
+          {/* the date shown is the date the times below are for (the baked day, or today once fetched) */}
           <div className="result-label">
-            {`आज का राहु काल — ${cityHi}`}{rows ? ` · ${fmtHi(todayDate)}` : ""}
+            {`आज का राहु काल — ${cityHi}`}{first ? ` · ${fmtHi(first.date)}` : ""}
           </div>
-          {!rows ? (
-            <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0" }}>गणना हो रही है…</p>
-          ) : today?.data ? (
+          {!first ? (
+            <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0", minHeight: "7rem" }}>गणना हो रही है…</p>
+          ) : first.data ? (
             <>
               <p
                 className="devanagari"
                 style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--maroon)", margin: "0.6rem 0 0.2rem" }}
               >
-                {today.data.rahu_kaal.start} – {today.data.rahu_kaal.end}
+                {first.data.rahu_kaal.start} – {first.data.rahu_kaal.end}
               </p>
               <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
-                {today.weekdayHi} · सूर्योदय {today.data.sunrise} · सूर्यास्त {today.data.sunset}
+                {first.weekdayHi} · सूर्योदय {first.data.sunrise} · सूर्यास्त {first.data.sunset}
               </p>
               <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--ink-light)", marginTop: "0.7rem" }}>
-                गुलिक काल: <strong>{today.data.gulika_kaal.start}–{today.data.gulika_kaal.end}</strong> · यमगण्ड:{" "}
-                <strong>{today.data.yamaganda.start}–{today.data.yamaganda.end}</strong>
+                गुलिक काल: <strong>{first.data.gulika_kaal.start}–{first.data.gulika_kaal.end}</strong> · यमगण्ड:{" "}
+                <strong>{first.data.yamaganda.start}–{first.data.yamaganda.end}</strong>
               </p>
             </>
           ) : (
@@ -127,7 +117,9 @@ export default function RahuKaalLive({ cityEn, cityHi, lat, lon, tz }: Props) {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.date} style={{ borderBottom: "1px solid rgba(201,154,58,0.25)" }}>
-                  <td style={{ padding: "0.5rem", whiteSpace: "nowrap" }}>{r.date}</td>
+                  <td className="devanagari" style={{ padding: "0.5rem", whiteSpace: "nowrap" }}>
+                    <time dateTime={r.date}>{fmtHiShort(r.date)}</time>
+                  </td>
                   <td className="devanagari" style={{ padding: "0.5rem" }}>{r.weekdayHi}</td>
                   <td style={{ padding: "0.5rem", fontWeight: 600, color: "var(--maroon)", whiteSpace: "nowrap" }}>
                     {r.data ? `${r.data.rahu_kaal.start}–${r.data.rahu_kaal.end}` : "—"}

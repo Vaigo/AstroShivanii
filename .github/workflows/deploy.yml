@@ -18,10 +18,24 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # Rebuild on the 1st and 15th: year-dated SEO pages (muhurta dates, festival
-  # lists) are computed at build time and must not go stale between pushes.
+    inputs:
+      strict:
+        description: "Strict: fail the build instead of deploying pages whose data could not be fetched (the nightly's mode). Untick only to ship an urgent fix while the API is down."
+        type: boolean
+        default: true
+  # Rebuild every night just after midnight IST (18:35 UTC): the Rahu Kaal,
+  # choghadiya and rashifal pages bake that day's answer into their HTML, and the
+  # muhurta lists drop dates that have passed. GitHub may start a scheduled run
+  # late; the pages correct themselves in the browser meanwhile (they compare the
+  # baked day with India's date and fetch live if it differs).
+  # Two GitHub rules to know: (1) in a PUBLIC repo, scheduled workflows are
+  # switched off automatically after 60 days with no repository activity, and
+  # nothing is emailed — the baked answers then age silently. Re-enable it
+  # by hand (Actions → this workflow → Enable workflow); a push does not do it.
+  # (2) a failed nightly run keeps yesterday's pages live and emails the repo
+  # owner — re-run it with "Run workflow" once the API is back.
   schedule:
-    - cron: "30 3 1,15 * *"
+    - cron: "35 18 * * *"
 
 permissions:
   contents: read
@@ -35,6 +49,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # an API that hangs must not keep a runner busy for the 6-hour default
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -51,17 +67,53 @@ jobs:
       # cross-platform here. Versions are still pinned by the lock.
       - run: npm install --no-audit --no-fund
 
+      # The build makes ~500 GrahaAPI calls a night with the site's key. That is only safe because the
+      # API lists the key as an operator key (no monthly quota, no per-minute limit). If that listing is
+      # ever lost, the free plan's limits (1,000 calls a month, 30 a minute) would 429 the whole site, as
+      # on 2026-08-26. A key that is NOT exempt gets X-Plan / X-Quota-* headers back; an exempt one does not.
+      - name: Check the site key is exempt from quota
+        env:
+          SITE_KEY: ${{ secrets.NEXT_PUBLIC_API_KEY }}
+          STRICT: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.strict)) && '1' || '' }}
+        run: |
+          if [ -z "$SITE_KEY" ]; then echo "::warning::NEXT_PUBLIC_API_KEY is not set: the daily pages cannot be baked"; exit 0; fi
+          if ! headers=$(curl -sS --max-time 30 -D - -o /dev/null -X POST https://api.grahaapi.com/v1/panchang/rahu-kaal \
+            -H "Authorization: Bearer $SITE_KEY" -H "Content-Type: application/json" \
+            -d '{"dob":"2026-01-01","tob":"12:00","lat":28.6139,"lon":77.209,"tz":5.5}'); then
+            echo "::warning::the API did not answer the key check"; exit 0
+          fi
+          if echo "$headers" | grep -qiE '^(x-plan|x-quota-)'; then
+            echo "::error title=Site key is not quota-exempt::The API answered with plan/quota headers, so this key is on a metered plan. Re-list it as an operator key before the nightly build exhausts its quota."
+            [ "$STRICT" = "1" ] && exit 1
+            exit 0
+          fi
+          echo "the site key is exempt from quota"
+
       # /festivals-2026 fetches the live GrahaAPI at build time — the API must
       # be reachable from CI. Without the key secret the build still succeeds
       # on the sk-test fallback, but tools/festival data will be SAMPLE data:
       # set the real secret before treating a deploy as production.
+      #
+      # The nightly scheduled run (and a manual run, unless "strict" is unticked) is STRICT (BAKE_STRICT=1):
+      # if today's Rahu Kaal / choghadiya / rashifal, a muhurta list or the festival calendar cannot be
+      # fetched, the build FAILS and yesterday's complete pages stay live, instead of deploying pages with
+      # no answer in them. Pushes are not strict, so an API outage never blocks an urgent fix (those pages
+      # then fall back to the live widget until the next night, and the verify step below warns).
       - name: Build static export
         env:
           NEXT_PUBLIC_API_BASE_URL: https://api.grahaapi.com
           NEXT_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_API_KEY }}
           NEXT_PUBLIC_RAZORPAY_KEY_ID: ${{ secrets.NEXT_PUBLIC_RAZORPAY_KEY_ID }}
           NEXT_PUBLIC_SITE_URL: https://astroshivanii.com
+          BAKE_STRICT: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.strict)) && '1' || '' }}
         run: npm run build
+
+      # Every page whose data the build fetches must have it, all for the same day (fails a strict run;
+      # warns on pushes). See scripts/verify-baked.mjs.
+      - name: Verify baked answers
+        env:
+          BAKE_STRICT: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.strict)) && '1' || '' }}
+        run: node scripts/verify-baked.mjs out
 
       - uses: actions/upload-pages-artifact@v3
         with:

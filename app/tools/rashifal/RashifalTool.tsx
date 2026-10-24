@@ -8,6 +8,7 @@ import Divider from "@/components/Divider";
 import ResultCTA from "@/components/ResultCTA";
 import { fetchRashifal, fetchWeeklyRashifal } from "@/lib/api/endpoints";
 import type { RashiPrediction, WeeklyRashifalResult } from "@/lib/api/types";
+import { starLabelEn, starLabelHi, starTone } from "@/lib/daily-data";
 import { ApiError } from "@/lib/api/client";
 import { useBackStep } from "@/lib/useBackStep";
 import { PLANET_HI, colorHi, weekdayHi, pickMessageLang } from "@/lib/hindi-labels";
@@ -22,8 +23,8 @@ const RASHIS = [
   { en: "Capricorn", hi: "मकर", glyph: "♑︎" }, { en: "Aquarius", hi: "कुंभ", glyph: "♒︎" }, { en: "Pisces", hi: "मीन", glyph: "♓︎" },
 ];
 
+// The five areas of life, each on its own: no combined "overall" (see lib/daily-data.ts for why)
 const DOMAINS = [
-  { key: "overall", en: "Overall", hi: "समग्र" },
   { key: "career",  en: "Career", hi: "करियर" },
   { key: "love",    en: "Love & Relationships", hi: "प्रेम और रिश्ते" },
   { key: "health",  en: "Health", hi: "स्वास्थ्य" },
@@ -31,12 +32,20 @@ const DOMAINS = [
   { key: "spirit",  en: "Spiritual", hi: "आध्यात्म" },
 ] as const;
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div style={{ display: "flex", gap: "0.2rem" }}>
+/** Stars, with (when given) the good/bad word for them beside them, or under them when `stacked`. */
+function StarRating({ rating, label, stacked }: { rating: number; label?: string; stacked?: boolean }) {
+  const row = (
+    <div role="img" aria-label={label ? `${rating}/5 — ${label}` : `${rating}/5`} style={{ display: "flex", gap: "0.2rem" }}>
       {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} style={{ color: i < Math.round(rating) ? "var(--gold)" : "rgba(201,154,58,0.3)", fontSize: "1rem" }}>★</span>
+        <span key={i} aria-hidden="true" style={{ color: i < Math.round(rating) ? "var(--gold)" : "rgba(201,154,58,0.3)", fontSize: stacked ? "0.8rem" : "1rem" }}>★</span>
       ))}
+    </div>
+  );
+  if (!label) return row;
+  return (
+    <div style={{ display: "flex", flexDirection: stacked ? "column" : "row", alignItems: stacked ? "center" : "center", gap: stacked ? "0.05rem" : "0.5rem" }}>
+      {row}
+      <span style={{ fontSize: "0.78rem", fontWeight: 700, color: starTone(rating) }}>{label}</span>
     </div>
   );
 }
@@ -191,12 +200,6 @@ export default function RashifalTool() {
                   {forDate} · {isHi ? "स्वामी" : "Lord"}: {isHi ? PLANET_HI[result.rashi_lord] ?? result.rashi_lord : result.rashi_lord} · {result.symbol}
                 </span>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <StarRating rating={result.overall_stars} />
-                <span style={{ fontSize: "0.78rem", color: "var(--saffron)", fontWeight: 700 }}>
-                  {texts.stars_label}
-                </span>
-              </div>
             </div>
 
             <Divider />
@@ -204,12 +207,12 @@ export default function RashifalTool() {
             {DOMAINS.map(({ key, en, hi }) => {
               const text = texts[key];
               if (!text) return null;
-              const stars = key === "overall" ? null : result.domain_stars[key];
+              const stars = result.domain_stars[key];
               return (
                 <div key={key} className="result-box" style={{ marginTop: "0.75rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div className="result-label">{isHi ? hi : en}</div>
-                    {stars != null && <StarRating rating={stars} />}
+                    <StarRating rating={stars} label={isHi ? starLabelHi(stars) : starLabelEn(stars)} />
                   </div>
                   <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
                     {text}
@@ -287,43 +290,38 @@ export default function RashifalTool() {
                   {weeklyResult.week_start} → {weeklyResult.week_end}
                 </span>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <StarRating rating={weeklyResult.week_average_stars} />
-                {weeklyResult.best_day && (
-                  <span style={{ fontSize: "0.78rem", color: "var(--saffron)", fontWeight: 700, display: "block" }}>
-                    {isHi ? "सर्वोत्तम दिन" : "Best Day"}: {isHi ? weekdayHi(weeklyResult.best_day) : weeklyResult.best_day}
-                  </span>
-                )}
-              </div>
             </div>
 
             <Divider />
 
-            <div className="result-box" style={{ marginTop: "0.75rem" }}>
-              <p className={isHi ? "devanagari" : undefined} style={{ fontSize: "0.9rem", color: "var(--ink-light)", lineHeight: 1.6 }}>
-                {isHi ? weeklyResult.summary_hi : weeklyResult.summary_en}
-              </p>
-            </div>
-
+            {/* day by day, each area on its own: no weekly average, "best day" or summary (those are built from the
+                combined overall star; see lib/daily-data.ts) */}
             <div style={{ overflowX: "auto", marginTop: "1rem" }}>
-              <table style={{ width: "100%", fontSize: "0.82rem", borderCollapse: "collapse", minWidth: "560px" }}>
+              <table style={{ width: "100%", fontSize: "0.82rem", borderCollapse: "collapse", minWidth: "700px" }}>
                 <thead>
                   <tr style={{ textAlign: "left", borderBottom: "1px solid rgba(201,154,58,0.3)" }}>
                     <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "दिन" : "Day"}</th>
-                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "समग्र" : "Overall"}</th>
-                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "सारांश" : "Summary"}</th>
+                    {DOMAINS.map(({ key, en, hi }) => (
+                      <th key={key} className={isHi ? "devanagari" : undefined} style={{ padding: "0.4rem 0.5rem", textAlign: "center" }}>{isHi ? hi : en}</th>
+                    ))}
                     <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "शुभ अंक" : "Lucky #"}</th>
-                    <th style={{ padding: "0.4rem 0.5rem" }}>{isHi ? "शुभ मुहूर्त" : "Auspicious Hours"}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {weeklyResult.days.map((d) => (
                     <tr key={d.date} style={{ borderBottom: "1px solid rgba(201,154,58,0.12)" }}>
                       <td style={{ padding: "0.4rem 0.5rem", fontWeight: 600 }}>{isHi ? weekdayHi(d.weekday) : d.weekday}<br /><span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{d.date}</span></td>
-                      <td style={{ padding: "0.4rem 0.5rem" }}><StarRating rating={d.overall_stars} /></td>
-                      <td style={{ padding: "0.4rem 0.5rem", color: "var(--ink-light)" }} className={isHi ? "devanagari" : undefined}>{isHi ? d.overall_hi : d.overall_en}</td>
+                      {DOMAINS.map(({ key }) => {
+                        const n = d.domain_stars[key];
+                        return (
+                          <td key={key} style={{ padding: "0.4rem 0.5rem", textAlign: "center" }}>
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                              <StarRating rating={n} label={isHi ? starLabelHi(n) : starLabelEn(n)} stacked />
+                            </div>
+                          </td>
+                        );
+                      })}
                       <td style={{ padding: "0.4rem 0.5rem" }}>{d.lucky_number}</td>
-                      <td style={{ padding: "0.4rem 0.5rem", color: "var(--muted)" }}>{d.auspicious_hours.join(" · ")}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -6,7 +6,7 @@ import { MUHURTA_PAGES } from "@/lib/muhurta-pages";
 export const metadata: Metadata = {
   title: "शुभ मुहूर्त 2026-27 — Muhurat Dates for Every Occasion",
   description:
-    "Shubh muhurat 2026 & 2027 for vehicle purchase, griha pravesh, vivah (marriage), property, business opening and naamkaran — real computed dates with each day's good hours, updated twice a month.",
+    "Shubh muhurat 2026 & 2027 for vehicle purchase, griha pravesh, vivah (marriage), property, business opening and naamkaran — real computed dates with each day's good hours, updated every night.",
   alternates: { canonical: "/muhurta/" },
 };
 
@@ -28,7 +28,7 @@ export default function Page() {
             नीचे हर विषय की सूची में नक्षत्र-तिथि से जांची तारीखें और हर दिन के शुभ चौघड़िया समय मिलेंगे।
           </p>
           <p>
-            Every list is computed astronomically (Lahiri ayanamsa) and refreshed twice a month — never a
+            Every list is computed astronomically (Lahiri ayanamsa) and refreshed every night — never a
             hand-copied calendar.
           </p>
         </div>

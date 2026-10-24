@@ -2,14 +2,29 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RahuKaalLive from "@/components/RahuKaalLive";
+import { bakedRahuKaal } from "@/lib/baked";
+import { datedTail, fitDescription, rahuKaalSentence } from "@/lib/daily-data";
+import { fmtHi } from "@/lib/hi-date";
 import { SEO_CITIES } from "@/lib/seo-cities";
 
-export const metadata: Metadata = {
-  title: "आज का राहु काल — Rahu Kaal Today, Live City-wise Timings",
-  description:
-    "Aaj ka Rahu Kaal: today's exact Rahu Kaal, Gulika Kaal and Yamaganda timings computed astronomically from your city's sunrise — Delhi, Mumbai and 30+ Indian cities, updated live.",
-  alternates: { canonical: "/rahu-kaal/" },
-};
+const delhi = SEO_CITIES[0];
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Delhi's answer from the build (shared with the page body), dated, goes into the snippet
+  const day = (await bakedRahuKaal(delhi))?.days[0];
+  const w = day?.data;
+  const description = w
+    ? fitDescription(
+        `${fmtHi(day.date)}: दिल्ली में राहु काल ${w.rahu_kaal.start}–${w.rahu_kaal.end}, गुलिक काल ${w.gulika_kaal.start}–${w.gulika_kaal.end}, यमगण्ड ${w.yamaganda.start}–${w.yamaganda.end}। Aaj ka Rahu Kaal for Delhi, Mumbai and 30+ cities.`,
+        `${fmtHi(day.date)}: दिल्ली में राहु काल ${w.rahu_kaal.start}–${w.rahu_kaal.end}। Aaj ka Rahu Kaal, Gulika Kaal, Yamaganda for 30+ Indian cities.`,
+      )
+    : "Aaj ka Rahu Kaal: today's exact Rahu Kaal, Gulika Kaal and Yamaganda timings computed astronomically from your city's sunrise — Delhi, Mumbai and 30+ Indian cities, updated every day.";
+  return {
+    title: "आज का राहु काल — Rahu Kaal Today, Live City-wise Timings",
+    description,
+    alternates: { canonical: "/rahu-kaal/" },
+  };
+}
 
 const FAQS = [
   {
@@ -18,7 +33,7 @@ const FAQS = [
   },
   {
     q: "हर शहर का राहु काल अलग क्यों होता है?",
-    a: "राहु काल सूर्योदय और सूर्यास्त पर आधारित है — दिन की लंबाई का 1/8 भाग। हर शहर का सूर्योदय अलग समय पर होता है, इसलिए दिल्ली, मुंबई, कोलकाता का राहु काल कुछ मिनटों से लेकर आधे घंटे तक अलग हो सकता है। इसीलिए यहां हर शहर के लिए अलग खगोलीय गणना की जाती है।",
+    a: "राहु काल सूर्योदय और सूर्यास्त पर आधारित है — दिन की लंबाई का 1/8 भाग। हर शहर का सूर्योदय अलग समय पर होता है, इसलिए दिल्ली, मुंबई, कोलकाता का राहु काल कुछ मिनटों से लेकर लगभग एक घंटे तक अलग हो सकता है। इसीलिए यहां हर शहर के लिए अलग खगोलीय गणना की जाती है।",
   },
   {
     q: "क्या राहु काल हर हफ्ते एक ही समय पर आता है?",
@@ -30,19 +45,31 @@ const FAQS = [
   },
 ];
 
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQS.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
+export default async function Page() {
+  const baked = await bakedRahuKaal(delhi);
+  const day = baked?.days[0];
+  const faqs = [
+    // the day's answer in plain words, dated (this text is frozen at build; the widget below follows today)
+    ...(day?.data
+      ? [
+          {
+            q: "दिल्ली में आज राहु काल कब है?",
+            a: `${rahuKaalSentence(delhi.hi, { ...day, data: day.data })} ${datedTail(day.date, "राहु काल")} दूसरे शहरों का समय इस पेज की शहरों की सूची में दिए पेजों पर है।`,
+          },
+        ]
+      : []),
+    ...FAQS,
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
 
-const delhi = SEO_CITIES[0];
-
-export default function Page() {
   return (
     <section className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
@@ -53,7 +80,7 @@ export default function Page() {
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           <p className="devanagari" style={{ fontWeight: 600, color: "var(--maroon)" }}>
-            शुभ काम शुरू करने से पहले एक नज़र — आज का राहु काल, गुलिक काल और यमगण्ड, लाइव।
+            शुभ काम शुरू करने से पहले एक नज़र — आज का राहु काल, गुलिक काल और यमगण्ड — रोज़ अपडेट।
           </p>
           <p>
             Rahu Kaal is one-eighth of the daytime ruled by Rahu — new beginnings, journeys and purchases are
@@ -61,7 +88,7 @@ export default function Page() {
           </p>
         </div>
 
-        <RahuKaalLive cityEn={delhi.en} cityHi={delhi.hi} lat={delhi.lat} lon={delhi.lon} tz={delhi.tz} />
+        <RahuKaalLive cityEn={delhi.en} cityHi={delhi.hi} lat={delhi.lat} lon={delhi.lon} tz={delhi.tz} initial={baked} />
 
         <h2 className="guide-h2 devanagari" style={{ marginTop: "2.5rem" }}>अपने शहर का राहु काल देखें</h2>
         <p className="guide-p devanagari">
@@ -111,12 +138,12 @@ export default function Page() {
           </div>
           <p className="guide-p devanagari">
             ध्यान रहे — यह तालिका केवल समझने के लिए है। असली समय आपके शहर के उस दिन के सूर्योदय-सूर्यास्त से
-            निकलता है, जो ऊपर के लाइव टूल में सटीक रूप से दिया गया है।
+            निकलता है, जो ऊपर की तालिका में सटीक रूप से दिया गया है।
           </p>
 
           <h2 className="guide-h2 devanagari">आम सवाल</h2>
           <div className="faq-list">
-            {FAQS.map((f, i) => (
+            {faqs.map((f, i) => (
               <details key={i} className="faq-item">
                 <summary className="faq-q devanagari">
                   <span>{f.q}</span>

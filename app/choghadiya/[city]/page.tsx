@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ChoghadiyaLive from "@/components/ChoghadiyaLive";
+import { bakedChoghadiya } from "@/lib/baked";
+import { bestShubhPeriods, choghadiyaSentence, datedTail, fitDescription, periodLabel, sunriseVsDelhi } from "@/lib/daily-data";
+import { fmtHi, weekdayHi } from "@/lib/hi-date";
 import { SEO_CITIES, cityBySlug } from "@/lib/seo-cities";
 
 export function generateStaticParams() {
@@ -13,9 +16,23 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const { city } = await params;
   const c = cityBySlug(city);
   if (!c) return {};
+  // the build's answer (one fetch per build, shared with the page body) goes into the snippet, dated
+  const baked = await bakedChoghadiya(c);
+  let description = `Aaj ka choghadiya in ${c.en} (${c.hi}): day & night choghadiya table with the current period highlighted, plus Abhijit muhurta — computed from ${c.en}'s own sunrise and sunset, refreshed every day.`;
+  if (baked) {
+    const { date, data } = baked;
+    // the best periods (Amrit first), not just the first by clock; no Abhijit on a Wednesday, when it is not observed
+    const best = (n: number) => bestShubhPeriods(data, n).map(periodLabel).join(", ");
+    const abhijit = weekdayHi(date) === "बुधवार" ? "" : `; अभिजीत ${data.abhijit.start}–${data.abhijit.end}`;
+    description = fitDescription(
+      `${fmtHi(date)}: ${c.hi} के शुभ चौघड़िया — ${best(3)}${abhijit}। Aaj ka choghadiya ${c.en}.`,
+      `${fmtHi(date)}: ${c.hi} के शुभ चौघड़िया — ${best(2)}${abhijit}। Choghadiya today, ${c.en}.`,
+      `${fmtHi(date)}: ${c.hi} के शुभ चौघड़िया — ${best(2)}। Aaj ka choghadiya ${c.en}.`,
+    );
+  }
   return {
     title: `${c.hi} का आज का चौघड़िया — Choghadiya Today in ${c.en}`,
-    description: `Aaj ka choghadiya in ${c.en} (${c.hi}): live day & night choghadiya table with the current period highlighted, plus Abhijit muhurta — computed from ${c.en}'s own sunrise and sunset.`,
+    description,
     alternates: { canonical: `/choghadiya/${c.slug}/` },
   };
 }
@@ -25,10 +42,24 @@ export default async function Page({ params }: { params: Promise<{ city: string 
   const c = cityBySlug(city);
   if (!c) notFound();
 
+  // this city's day and Delhi's (cached per build process) are fetched together, so they share one wait
+  const [baked, delhiToday] = await Promise.all([bakedChoghadiya(c), c.slug === "delhi" ? null : bakedChoghadiya(SEO_CITIES[0])]);
+  // Delhi's day: the figures that make this city's page differ from its neighbours'
+  const vsDelhi = baked && delhiToday ? ` ${sunriseVsDelhi(c.hi, baked.data, delhiToday.data)}` : "";
+
   const faqs = [
+    // the day's answer in plain words, dated (this text is frozen at build; the widget below follows today)
+    ...(baked
+      ? [
+          {
+            q: `${c.hi} में आज कौन-से चौघड़िया शुभ हैं?`,
+            a: `${choghadiyaSentence(c.hi, baked.date, baked.data)} ${datedTail(baked.date, "चौघड़िया")}`,
+          },
+        ]
+      : []),
     {
       q: `${c.hi} का चौघड़िया दूसरे शहरों से अलग क्यों है?`,
-      a: `चौघड़िया सूर्योदय-सूर्यास्त के 8-8 भाग हैं, और ${c.hi} (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) का सूर्योदय दूसरे शहरों से अलग समय पर होता है। यहां दिया हर समय ${c.hi} की अपनी खगोलीय गणना से है — किसी और शहर की तालिका यहां सटीक नहीं बैठेगी।`,
+      a: `चौघड़िया सूर्योदय-सूर्यास्त के 8-8 भाग हैं, और ${c.hi} (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) का सूर्योदय दूसरे शहरों से अलग समय पर होता है।${vsDelhi} यहां दिया हर समय ${c.hi} की अपनी खगोलीय गणना से है — किसी और शहर की तालिका यहां सटीक नहीं बैठेगी।`,
     },
     {
       q: "शुभ काम के लिए कौन-से चौघड़िया चुनें?",
@@ -70,7 +101,8 @@ export default async function Page({ params }: { params: Promise<{ city: string 
           </p>
         </div>
 
-        <ChoghadiyaLive cityEn={c.en} cityHi={c.hi} lat={c.lat} lon={c.lon} tz={c.tz} />
+        {/* key: moving between city pages in the browser must not carry one city's fetched table to the next */}
+        <ChoghadiyaLive key={c.slug} cityEn={c.en} cityHi={c.hi} lat={c.lat} lon={c.lon} tz={c.tz} initial={baked} />
 
         <article className="guide-article" style={{ marginTop: "2.5rem" }}>
           <h2 className="guide-h2 devanagari">आम सवाल</h2>

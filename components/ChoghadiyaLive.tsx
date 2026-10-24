@@ -1,14 +1,31 @@
 "use client";
 
 /**
- * Live Choghadiya widget for the /choghadiya SEO pages: today's 16 periods
- * (8 day + 8 night) computed from the city's own sunrise/sunset, with the
- * CURRENT period highlighted live and Abhijit muhurta called out.
+ * Choghadiya widget for the /choghadiya SEO pages: the day's 16 periods (8 day + 8 night) computed from the
+ * city's own sunrise/sunset, with the CURRENT period highlighted live and Abhijit muhurta called out.
+ *
+ * The build bakes the build day's table into the static HTML (`initial`, see lib/baked.ts). The "now"
+ * highlight is client-only (the clock is not known at build time, and a build-time "now" would mismatch on
+ * hydration); if the page is served on a later India date than its build, today's table is fetched live.
+ *
+ * Between midnight and sunrise the running period belongs to YESTERDAY's night table (a night table runs
+ * from sunset to the next sunrise, and each weekday has its own sequence), so that is what the "now" line
+ * reads then; today's rows are not highlighted before sunrise.
  */
 import { useEffect, useState } from "react";
 import PatrikaFrame from "@/components/PatrikaFrame";
 import { fetchChoghadiyaDay } from "@/lib/api/endpoints";
 import type { ChoghadiyaDayResult, ChoghadiyaPeriod } from "@/lib/api/types";
+import {
+  CHOGHADIYA_NAME_HI as NAME_HI,
+  CHOGHADIYA_QUALITY_HI as QUALITY_HI,
+  isChoghadiyaDay,
+  periodLabel,
+  shubhDayPeriods,
+  type ChoghadiyaBaked,
+} from "@/lib/daily-data";
+import { addDaysIso, fmtHi, weekdayHi } from "@/lib/hi-date";
+import { useIstMinutes, useIstTodayIso } from "@/lib/useToday";
 
 interface Props {
   cityEn: string;
@@ -16,23 +33,8 @@ interface Props {
   lat: number;
   lon: number;
   tz: number;
-}
-
-const NAME_HI: Record<string, string> = {
-  Amrit: "अमृत", Shubh: "शुभ", Labh: "लाभ", Char: "चर",
-  Kaal: "काल", Rog: "रोग", Udveg: "उद्वेग",
-};
-const QUALITY_HI: Record<string, string> = {
-  Excellent: "सर्वश्रेष्ठ", Good: "शुभ", Neutral: "सामान्य", Bad: "अशुभ",
-};
-const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
-
-function istNow(): Date {
-  return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-}
-
-function iso(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  /** The build's answer for this city; absent when the build could not fetch it (the widget then fetches). */
+  initial?: ChoghadiyaBaked | null;
 }
 
 function toMinutes(hm: string): number {
@@ -55,16 +57,55 @@ function qualityStyle(q: string): React.CSSProperties {
   return { color: "var(--muted)" };
 }
 
-export default function ChoghadiyaLive({ cityEn, cityHi, lat, lon, tz }: Props) {
-  const [data, setData] = useState<ChoghadiyaDayResult | null>(null);
-  const [error, setError] = useState(false);
-  const [nowMin, setNowMin] = useState(() => { const n = istNow(); return n.getHours() * 60 + n.getMinutes(); });
+export default function ChoghadiyaLive({ cityEn, cityHi, lat, lon, tz, initial }: Props) {
+  const today = useIstTodayIso(); // undefined until hydrated
+  const nowMin = useIstMinutes(); // null until hydrated
+  // the baked table is today's table until India's date moves past the build day
+  const baked = initial && (today === undefined || today === initial.date) ? initial : null;
+  const needLive = !baked && today !== undefined;
+
+  const [live, setLive] = useState<{ date: string; data: ChoghadiyaDayResult | null } | null>(null);
 
   useEffect(() => {
-    fetchChoghadiyaDay(iso(istNow()), lat, lon, tz).then(setData).catch(() => setError(true));
-    const t = setInterval(() => { const n = istNow(); setNowMin(n.getHours() * 60 + n.getMinutes()); }, 60_000);
-    return () => clearInterval(t);
-  }, [lat, lon, tz]);
+    if (!needLive || !today) return;
+    let cancelled = false;
+    fetchChoghadiyaDay(today, lat, lon, tz)
+      .then((data) => {
+        // a 200 with an unexpected body is the error state, never a render crash
+        if (!cancelled) setLive({ date: today, data: isChoghadiyaDay(data) ? data : null });
+      })
+      .catch(() => {
+        if (!cancelled) setLive({ date: today, data: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needLive, today, lat, lon, tz]);
+
+  const liveNow = live && live.date === today ? live : null;
+  const error = !!liveNow && liveNow.data === null;
+  const data = baked ? baked.data : liveNow?.data ?? null;
+  const date = baked ? baked.date : liveNow?.data ? liveNow.date : null;
+
+  // Before sunrise the running period is in yesterday's night table: fetch that one (only in those hours)
+  const preDawn = !!data && nowMin !== null && nowMin < toMinutes(data.sunrise);
+  const prevDate = date ? addDaysIso(date, -1) : null;
+  const [prev, setPrev] = useState<{ date: string; data: ChoghadiyaDayResult | null } | null>(null);
+
+  useEffect(() => {
+    if (!preDawn || !prevDate) return;
+    let cancelled = false;
+    fetchChoghadiyaDay(prevDate, lat, lon, tz)
+      .then((d) => {
+        if (!cancelled) setPrev({ date: prevDate, data: isChoghadiyaDay(d) ? d : null });
+      })
+      .catch(() => {
+        if (!cancelled) setPrev({ date: prevDate, data: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [preDawn, prevDate, lat, lon, tz]);
 
   if (error) {
     return (
@@ -74,8 +115,14 @@ export default function ChoghadiyaLive({ cityEn, cityHi, lat, lon, tz }: Props) 
     );
   }
 
-  const today = istNow();
-  const current = data?.choghadiya.find((p) => isCurrent(p, nowMin));
+  const prevData = prev && prev.date === prevDate ? prev.data : null;
+  let current: ChoghadiyaPeriod | undefined;
+  if (data && nowMin !== null) {
+    current = preDawn
+      ? prevData?.choghadiya.filter((p) => p.type === "night").find((p) => isCurrent(p, nowMin))
+      : data.choghadiya.find((p) => isCurrent(p, nowMin));
+  }
+  const wednesday = !!date && weekdayHi(date) === "बुधवार";
 
   const table = (type: "day" | "night", heading: string) => (
     <div style={{ flex: "1 1 280px", minWidth: 0 }}>
@@ -83,7 +130,8 @@ export default function ChoghadiyaLive({ cityEn, cityHi, lat, lon, tz }: Props) 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
         <tbody>
           {data?.choghadiya.filter((p) => p.type === type).map((p) => {
-            const cur = isCurrent(p, nowMin);
+            // today's rows are highlighted only from sunrise on (see the note at the top of the file)
+            const cur = nowMin !== null && !preDawn && isCurrent(p, nowMin);
             return (
               <tr key={`${p.type}-${p.period}`} style={{
                 borderBottom: "1px solid rgba(201,154,58,0.25)",
@@ -105,25 +153,34 @@ export default function ChoghadiyaLive({ cityEn, cityHi, lat, lon, tz }: Props) 
   );
 
   return (
-    <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "760px", margin: "0 auto" }} data-baked={baked ? baked.date : undefined}>
       <PatrikaFrame>
         <div style={{ textAlign: "center" }}>
-          {/* date only once the live data is in: a build-time date in the static HTML is stale */}
+          {/* the date shown is the date the table is for (the baked day, or today once fetched) */}
           <div className="result-label">
-            {`आज का चौघड़िया — ${cityHi}`}{data ? ` · ${today.getDate()} ${MONTHS_HI[today.getMonth()]} ${today.getFullYear()}` : ""}
+            {`आज का चौघड़िया — ${cityHi}`}{date ? ` · ${fmtHi(date)}` : ""}
           </div>
           {!data ? (
-            <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0" }}>गणना हो रही है…</p>
+            <p className="devanagari" style={{ color: "var(--muted)", margin: "1rem 0", minHeight: "6rem" }}>गणना हो रही है…</p>
           ) : (
             <>
               {current && (
                 <p className="devanagari" style={{ fontSize: "1.5rem", fontWeight: 700, margin: "0.6rem 0 0.2rem", ...qualityStyle(current.quality) }}>
                   अभी: {NAME_HI[current.name] ?? current.name} ({QUALITY_HI[current.quality]}) · {current.start}–{current.end}
+                  {preDawn && (
+                    <span style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "var(--muted)" }}>
+                      कल रात की तालिका से — आज की तालिका सूर्योदय {data.sunrise} से चलती है
+                    </span>
+                  )}
                 </p>
               )}
               <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0.2rem 0 0" }}>
                 सूर्योदय {data.sunrise} · सूर्यास्त {data.sunset} · अभिजीत मुहूर्त:{" "}
                 <strong style={{ color: "var(--maroon)" }}>{data.abhijit.start}–{data.abhijit.end}</strong>
+                {wednesday && " (बुधवार को अभिजीत मान्य नहीं माना जाता)"}
+              </p>
+              <p className="devanagari" style={{ fontSize: "0.85rem", color: "var(--ink-light)", margin: "0.5rem 0 0" }}>
+                दिन के शुभ चौघड़िया: <strong>{shubhDayPeriods(data).map(periodLabel).join(" · ") || "—"}</strong>
               </p>
             </>
           )}

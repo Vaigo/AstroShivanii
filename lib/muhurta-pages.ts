@@ -6,7 +6,7 @@
  * These pages are honest by design: they carry generic panchang-based dates
  * (nakshatra + tithi + choghadiya for Delhi sunrise) and say so, with the
  * ₹51 personal tool as the "checked against YOUR chart" upgrade. The deploy
- * workflow rebuilds on the 1st and 15th so the lists never go stale.
+ * workflow rebuilds every night so the lists never go stale.
  *
  * Each page is scoped to one calendar year (`year`), not a rolling window —
  * fetchMuhurtaDates(purpose, year) bounds its query to [today, Dec 31 of
@@ -17,6 +17,8 @@
  * rename/redirect the "-2026" slugs forward a year, the same convention
  * already planned for /festivals (see LAUNCH.md §3S).
  */
+import { BAKE_DATE, STRICT, bakeOr, buildPost } from "@/lib/build-api";
+import { MONTHS_HI } from "@/lib/hi-date";
 
 export interface MuhurtaPageDef {
   slug: string;
@@ -38,7 +40,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
     enTitle: "Vehicle Purchase Muhurat 2026 — Shubh Dates for Car & Bike",
     hiHook: "गाड़ी या बाइक की डिलीवरी के लिए नक्षत्र-तिथि से जांचे हुए शुभ दिन, हर दिन के शुभ चौघड़िया समय के साथ।",
     description:
-      "Shubh muhurat 2026 for buying a car or bike: real computed auspicious dates (nakshatra + tithi checked) with each day's good choghadiya hours. Updated twice a month.",
+      "Shubh muhurat 2026 for buying a car or bike: real computed auspicious dates (nakshatra + tithi checked) with each day's good choghadiya hours. Updated every night.",
     faqs: [
       {
         q: "वाहन खरीदने के लिए कौन से नक्षत्र शुभ माने जाते हैं?",
@@ -62,7 +64,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
     enTitle: "Griha Pravesh Muhurat 2026 — Auspicious Dates for Housewarming",
     hiHook: "नए घर में प्रवेश के लिए नक्षत्र-तिथि से जांचे शुभ दिन — हर दिन के शुभ समय सहित।",
     description:
-      "Griha Pravesh muhurat 2026: computed auspicious housewarming dates (nakshatra + tithi screened) with each day's good hours. Astronomical calculation, updated twice a month.",
+      "Griha Pravesh muhurat 2026: computed auspicious housewarming dates (nakshatra + tithi screened) with each day's good hours. Astronomical calculation, updated every night.",
     faqs: [
       {
         q: "गृह प्रवेश के लिए कौन से महीने सर्वोत्तम माने जाते हैं?",
@@ -86,7 +88,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
     enTitle: "Vivah (Marriage) Muhurat 2026 — Shubh Wedding Dates",
     hiHook: "शादी की तारीख तय करने से पहले — नक्षत्र-तिथि से जांचे हुए शुभ विवाह-दिन।",
     description:
-      "Vivah muhurat 2026: computed shubh wedding dates (nakshatra + tithi screened, Lahiri ayanamsa) with each day's good hours. Updated twice a month.",
+      "Vivah muhurat 2026: computed shubh wedding dates (nakshatra + tithi screened, Lahiri ayanamsa) with each day's good hours. Updated every night.",
     faqs: [
       {
         q: "विवाह के लिए कौन से महीने शुभ माने जाते हैं?",
@@ -110,7 +112,7 @@ export const MUHURTA_PAGES: MuhurtaPageDef[] = [
     enTitle: "Property Purchase Muhurat 2026 — Shubh Dates for Land & Home",
     hiHook: "प्लॉट, फ्लैट या ज़मीन की रजिस्ट्री के लिए जांचे हुए शुभ दिन।",
     description:
-      "Property and land purchase muhurat 2026: computed auspicious registry dates (nakshatra + tithi screened) with good hours for each day. Updated twice a month.",
+      "Property and land purchase muhurat 2026: computed auspicious registry dates (nakshatra + tithi screened) with good hours for each day. Updated every night.",
     faqs: [
       {
         q: "रजिस्ट्री और गृह प्रवेश का मुहूर्त अलग-अलग क्यों?",
@@ -185,7 +187,7 @@ MUHURTA_PAGES.push(
     enTitle: "Yatra (Travel) Muhurat 2026 — Auspicious Journey Dates",
     hiHook: "लंबी यात्रा, विदेश-प्रस्थान या तीर्थ के लिए नक्षत्र-तिथि से जांचे शुभ दिन।",
     description:
-      "Yatra muhurat 2026: computed auspicious travel and journey dates (nakshatra + tithi screened) with each day's good hours. Updated twice a month.",
+      "Yatra muhurat 2026: computed auspicious travel and journey dates (nakshatra + tithi screened) with each day's good hours. Updated every night.",
     faqs: [
       {
         q: "यात्रा के लिए कौन-से नक्षत्र शुभ माने जाते हैं?",
@@ -242,7 +244,7 @@ MUHURTA_PAGES.push(
     enTitle: "Vehicle Purchase Muhurat 2027 — Shubh Dates for Car & Bike",
     hiHook: "2027 में गाड़ी या बाइक की डिलीवरी के लिए नक्षत्र-तिथि से जांचे हुए शुभ दिन, हर दिन के शुभ चौघड़िया समय के साथ।",
     description:
-      "Shubh muhurat 2027 for buying a car or bike: full-year computed auspicious dates (nakshatra + tithi checked) with each day's good choghadiya hours. Updated twice a month.",
+      "Shubh muhurat 2027 for buying a car or bike: full-year computed auspicious dates (nakshatra + tithi checked) with each day's good choghadiya hours. Updated every night.",
     faqs: [
       {
         q: "वाहन खरीदने के लिए कौन से नक्षत्र शुभ माने जाते हैं?",
@@ -266,7 +268,7 @@ MUHURTA_PAGES.push(
     enTitle: "Griha Pravesh Muhurat 2027 — Auspicious Dates for Housewarming",
     hiHook: "2027 में नए घर में प्रवेश के लिए नक्षत्र-तिथि से जांचे शुभ दिन — साल भर की सूची, हर दिन के शुभ समय सहित।",
     description:
-      "Griha Pravesh muhurat 2027: full-year computed auspicious housewarming dates (nakshatra + tithi screened) with each day's good hours. Astronomical calculation, updated twice a month.",
+      "Griha Pravesh muhurat 2027: full-year computed auspicious housewarming dates (nakshatra + tithi screened) with each day's good hours. Astronomical calculation, updated every night.",
     faqs: [
       {
         q: "गृह प्रवेश के लिए कौन से महीने सर्वोत्तम माने जाते हैं?",
@@ -290,7 +292,7 @@ MUHURTA_PAGES.push(
     enTitle: "Vivah (Marriage) Muhurat 2027 — Shubh Wedding Dates",
     hiHook: "2027 की शादी की तारीख तय करने से पहले — नक्षत्र-तिथि से जांचे हुए साल भर के शुभ विवाह-दिन।",
     description:
-      "Vivah muhurat 2027: full-year computed shubh wedding dates (nakshatra + tithi screened, Lahiri ayanamsa) with each day's good hours. Updated twice a month.",
+      "Vivah muhurat 2027: full-year computed shubh wedding dates (nakshatra + tithi screened, Lahiri ayanamsa) with each day's good hours. Updated every night.",
     faqs: [
       {
         q: "विवाह के लिए कौन से महीने शुभ माने जाते हैं?",
@@ -314,7 +316,7 @@ MUHURTA_PAGES.push(
     enTitle: "Property Purchase Muhurat 2027 — Shubh Dates for Land & Home",
     hiHook: "2027 में प्लॉट, फ्लैट या ज़मीन की रजिस्ट्री के लिए जांचे हुए साल भर के शुभ दिन।",
     description:
-      "Property and land purchase muhurat 2027: full-year computed auspicious registry dates (nakshatra + tithi screened) with good hours for each day. Updated twice a month.",
+      "Property and land purchase muhurat 2027: full-year computed auspicious registry dates (nakshatra + tithi screened) with good hours for each day. Updated every night.",
     faqs: [
       {
         q: "रजिस्ट्री और गृह प्रवेश का मुहूर्त अलग-अलग क्यों?",
@@ -386,7 +388,7 @@ MUHURTA_PAGES.push(
     enTitle: "Yatra (Travel) Muhurat 2027 — Auspicious Journey Dates",
     hiHook: "2027 में लंबी यात्रा, विदेश-प्रस्थान या तीर्थ के लिए नक्षत्र-तिथि से जांचे साल भर के शुभ दिन।",
     description:
-      "Yatra muhurat 2027: full-year computed auspicious travel and journey dates (nakshatra + tithi screened) with each day's good hours. Updated twice a month.",
+      "Yatra muhurat 2027: full-year computed auspicious travel and journey dates (nakshatra + tithi screened) with each day's good hours. Updated every night.",
     faqs: [
       {
         q: "यात्रा के लिए कौन-से नक्षत्र शुभ माने जाते हैं?",
@@ -454,7 +456,7 @@ export const PURPOSE_COPY: Record<string, { hi: string; roman: string; en: strin
  *  highlight upcoming dates at the top. */
 export const SEASONAL_CAUTION = new Set(["marriage", "griha_pravesh"]);
 
-export const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"];
+export { MONTHS_HI };
 const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const monthOf = (d: string) => Number(d.split("-")[1]) - 1;
@@ -508,8 +510,6 @@ export interface FinderDate {
   auspicious_slots: { choghadiya: string; start: string; end: string }[];
 }
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-const KEY = process.env.NEXT_PUBLIC_API_KEY ?? process.env.NEXT_PUBLIC_API_TEST_KEY ?? "sk-test-dev";
 // Delhi — the generic reference point; the page says so and points at the
 // personal tool for city/chart-specific screening.
 const REF = { lat: 28.6139, lon: 77.209, tz: 5.5 };
@@ -544,7 +544,9 @@ export function fetchMuhurtaDates(purpose: string, year: number): Promise<Finder
   const key = `${purpose}:${year}`;
   let p = datesCache.get(key);
   if (!p) {
-    p = fetchMuhurtaDatesUncached(purpose, year).then((r) => {
+    // under the build's deadline and strict mode (lib/build-api.ts): a nightly build whose list would be
+    // missing months fails instead of deploying a shorter list
+    p = bakeOr(`muhurta ${purpose} ${year}`, () => fetchMuhurtaDatesUncached(purpose, year), [] as FinderDate[]).then((r) => {
       if (r.length === 0) datesCache.delete(key); // a failed fetch must not stick for the life of a dev server
       return r;
     });
@@ -553,8 +555,10 @@ export function fetchMuhurtaDates(purpose: string, year: number): Promise<Finder
   return p;
 }
 
-/** Scan ONE calendar year for auspicious dates — [max(tomorrow, Jan 1 of
- *  `year`), Dec 31 of `year`], chunked in ≤60-day windows. Bounding to the
+/** Scan ONE calendar year for auspicious dates — [max(today, Jan 1 of
+ *  `year`), Dec 31 of `year`] (today = India's date for this build; the
+ *  browser hides rows once their day has passed), chunked in ≤60-day
+ *  windows. Bounding to the
  *  named year (not a rolling "next N months" window) is what keeps the
  *  "-2026" and "-2027" pages honest and non-overlapping: a "2026" page never
  *  shows a 2027 date, and vice versa. Returns [] once `year` has fully
@@ -562,26 +566,25 @@ export function fetchMuhurtaDates(purpose: string, year: number): Promise<Finder
  *  explainer with an honest "list temporarily unavailable" note rather than
  *  failing the whole build. */
 async function fetchMuhurtaDatesUncached(purpose: string, year: number): Promise<FinderDate[]> {
-  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const [ty, tm, td] = BAKE_DATE.split("-").map(Number);
+  const today = new Date(ty, tm - 1, td); // India's date for this build, as a local calendar date
   const jan1 = new Date(year, 0, 1);
   const dec31 = new Date(year, 11, 31);
-  const tomorrow = addDays(today, 1);
-  const start = tomorrow > jan1 ? tomorrow : jan1;
+  // today itself counts: the list is built just after midnight IST, and the page's "upcoming dates" block
+  // and table must include the day it is being read on (the browser hides a row only once its day is past)
+  const start = today > jan1 ? today : jan1;
   if (start > dec31) return [];
   const all: FinderDate[] = [];
   for (const [from_date, to_date] of chunkRange(start, dec31)) {
     try {
-      const res = await fetch(`${BASE}/v1/muhurta/find`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${KEY}` },
-        body: JSON.stringify({ from_date, to_date, purpose, ...REF }),
-      });
-      if (!res.ok) continue;
-      const json = await res.json();
-      if (json?.meta?.mode === "test") continue; // sample-chart data must never ship as real dates
-      all.push(...(json?.data?.auspicious_times ?? []));
-    } catch {
-      // keep whatever chunks succeeded
+      // test-mode (sample-chart) answers are refused by buildPost: they must never ship as real dates
+      const data = await buildPost<{ auspicious_times?: FinderDate[] }>("/v1/muhurta/find", { from_date, to_date, purpose, ...REF });
+      all.push(...(data.auspicious_times ?? []));
+    } catch (e) {
+      // the nightly (strict) build must not publish a list with a month missing; any other build keeps the
+      // chunks that did succeed, and says so
+      if (STRICT) throw e;
+      console.warn(`[bake] muhurta ${purpose} ${from_date}..${to_date}: ${e instanceof Error ? e.message : String(e)} (chunk skipped)`);
     }
   }
   return all;

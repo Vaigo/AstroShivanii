@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import type { FestivalItem } from "@/lib/api/types";
+import { festivalYear2026 } from "@/lib/festival-pages";
+import { MONTHS_HI } from "@/lib/hi-date";
 
 export const metadata: Metadata = {
   title: "व्रत एवं त्यौहार कैलेंडर 2026 — Ekadashi, Pradosh, Purnima, Amavasya Dates",
@@ -10,42 +12,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/festivals-2026/" },
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-const KEY = process.env.NEXT_PUBLIC_API_KEY ?? process.env.NEXT_PUBLIC_API_TEST_KEY ?? "sk-test-dev";
-
-const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
 /** Weekly weekday-vrats (every Somvar/Shanivar…) would flood a yearly
  *  calendar — we list tithi-based observances and mention weekly vrats in prose. */
 const WEEKLY = /^(Somvar|Mangalvar|Budhvar|Guruvar|Shukravar|Shanivar|Ravivar)/i;
 
 async function fetchYearFestivals(): Promise<FestivalItem[]> {
-  const seen = new Set<string>();
-  const all: FestivalItem[] = [];
-  for (let m = 1; m <= 12; m++) {
-    const dob = `2026-${String(m).padStart(2, "0")}-01`;
-    try {
-      const res = await fetch(`${BASE}/v1/panchang/festivals`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${KEY}` },
-        body: JSON.stringify({ dob, tob: "12:00", lat: 28.6139, lon: 77.209, tz: 5.5 }),
-      });
-      if (!res.ok) continue;
-      const json = await res.json();
-      const items: FestivalItem[] = json?.data?.festivals ?? [];
-      for (const f of items) {
-        if (!f.date?.startsWith("2026")) continue;
-        if (WEEKLY.test(f.name)) continue;
-        const k = `${f.date}|${f.name}`;
-        if (!seen.has(k)) {
-          seen.add(k);
-          all.push(f);
-        }
-      }
-    } catch {
-      // build proceeds with whatever months succeeded
-    }
-  }
-  return all.sort((a, b) => a.date.localeCompare(b.date));
+  // the year's festivals are fetched once per build and shared with the /festivals/* pages (lib/festival-pages.ts:
+  // strict nightly build fails on a missing month, test-mode answers are refused)
+  const all = await festivalYear2026();
+  return all.filter((f) => !WEEKLY.test(f.name)).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 const FAQS = [

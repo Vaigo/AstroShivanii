@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RahuKaalLive from "@/components/RahuKaalLive";
+import { bakedRahuKaal } from "@/lib/baked";
+import { datedTail, fitDescription, rahuKaalSentence, sunriseVsDelhi } from "@/lib/daily-data";
+import { fmtHi } from "@/lib/hi-date";
 import { SEO_CITIES, cityBySlug } from "@/lib/seo-cities";
 
 export function generateStaticParams() {
@@ -13,9 +16,19 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const { city } = await params;
   const c = cityBySlug(city);
   if (!c) return {};
+  // the build's answer (one fetch per build, shared with the page body) goes into the snippet, dated
+  const day = (await bakedRahuKaal(c))?.days[0];
+  const w = day?.data;
+  const description = w
+    ? fitDescription(
+        `${fmtHi(day.date)}: ${c.hi} में राहु काल ${w.rahu_kaal.start}–${w.rahu_kaal.end}, गुलिक काल ${w.gulika_kaal.start}–${w.gulika_kaal.end}, यमगण्ड ${w.yamaganda.start}–${w.yamaganda.end}। Rahu Kaal today in ${c.en} + next 6 days.`,
+        `${fmtHi(day.date)}: ${c.hi} में राहु काल ${w.rahu_kaal.start}–${w.rahu_kaal.end} (गुलिक ${w.gulika_kaal.start}–${w.gulika_kaal.end}, यमगण्ड ${w.yamaganda.start}–${w.yamaganda.end}) · Rahu Kaal today in ${c.en}.`,
+        `${fmtHi(day.date)}: ${c.hi} में राहु काल ${w.rahu_kaal.start}–${w.rahu_kaal.end}। Rahu Kaal today in ${c.en} with Gulika Kaal and Yamaganda.`,
+      )
+    : `Rahu Kaal today in ${c.en} (${c.hi}): exact timings with Gulika Kaal and Yamaganda, computed astronomically from ${c.en}'s own sunrise — today plus the next 6 days, refreshed every day.`;
   return {
     title: `${c.hi} में आज का राहु काल — Rahu Kaal Today in ${c.en}`,
-    description: `Rahu Kaal today in ${c.en} (${c.hi}): exact live timings with Gulika Kaal and Yamaganda, computed astronomically from ${c.en}'s own sunrise — today plus the next 6 days.`,
+    description,
     alternates: { canonical: `/rahu-kaal/${c.slug}/` },
   };
 }
@@ -25,17 +38,33 @@ export default async function Page({ params }: { params: Promise<{ city: string 
   const c = cityBySlug(city);
   if (!c) notFound();
 
+  // this city's day and Delhi's (cached per build process) are fetched together, so they share one wait
+  const [baked, delhiBaked] = await Promise.all([bakedRahuKaal(c), c.slug === "delhi" ? null : bakedRahuKaal(SEO_CITIES[0])]);
+  const day = baked?.days[0];
+  // Delhi's day: the figures that make this city's page differ from its neighbours'
+  const delhiToday = delhiBaked?.days[0]?.data ?? null;
+  const vsDelhi = day?.data && delhiToday ? ` ${sunriseVsDelhi(c.hi, day.data, delhiToday)}` : "";
+
   // Delhi is the reference city every other page compares with, so "why is Delhi's Rahu Kaal different
   // from Delhi" made no sense (and went into the FAQPage markup too).
   const faqs = [
+    // the day's answer in plain words, dated (this text is frozen at build; the widget below follows today)
+    ...(day?.data
+      ? [
+          {
+            q: `${c.hi} में आज राहु काल कब है?`,
+            a: `${rahuKaalSentence(c.hi, { ...day, data: day.data })} ${datedTail(day.date, "राहु काल")}`,
+          },
+        ]
+      : []),
     c.slug === "delhi"
       ? {
           q: "दिल्ली का राहु काल कैसे निकाला जाता है?",
-          a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। यहां दिया समय दिल्ली (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) के अपने सूर्योदय से निकाला गया है; दूसरे शहरों में सूर्योदय अलग होने से राहु काल कुछ मिनट आगे-पीछे रहता है।`,
+          a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। यहां दिया समय दिल्ली (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) के अपने सूर्योदय से निकाला गया है; दूसरे शहरों में सूर्योदय अलग होने से राहु काल कुछ मिनट से लेकर लगभग एक घंटे तक आगे-पीछे रहता है।`,
         }
       : {
           q: `${c.hi} का राहु काल दिल्ली से अलग क्यों है?`,
-          a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। ${c.hi} का सूर्योदय (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) दिल्ली से अलग समय पर होता है, इसलिए राहु काल भी कुछ मिनट आगे-पीछे रहता है। यहां दिया समय ${c.hi} की अपनी खगोलीय गणना से है।`,
+          a: `राहु काल सूर्योदय-सूर्यास्त पर आधारित है — दिन का 1/8 भाग। ${c.hi} का सूर्योदय (अक्षांश ${c.lat}°, देशांतर ${c.lon}°) दिल्ली से अलग समय पर होता है, इसलिए राहु काल भी कुछ मिनट से लेकर लगभग एक घंटे तक आगे-पीछे रहता है।${vsDelhi} यहां दिया समय ${c.hi} की अपनी खगोलीय गणना से है।`,
         },
     {
       q: "राहु काल में क्या टालना चाहिए?",
@@ -69,7 +98,7 @@ export default async function Page({ params }: { params: Promise<{ city: string 
           ]}
         />
         <h1 className="section-heading">{c.hi} में आज का राहु काल</h1>
-        <p className="section-heading-hi devanagari">Rahu Kaal Today in {c.en} · गुलिक काल · यमगण्ड — लाइव</p>
+        <p className="section-heading-hi devanagari">Rahu Kaal Today in {c.en} · गुलिक काल · यमगण्ड — रोज़ अपडेट</p>
 
         <div className="tool-explainer" style={{ textAlign: "center", marginBottom: "2rem" }}>
           <p className="devanagari" style={{ fontWeight: 600, color: "var(--maroon)" }}>
@@ -77,11 +106,12 @@ export default async function Page({ params }: { params: Promise<{ city: string 
           </p>
           {/* one string, not "text {expr} text": the build rendered that as "Delhi<!-- -->is" with the space lost */}
           <p>
-            {`Rahu Kaal in ${c.en} is computed from the city's own sunrise and sunset for each date — the window below updates live and includes the next 6 days for planning.`}
+            {`Rahu Kaal in ${c.en} is computed from the city's own sunrise and sunset for each date — the table below is refreshed every day and includes the next 6 days for planning.`}
           </p>
         </div>
 
-        <RahuKaalLive cityEn={c.en} cityHi={c.hi} lat={c.lat} lon={c.lon} tz={c.tz} />
+        {/* key: moving between city pages in the browser must not carry one city's fetched rows to the next */}
+        <RahuKaalLive key={c.slug} cityEn={c.en} cityHi={c.hi} lat={c.lat} lon={c.lon} tz={c.tz} initial={baked} />
 
         <article className="guide-article" style={{ marginTop: "2.5rem" }}>
           <h2 className="guide-h2 devanagari">आम सवाल</h2>

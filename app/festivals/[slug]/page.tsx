@@ -7,6 +7,7 @@ import {
   festivalPageBySlug,
   computeFestival,
 } from "@/lib/festival-pages";
+import { MONTHS_HI } from "@/lib/hi-date";
 
 export function generateStaticParams() {
   return FESTIVAL_PAGES.map((f) => ({ slug: f.slug }));
@@ -23,7 +24,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"];
 const WEEKDAY_HI: Record<string, string> = {
   Sunday: "रविवार", Monday: "सोमवार", Tuesday: "मंगलवार", Wednesday: "बुधवार",
   Thursday: "गुरुवार", Friday: "शुक्रवार", Saturday: "शनिवार",
